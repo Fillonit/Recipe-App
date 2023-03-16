@@ -1,0 +1,20 @@
+{
+  "name": "magnolia-foods",
+  "version": "1.0.0",
+  "description": "Recipe App",
+  "main": "server.js",
+  "scripts": {
+    "server": "nodemon server/server.js"
+  },
+  "author": "Fillonit Ibishi",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "mongoose": "^7.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.21"
+  }
+}
