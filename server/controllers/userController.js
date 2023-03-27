@@ -9,6 +9,15 @@ const getUsers = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc: Get user from the database
+// @route: GET /api/users/:id
+// @access: Private
+const getUser = asyncHandler(async (req, res) => {
+    res.status(200).json({
+        msg: `Get user with id: ${req.params.id}`
+    });
+});
+
 // @desc: Set user from the database
 // @route: POST /api/users
 // @access: Private
