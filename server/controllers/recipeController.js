@@ -137,7 +137,7 @@ const addRecipe = asyncHandler(async (req, res) => {
                 currentRecipeId = 1; //if the recordset length is 0,
                 return               // it means that there are currently no rows
             }                  // so the id that will be assigned is 1.
-            currentRecipeId = result.recordset[0].Max
+            currentRecipeId = result.recordset[0].Max + 1;
         });
         const queries = [];
         const fileName = image.originalname;
