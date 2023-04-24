@@ -86,7 +86,7 @@ const unfollowChef = asyncHandler(async (req, res) => {
         queries.push(`UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount - 1 WHERE ${tableToUpdate[role][1]} = ${userId}`);
         queries.unshift(`BEGIN TRANSACTION`);
         queries.push(`COMMIT`);
-        const QUERY = queries.join("; ");
+        const QUERY = queries.join("; ")+";";
         request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
@@ -168,7 +168,7 @@ const followChef = asyncHandler(async (req, res) => {
         queries.push(`UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount + 1 WHERE ${tableToUpdate[role][1]} = ${userId}`);
         queries.unshift(`BEGIN TRANSACTION`);
         queries.push(`COMMIT`);
-        const QUERY = queries.join("; ");
+        const QUERY = queries.join("; ")+";";
         request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");

@@ -33,10 +33,27 @@ const deleteRecipe = asyncHandler(async (req, res) => {
             handler(err, req, res, "");
             return;
         }
-        const recipeId = req.body.recipeId;
-        const deleteQuery = `DELETE FROM Recipes WHERE RecipeId = '${recipeId}'`
-        const getQuery = `SELECT * FROM Recipes WHERE RecipeId = '${recipeId}'`;
         const request = new sql.Request();
+        const recipeId = req.body.recipeId;
+        const commentIdQuery = `SELECT CommentId FROM Comments WHERE RecipeId = ${recipeId}`
+        let commentIds = [];
+        request.query(commentIdQuery, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) return; //this just means that there are no comments so no need to include them;
+            for (const element of result.recordset)
+                commentIds.push(element.CommentId);
+        });
+        const getQuery = `SELECT ChefId FROM Recipes WHERE RecipeId = ${recipeId}`
+        const queries = [`BEGIN TRANSACTION`];
+        queries.push(`DELETE FROM Recipes WHERE RecipeId = ${recipeId}`);
+        queries.push(`DELETE FROM Comments WHERE RecipeId = ${recipeId}`);
+        if (commentIds.length !== 0) queries.push(`DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`);
+        queries.push(`COMMIT`);
+        const deleteQuery = queries.join("; ") + ";";
+
         if (isAdmin) {
             request.query(deleteQuery, (err, result) => {
                 if (err) {
@@ -44,7 +61,7 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                     return;
                 }
                 if (result.rowsAffected === 0) {
-                    handler(err, req, res, "");
+                    res.status(204).json({ message: "Could not find resource." });
                     return;
                 }
                 res.status(204).json({ message: "Recipe deleted successfully." });
@@ -57,16 +74,26 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                 return;
             }
             if (result.recordset.length === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+            recipePoster = result.recordset[0].ChefId;
+        });
+        if (recipePoster != userId) {
+            res.status(403).json({ message: "Unauthorized request, access denied." });
+            return;
+        }
+        request.query(deleteQuery, (err, result) => {
+            if (err) {
                 handler(err, req, res, "");
                 return;
             }
-            recipePoster = result.recordset[0].poster;
-        });
-        if (recipePoster == userId) {
-            res.status(204).json({ message: "Recipe deleted successfully" });
-            return;
-        }
-        res.status(403).json({ message: "Unauthorized request, access denied." });
+            if (result.rowsAffected === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+            res.status(204).json({ message: "Recipe deleted successfully." });
+        })
     })
 });
 
@@ -160,7 +187,7 @@ const addRecipe = asyncHandler(async (req, res) => {
         }
         queries.unshift(`BEGIN TRANSACTION`);
         queries.push(`COMMIT`);
-        const insertQuery = queries.join("; ");
+        const insertQuery = queries.join("; ") + ";";
         request.query(insertQuery, (err, res) => {
             if (err) {
                 const fs = require('fs');

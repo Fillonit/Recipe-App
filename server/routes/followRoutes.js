@@ -6,7 +6,7 @@ const port = process.env.PORT || 5000;
 const {
     followChef,
     unfollowChef
-} = require('../controllers/followController');
+} = require('../controllers/followController.js');
 
 router.route('/:id').post(followChef);
 router.route('/:id').delete(unfollowChef);
