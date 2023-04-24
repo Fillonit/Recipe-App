@@ -65,6 +65,7 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                     return;
                 }
                 res.status(204).json({ message: "Recipe deleted successfully." });
+                return;
             });
         }
         let recipePoster = null;
@@ -93,6 +94,7 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                 return;
             }
             res.status(204).json({ message: "Recipe deleted successfully." });
+            return;
         })
     })
 });
@@ -204,6 +206,7 @@ const addRecipe = asyncHandler(async (req, res) => {
                 return;
             }
             res.status(201).json({ message: "Recipe was successfully added." });
+            return;
         });
     });
 });
