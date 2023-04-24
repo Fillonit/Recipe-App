@@ -11,7 +11,7 @@ const {
 } = require('../controllers/recipeController');
 
 router.route('/add/:id').post(addRecipe);
-router.route('/delete/:id').post(deleteRecipe, uploads.single('file'));
+router.route('/delete/:id').delete(deleteRecipe, uploads.single('file'));
 
 
 module.exports = router;

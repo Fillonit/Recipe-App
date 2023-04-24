@@ -3,7 +3,7 @@ const sql = require("mssql/msnodesqlv8");
 const crypto = require("crypto");
 const jwt = require('jsonwebtoken');
 const handler = require("../middleware/errorMiddleware.js");
-const { RSC_MODULE_TYPES } = require('next/dist/shared/lib/constants.js');
+
 const config = {
     database: 'Recipes',
     server: 'DESKTOP-8HBAVK7',
