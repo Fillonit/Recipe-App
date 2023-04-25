@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @keyframes wave {
     0% {
       transform: translateX(0) translateY(20px);
