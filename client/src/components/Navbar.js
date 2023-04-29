@@ -19,7 +19,7 @@ const Navbar = ({ title, image, description }) => {
 
   return (
     
-    <div className="fixed top-0 inset-x-0 justify-center items-center opacity-90">
+    <div className="fixed top-0 inset-x-0 justify-center items-center opacity-90 z-50">
     <nav className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
      xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
       <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
