@@ -2,7 +2,7 @@ import React from "react";
 
 const HeroPage = () => {
   return (
-    <div className="bg-indigo-500 h-screen flex items-center justify-center bg-[url('https://img.freepik.com/free-photo/ingredients-homemade-tarte-tatin-pie-with-apples-nuts-beige-background-french-apple-pie-selective-focus_127032-2805.jpg?w=2000')]">
+    <div className="bg-indigo-500 mt-2 h-screen flex items-center justify-center bg-[url('https://img.freepik.com/free-photo/ingredients-homemade-tarte-tatin-pie-with-apples-nuts-beige-background-french-apple-pie-selective-focus_127032-2805.jpg?w=2000')]">
       
       <div className="max-w-lg px-6 text-center text-white">
         <h1 className="text-4xl font-bold mb-6 text-indigo-500">Welcome to RecipeApp</h1>
