@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import ProfilePage from './components/ProfilePage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
+import Profile from './pages/Profile';
 
 const recipes = [
   {
@@ -32,7 +33,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

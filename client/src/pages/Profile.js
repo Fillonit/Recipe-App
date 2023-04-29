@@ -1,8 +1,8 @@
 import React from 'react';
 // import RecipeList from './components/RecipeList';
-import Navbar from './components/Navbar';
+import Navbar from '../components/Navbar';
 // import Hero from './components/Hero';
-import ProfilePage from './components/ProfilePage';
+import ProfilePage from '../components/ProfilePage';
 
 
 function App() {

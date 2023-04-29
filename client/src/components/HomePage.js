@@ -29,7 +29,7 @@ const recipes = [
 
 function App() {
     return (
-      <div>
+      <div className='-mt-2 p-0'>
         <Navbar />
         <Hero />
         {/* <Wave /> */}
