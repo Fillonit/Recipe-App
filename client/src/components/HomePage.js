@@ -6,6 +6,7 @@ import ProfilePage from './ProfilePage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Footer from './Footer';
 // import Wave from './Wave';
+import Content from './Content';
 
 const recipes = [
   {
@@ -30,7 +31,7 @@ const recipes = [
 
 function App() {
     return (
-      <div>
+      <div className="-mt-2">
         <Navbar />
         <Hero />
         {/* <Wave /> */}
@@ -38,6 +39,7 @@ function App() {
           <div className="container mx-auto my-8">
             <h1 className="text-6xl pb-4 border-b-2 font-bold mb-6 flex justify-center text-indigo-500 border-indigo-300">Recipes</h1>
             <RecipeList recipes={recipes} />
+            <Content />
             {/* <ProfilePage /> */}
           </div>
           <div className="absolute bottom-0 left-0 w-full">
