@@ -8,6 +8,8 @@ import HomePage from './components/HomePage';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import Recipe from './pages/Recipe';
+import Footer from './components/Footer';
+import Contact from './components/Contact';
 
 const recipes = [
   {
@@ -38,6 +40,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
         <Route path="/recipe" element={<Recipe />} />
+        <Route path='/contact' element={<Contact />} />
       </Routes>
     </Router>
   );

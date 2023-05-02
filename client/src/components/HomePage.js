@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Hero from './Hero';
 import ProfilePage from './ProfilePage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Footer from './Footer';
 // import Wave from './Wave';
 
 const recipes = [
@@ -29,7 +30,7 @@ const recipes = [
 
 function App() {
     return (
-      <div className='-mt-2 p-0'>
+      <div>
         <Navbar />
         <Hero />
         {/* <Wave /> */}
@@ -43,7 +44,9 @@ function App() {
             {/* <WaveAnimation /> */}
           </div>
         </div>
+        <Footer />
       </div>
+      
     );
   }
   
