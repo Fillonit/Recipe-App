@@ -6,6 +6,8 @@ import ProfilePage from './components/ProfilePage';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import Profile from './pages/Profile';
+import About from './pages/About';
+import Recipe from './pages/Recipe';
 
 const recipes = [
   {
@@ -34,6 +36,8 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/recipe" element={<Recipe />} />
       </Routes>
     </Router>
   );
