@@ -15,7 +15,7 @@ const config = {
 
 const tokenKey = "TEST";
 
-const salt = crypto.randomBytes(16).toString('hex'), iterations = 1000, keylen = 64, digest = "sha512";
+const salt = 'magnoliadev', iterations = 1000, keylen = 64, digest = "sha512";
 
 // @desc: Get all users from the database
 // @route: GET /api/users
@@ -203,6 +203,62 @@ const deleteUser = asyncHandler(async (req, res) => {
             res.status(204).json({ message: "User deleted successfully." });
         })
     });
+});
+
+const register = asyncHandler(async (req, res) => {
+    console.log("registered");
+    if (req.body === undefined || req.body === null || req.body === "" || req.body === {} || req.body === []) {
+        res.status(401).json({ message: "Body property not included in the request." });
+        console.log("req.body undefined");
+        return;
+    }
+    // const username = req.body.username, password = req.body.password;
+    const {
+        username,
+        password,
+        description,
+        profilePicture,
+        name,
+        email
+    } = req.body;
+
+    if (typeof username != 'string' || typeof password != 'string') {
+        console.log("req.body undefined");
+        res.status(401).json({ message: "Expected both password and usernmae to be string, instead got: " + (typeof username) + ", and " + (typeof password) });
+        return;
+    }
+    if (username.length > 30 || password.length > 30) {
+        res.status(401).json({ message: "Username or password are too long." });
+        console.log("username too long pass too long");
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            console.log("database connection failed.");
+            return;
+        }
+
+        const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, 'sha512').toString('hex');
+        const request = new sql.Request();
+        request.input('username', sql.VarChar, username);
+        request.input('password', sql.VarChar, hashedPassword);
+
+        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user')`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "A mistake happened on our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(400).json({ message: "Could not add the resource." });
+                return;
+            }
+            res.status(201).json({ message: "Successfully created resource." });
+        });
+    })
 });
 
 module.exports = {
