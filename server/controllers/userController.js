@@ -140,12 +140,12 @@ const logUserIn = asyncHandler(async (req, res) => {
         res.status(200).json({ message: "The log in process was successful.", auth: token });
     })
 });
-// @desc: Update all users from the database
+// @desc: User self-edit data
 // @route: PUT /api/users
 // @access: Private
-const updateUser = asyncHandler(async (req, res) => {
+const editUser = asyncHandler(async (req, res) => {
     const token = req.body.auth;
-    let username = null;
+    let username = null, role = null;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -156,6 +156,36 @@ const updateUser = asyncHandler(async (req, res) => {
             return;
         }
         username = decoded.username;
+        role = decoded.role;
+    });
+    const { usernameToUpdate, password, description, email, name, profilePicture } = req.body;
+
+    if (usernameToUpdate === null || usernameToUpdate === undefined || usernameToUpdate === "" || password === null || password === undefined || password === "" || description === null || description === undefined || description === "" || email === null || email === undefined || email === "" || name === null || name === undefined || name === "" || profilePicture === null || profilePicture === undefined || profilePicture === "") {
+        res.status(401).json({ message: "You are not authorized to do this." });
+        return;
+    }
+
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred in our part." });
+            return;
+        }
+        const request = new sql.Request();
+        const QUERY = `
+        UPDATE Users 
+        SET Username = '${usernameToUpdate}', Password = '${password}', Description = '${description}', Email = '${email}', Name = '${name}', ProfilePicture = '${profilePicture}'
+        WHERE Username = '${username}';`;
+        request.query(QUERY, (err, result)=>{
+            if (err) {
+                res.status(500).json({ message: "An error ocurred in our part." });
+                return;
+            }
+            if(result.rowsAffected === 0){
+                res.status(401).json({message:"The data provided conflicts with our database"});
+                return;
+            }
+            res.status(204).json({message: "Updated resource successfully."});
+        })
     });
 });
 
@@ -273,8 +303,10 @@ const register = asyncHandler(async (req, res) => {
 
 module.exports = {
     getUsers,
+    register,
+    getUser,
     setUser,
-    updateUser,
+    editUser,
     deleteUser,
     logUserIn
 };
