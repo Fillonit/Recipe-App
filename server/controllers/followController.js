@@ -80,13 +80,12 @@ const unfollowChef = asyncHandler(async (req, res) => {
                      is a chef, then I want to increment 
                      the FollowingCount in the Chef table
         */
-        const queries = [];
-        queries.push(`DELETE FROM Followers WHERE FolloweeId = ${followeeId} AND FollowerId = ${FollowerId}`);
-        queries.push(`UPDATE Chef SET FollowersCount = FollowersCount - 1 WHERE ChefId = ${followeeId}`);
-        queries.push(`UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount - 1 WHERE ${tableToUpdate[role][1]} = ${userId}`);
-        queries.unshift(`BEGIN TRANSACTION`);
-        queries.push(`COMMIT`);
-        const QUERY = queries.join("; ") + ";";
+        let queriesList = `
+        BEGIN TRANSACTION
+        DELETE FROM Followers WHERE FolloweeId = ${followeeId} AND FollowerId = ${followerId};
+        UPDATE Chef SET FollowersCount = FollowersCount - 1 WHERE ChefId = ${followeeId};
+        UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount - 1 WHERE ${tableToUpdate[role][1]} = ${userId};
+        COMMIT`;
         request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
