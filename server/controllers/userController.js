@@ -54,11 +54,48 @@ const getUsers = asyncHandler(async (req, res) => {
 // @route: GET /api/users/:id
 // @access: Private
 const getUser = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        msg: `Get user with id: ${req.params.id}`
+    const token = req.body.auth;
+    let username = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token expired" });
+            return;
+        }
+        username = decoded.username;
+    });
+    const userToGet = req.params.id;
+    if (isNaN(Number(userToGet))) {
+        res.status(401).json({
+            message: "Expected integer, instead got else"
+        });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('username', sql.Int, userToGet);
+        const QUERY = 'SELECT * FROM Users WHERE UserId = @username';
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error ocurred on our part" });
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "No such user was found." });
+                return;
+            }
+            res.status(200).json({ message: "Successfully fetched user.", response: result.recordset[0] });
+        });
     });
 });
-
 // @desc: Set user from the database
 // @route: POST /api/users
 // @access: Private
