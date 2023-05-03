@@ -15,7 +15,7 @@ const config = {
 
 const tokenKey = "TEST";
 
-const salt = crypto.randomBytes(16).toString('hex'), iterations = 1000, keylen = 64, digest = "sha512";
+const salt = 'magnoliadev', iterations = 1000, keylen = 64, digest = "sha512";
 
 // @desc: Get all users from the database
 // @route: GET /api/users
@@ -53,11 +53,7 @@ const getUsers = asyncHandler(async (req, res) => {
 // @desc: Get user from the database
 // @route: GET /api/users/:id
 // @access: Private
-const getUser = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        msg: `Get user with id: ${req.params.id}`
-    });
-});
+
 
 // @desc: Set user from the database
 // @route: POST /api/users
@@ -107,8 +103,18 @@ const logUserIn = asyncHandler(async (req, res) => {
 // @route: PUT /api/users
 // @access: Private
 const updateUser = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        msg: `Update user with id: ${req.params.id}`
+    const token = req.body.auth;
+    let username = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        username = decoded.username;
     });
 });
 
@@ -134,7 +140,7 @@ const deleteUser = asyncHandler(async (req, res) => {
         return;
     }
     const password = req.body.password;
-    sql.connect(config, (err) => {
+    sql.connect(config, async (err) => {
         if (err) {
             handler(err, req, res, "");
             return;
@@ -143,7 +149,7 @@ const deleteUser = asyncHandler(async (req, res) => {
         const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();
 
-        request.query(userQuery, (err, result) => {
+        await request.query(userQuery, (err, result) => {
             if (err) {
                 handler(err, req, res, "");
                 return;
@@ -154,7 +160,7 @@ const deleteUser = asyncHandler(async (req, res) => {
             }
         });
         const deleteQuery = `DELETE FROM Users WHERE Username = '${username}'`;
-        request.query(deleteQuery, (err, result) => {
+        await request.query(deleteQuery, (err, result) => {
             if (err) {
                 handler(err, req, res, "");
                 return;
@@ -172,5 +178,6 @@ module.exports = {
     getUsers,
     setUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    logUserIn
 };
