@@ -7,6 +7,13 @@ const errorHandler = (err, req, res, next) => {
     });
 }
 
+const requestLoggerMiddleware = (req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+  };
+  
+
 module.exports = {
-    errorHandler
+    errorHandler,
+    requestLoggerMiddleware
 };

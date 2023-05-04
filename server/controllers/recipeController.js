@@ -47,12 +47,21 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                 commentIds.push(element.CommentId);
         });
         const getQuery = `SELECT ChefId FROM Recipes WHERE RecipeId = ${recipeId}`
-        const queries = [`BEGIN TRANSACTION`];
-        queries.push(`DELETE FROM Recipes WHERE RecipeId = ${recipeId}`);
-        queries.push(`DELETE FROM Comments WHERE RecipeId = ${recipeId}`);
-        if (commentIds.length !== 0) queries.push(`DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`);
-        queries.push(`COMMIT`);
-        const deleteQuery = queries.join("; ") + ";";
+
+        let deleteQuery = `
+        BEGIN TRANSACTION
+        DELETE FROM Recipes WHERE RecipeId = ${recipeId};
+        DELETE FROM Comments WHERE RecipeId = ${recipeId};
+        `;
+        if (commentIds.length !== 0) queries += `DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`;
+        queries += `COMMIT`;
+        // const deleteQuery = queries;
+        // const queries = [`BEGIN TRANSACTION`];
+        // queries.push(`DELETE FROM Recipes WHERE RecipeId = ${recipeId}`);
+        // queries.push(`DELETE FROM Comments WHERE RecipeId = ${recipeId}`);
+        // if (commentIds.length !== 0) queries.push(`DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`);
+        // queries.push(`COMMIT`);
+        // const deleteQuery = queries.join("; ") + ";";
 
         if (isAdmin) {
             request.query(deleteQuery, (err, result) => {
@@ -178,17 +187,35 @@ const addRecipe = asyncHandler(async (req, res) => {
             }
             res.status(200).send('File uploaded successfully');
         });
-        queries.push(`INSERT INTO Recipes(Title, Description, ImageUrl, PreparationTime, CookTime, Servings, ChefId, CreatedAt, CuisineId) VALUES` +
-            `('${title}','${description}','${imageURL}','${prepTime}','${cookTime}','${servings}','${cookTime}','${chefId}','${cuisineId}')`);
+        let queryList = `
+        BEGIN TRANSACTION;
+        INSERT INTO Recipes(Title, Description, ImageUrl, PreparationTime, CookTime, Servings, ChefId, CreatedAt, CuisineId) VALUES
+        ('${title}','${description}','${imageURL}','${prepTime}','${cookTime}','${servings}','${cookTime}','${chefId}','${cuisineId}');
+        `;
         for (const key in ingredients) {
-            queries.push(`INSERT INTO RecipeIngredients(RecipeId, IngredientId, Amount, Unit) VALUES` +
-                `('${currentRecipeId}','${key}','${ingredients[key][0]}','${ingredients[key][1]}')`);
+            queryList += `
+            INSERT INTO RecipeIngredients(RecipeId, IngredientId, Amount, Unit) VALUES
+            ('${currentRecipeId}','${key}','${ingredients[key][0]}','${ingredients[key][1]}');
+            `;
         }
         for (const element of steps) {
-            queries.push(`EXEC InsertOrUpdateRow @RecipeId = ${currentRecipeId}, @Description = ${element}`);
+            queryList += `
+            EXEC InsertOrUpdateRow @RecipeId = ${currentRecipeId}, @Description = ${element};
+            `;
         }
-        queries.unshift(`BEGIN TRANSACTION`);
-        queries.push(`COMMIT`);
+        
+
+        // queries.push(`INSERT INTO Recipes(Title, Description, ImageUrl, PreparationTime, CookTime, Servings, ChefId, CreatedAt, CuisineId) VALUES` +
+        //     `('${title}','${description}','${imageURL}','${prepTime}','${cookTime}','${servings}','${cookTime}','${chefId}','${cuisineId}')`);
+        // for (const key in ingredients) {
+        //     queries.push(`INSERT INTO RecipeIngredients(RecipeId, IngredientId, Amount, Unit) VALUES` +
+        //         `('${currentRecipeId}','${key}','${ingredients[key][0]}','${ingredients[key][1]}')`);
+        // }
+        // for (const element of steps) {
+        //     queries.push(`EXEC InsertOrUpdateRow @RecipeId = ${currentRecipeId}, @Description = ${element}`);
+        // }
+        // queries.unshift(`BEGIN TRANSACTION`);
+        // queries.push(`COMMIT`);
         const insertQuery = queries.join("; ") + ";";
         request.query(insertQuery, (err, res) => {
             if (err) {

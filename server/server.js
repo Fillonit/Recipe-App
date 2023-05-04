@@ -5,7 +5,8 @@ const cors = require('cors');
 
 
 const {
-    errorHandler
+    errorHandler,
+    requestLoggerMiddleware
 } = require('./middleware/errorMiddleware');
 
 const userRouter = require('./routes/userRoutes');
@@ -23,6 +24,7 @@ app.use(express.urlencoded({
 app.use('/api/users', userRouter);
 
 app.use(errorHandler);
+app.use(requestLoggerMiddleware);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
