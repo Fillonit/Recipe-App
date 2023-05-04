@@ -52,6 +52,27 @@ export default function Register() {
     }
   }
 
+  async function handleLogin() {
+    try {
+      const response = await fetch('http://localhost:5000/api/users', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      // Do something with the response data, e.g. show a success message
+      alert(`Here is the user data: ${JSON.stringify(data)}`)
+    } catch (error) {
+      console.error(error);
+
+      // Show an error message to the user
+    }
+  }
+
   function handleUsernameChange(event) {
     setUsername(event.target.value);
   }
