@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const sql = require("mssql/msnodesqlv8");
 const crypto = require("crypto");
 const jwt = require('jsonwebtoken');
-const handler = require("../middleware/errorMiddleware.js");
+const { errorHandler } = require("../middleware/errorMiddleware.js");
 const dotenv = require('dotenv').config();
 
 const {
@@ -14,9 +14,9 @@ const {
 } = process.env;
 
 const config = {
-    database: 'Recipes',
-    server: 'DESKTOP-8HBAVK7',
-    driver: 'msnodesqlv8',
+    database: process.env.MSSQL_DATABASE_NAME,
+    server: process.env.MSSQL_SERVER_NAME,
+    driver: process.env.MSSQL_DRIVER,
     options: {
         trustedConnection: true
     }
@@ -31,6 +31,8 @@ const salt = process.env.SALT, iterations = 1000, keylen = 64, digest = "sha512"
 // @access: Private
 const getUsers = asyncHandler(async (req, res) => {
     const token = req.body.auth;
+
+    // getUsers osht GET request, pra nuk ka body, ka vetem params
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -43,14 +45,14 @@ const getUsers = asyncHandler(async (req, res) => {
     })
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, "");//im not sure what next is
+            errorHandler(error, req, res, "");//im not sure what next is
             return;
         }
         const QUERY = "SELECT * FROM Users";
         const request = new sql.Request();
         request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                errorHandler(error, req, res, "");
                 return;
             }
             const object = result.recordset[0];
@@ -125,7 +127,7 @@ const logUserIn = asyncHandler(async (req, res) => {
     }
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            errorHandler(err, req, res, "");
             return;
         }
         const username = req.body.username, password = req.body.password;
@@ -135,7 +137,7 @@ const logUserIn = asyncHandler(async (req, res) => {
         let userType, userId;
         request.query(userQuery, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                errorHandler(err, req, res, "");
                 return;
             }
             if (result.recordset.length === 0) {
@@ -222,7 +224,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     const password = req.body.password;
     sql.connect(config, async (err) => {
         if (err) {
-            handler(err, req, res, "");
+            errorHandler(err, req, res, "");
             return;
         }
         const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
@@ -231,7 +233,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
         await request.query(userQuery, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                errorHandler(err, req, res, "");
                 return;
             }
             if (result.recordset.length === 0) {
@@ -242,7 +244,7 @@ const deleteUser = asyncHandler(async (req, res) => {
         const deleteQuery = `DELETE FROM Users WHERE Username = '${username}'`;
         await request.query(deleteQuery, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                errorHandler(err, req, res, "");
                 return;
             }
             if (result.rowsAffected === 0) {
@@ -310,6 +312,12 @@ const register = asyncHandler(async (req, res) => {
     })
 });
 
+const testError = asyncHandler(async (req, res, next) => {
+    const err = new Error("This is a test error.");
+    next(err);
+});
+
+
 module.exports = {
     getUsers,
     register,
@@ -317,5 +325,6 @@ module.exports = {
     setUser,
     editUser,
     deleteUser,
-    logUserIn
+    logUserIn,
+    testError
 };

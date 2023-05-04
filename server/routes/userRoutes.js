@@ -9,10 +9,12 @@ const {
     register,
     editUser,
     deleteUser,
-    logUserIn
+    logUserIn,
+    testError
 } = require('../controllers/userController');
 
 router.route('/').get(getUsers).post(register);
 router.route('/:id').get(getUser).put(editUser).delete(deleteUser);
-router.route('/login').post(logUserIn)
+router.route('/login').post(logUserIn);
+router.route('/test').get(testError);
 module.exports = router;
