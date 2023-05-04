@@ -3,6 +3,15 @@ const sql = require("mssql/msnodesqlv8");
 const crypto = require("crypto");
 const jwt = require('jsonwebtoken');
 const handler = require("../middleware/errorMiddleware.js");
+const dotenv = require('dotenv').config();
+
+const {
+    MSSQL_DATABASE_NAME,
+    MSSQL_SERVER_NAME,
+    MSSQL_DRIVER,
+    TOKEN_KEY,
+    SALT
+} = process.env;
 
 const config = {
     database: 'Recipes',
@@ -13,9 +22,9 @@ const config = {
     }
 };
 
-const tokenKey = "TEST";
+const tokenKey = process.env.TOKEN_KEY;
 
-const salt = 'magnoliadev', iterations = 1000, keylen = 64, digest = "sha512";
+const salt = process.env.SALT, iterations = 1000, keylen = 64, digest = "sha512";
 
 // @desc: Get all users from the database
 // @route: GET /api/users
