@@ -10,6 +10,7 @@ const {
     editUser,
     deleteUser,
     logUserIn,
+    updateUser,
     testError
 } = require('../controllers/userController');
 

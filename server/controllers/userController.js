@@ -200,6 +200,60 @@ const editUser = asyncHandler(async (req, res) => {
     });
 });
 
+// @desc: Update user from the database
+// @route: /api/users
+// @access: Private
+const updateUser = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let role = null, isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        role = decoded.role;
+    });
+    if (!isValid) return;
+    if (role !== 'admin') {
+        res.status(403).json({ message: "You are not authorized to access this resource." });
+        return;
+    }
+    const { usernameToUpdate, username, password, description, email, name, profilePicture } = req.body;
+
+    if (usernameToUpdate === null || usernameToUpdate === undefined || usernameToUpdate === "" || password === null || password === undefined || password === "" || description === null || description === undefined || description === "" || email === null || email === undefined || email === "" || name === null || name === undefined || name === "" || profilePicture === null || profilePicture === undefined || profilePicture === "") {
+        res.status(401).json({ message: "You are not authorized to do this." });
+        return;
+    }
+
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred in our part." });
+            return;
+        }
+        const request = new sql.Request();
+        const QUERY = `
+        UPDATE Users 
+        SET Username = '${usernameToUpdate}', Password = '${password}', Description = '${description}', Email = '${email}', Name = '${name}', ProfilePicture = '${profilePicture}'
+        WHERE Username = '${username}';`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error ocurred in our part." });
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
+                return;
+            }
+            res.status(204).json({ message: "Updated resource successfully." });
+        })
+    });
+});
+
 // @desc: Delete user from the database
 // @route: DELETE /api/users
 // @access: Private
@@ -326,5 +380,6 @@ module.exports = {
     editUser,
     deleteUser,
     logUserIn,
+    updateUser,
     testError
 };
