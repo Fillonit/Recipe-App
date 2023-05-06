@@ -134,11 +134,14 @@ const addRecipe = asyncHandler(async (req, res) => {
     /*req.body.steps = [step1, step2, step3 ...]*/
     const fileType = require('file-type');
 
-    const title = req.body.title, description = req.body.description;
-    const image = req.files.imageURL, ingredients = req.body.ingredients;
-    const cookTime = req.body.cookTime, servings = req.body.servings;
-    const steps = req.body.steps, prepTime = req.body.preparationTime;
-    const cuisineId = req.body.cuisineId;
+    // const title = req.body.title, description = req.body.description;
+    // const image = req.files.imageURL, ingredients = req.body.ingredients;
+    // const cookTime = req.body.cookTime, servings = req.body.servings;
+    // const steps = req.body.steps, prepTime = req.body.preparationTime;
+    // const cuisineId = req.body.cuisineId;
+
+    const { title, description, image, ingredients, cookTime, servings, steps, prepTime, cuisineId } = req.body;
+
 
     if (title === undefined || description === undefined || image === undefined || ingredients === undefined
         || cookTime === undefined || servings === undefined || steps === undefined || prepTime === undefined || cuisineId === undefined) {
