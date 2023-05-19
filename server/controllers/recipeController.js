@@ -240,6 +240,60 @@ const addRecipe = asyncHandler(async (req, res) => {
         });
     });
 });
+
+const getRecipes = asyncHandler(async (req, res, next) => {
+    const { page, pageSize, cuisineId, title, ingredients, sortBy, sortOrder } = req.query;
+    const { userId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    let chefId = null;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        chefId = token.userId;
+    });
+    if (page === undefined || pageSize === undefined || cuisineId === undefined || title === undefined || ingredients === undefined || sortBy === undefined || sortOrder === undefined) {
+        res.status(400).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (typeof page != 'number' || typeof pageSize != 'number' || typeof cuisineId != 'number' || typeof title != 'string' || typeof ingredients != 'object' || typeof sortBy != 'string' || typeof sortOrder != 'string') {
+        res.status(400).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (page < 0 || pageSize <= 0 || cuisineId < 0 || title.length > 100 || Object.keys(ingredients).length === 0 || (sortBy != 'title' && sortBy != 'createdAt') || (sortOrder != 'asc' && sortOrder != 'desc')) {
+        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        const queries = [];
+        const queryList = `
+        SELECT * FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%' ORDER BY ${sortBy} ${sortOrder} OFFSET ${page * pageSize} ROWS FETCH NEXT ${pageSize} ROWS ONLY;
+        SELECT COUNT(*) AS Total FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%';
+        `;
+        queries.push(queryList);
+        request.query(queryList, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                handler(err, req, res, "");
+                return;
+            }
+            const recipes = result.recordset[0];
+            const total = result.recordset[1];
+            res.status(200).json({ recipes, total });
+            return;
+        });
+    });
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe
