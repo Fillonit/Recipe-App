@@ -294,7 +294,124 @@ const getRecipes = asyncHandler(async (req, res, next) => {
     });
 });
 
+const getRecipe = asyncHandler(async (req, res, next) => {
+    const { recipeId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    let chefId = null;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        chefId = token.userId;
+    });
+    if (recipeId === undefined) {
+        res.status(400).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (typeof recipeId != 'number') {
+        res.status(400).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (recipeId < 0) {
+        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        const queries = [];
+        const queryList = `
+        SELECT * FROM Recipes WHERE ChefId = ${chefId} AND RecipeId = ${recipeId};
+        SELECT * FROM RecipeIngredients WHERE RecipeId = ${recipeId};
+        SELECT * FROM RecipeSteps WHERE RecipeId = ${recipeId};
+        `;
+        queries.push(queryList);
+        request.query(queryList, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                handler(err, req, res, "");
+                return;
+            }
+            const recipe = result.recordset[0];
+            const ingredients = result.recordset[1];
+            const steps = result.recordset[2];
+            res.status(200).json({ recipe, ingredients, steps });
+            return;
+        });
+    });
+});
+
+const editRecipe = asyncHandler(async (req, res, next) => {
+    const { recipeId } = req.params;
+    const { title, cuisineId, ingredients, steps } = req.body;
+    const token = req.headers.authorization.split(" ")[1];
+    let chefId = null;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to edit recipes." });
+            return;
+        }
+        chefId = token.userId;
+    });
+    if (recipeId === undefined || title === undefined || cuisineId === undefined || ingredients === undefined || steps === undefined) {
+        res.status(400).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (typeof recipeId != 'number' || typeof title != 'string' || typeof cuisineId != 'number' || typeof ingredients != 'object' || typeof steps != 'object') {
+        res.status(400).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (recipeId < 0 || title.length > 100 || cuisineId < 0 || Object.keys(ingredients).length === 0 || Object.keys(steps).length === 0) {
+        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        const queries = [];
+        const queryList = `
+        UPDATE Recipes SET Title = '${title}', CuisineId = ${cuisineId} WHERE ChefId = ${chefId} AND RecipeId = ${recipeId};
+        DELETE FROM RecipeIngredients WHERE RecipeId = ${recipeId};
+        DELETE FROM RecipeSteps WHERE RecipeId = ${recipeId};
+        `;
+        queries.push(queryList);
+        for (let i = 0; i < ingredients.length; i++) {
+            const ingredient = ingredients[i];
+            const query = `INSERT INTO RecipeIngredients (RecipeId, IngredientId, Quantity, Unit) VALUES (${recipeId}, ${ingredient.ingredientId}, ${ingredient.quantity}, '${ingredient.unit}');`;
+            queries.push(query);
+        }
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            const query = `INSERT INTO RecipeSteps (RecipeId, StepNumber, Description) VALUES (${recipeId}, ${step.stepNumber}, '${step.description}');`;
+            queries.push(query);
+        }
+        request.query(queryList, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            res.status(200).json({ message: "Recipe successfully edited." });
+            return;
+        });
+    });
+});
+
+
+
 module.exports = {
     deleteRecipe,
-    addRecipe
+    addRecipe,
+    getRecipes,
+    getRecipe,
+    editRecipe
 };

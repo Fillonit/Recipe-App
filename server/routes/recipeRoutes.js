@@ -7,7 +7,10 @@ const port = process.env.PORT || 5000;
 
 const {
     deleteRecipe,
-    addRecipe
+    addRecipe,
+    getRecipes,
+    getRecipe,
+    editRecipe
 } = require('../controllers/recipeController');
 
 router.route('/add/:id').post(addRecipe);
