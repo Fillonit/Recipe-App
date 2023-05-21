@@ -2,11 +2,11 @@ import React from 'react';
 import RecipeList from './RecipeList';
 import Navbar from './Navbar';
 import Hero from './Hero';
-import ProfilePage from './ProfilePage';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// import ProfilePage from './ProfilePage';
+// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Footer from './Footer';
 // import Wave from './Wave';
-import Content from './Content';
+// import Content from './Content';
 
 const recipes = [
   {

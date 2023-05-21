@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaHome, FaUser, FaRandom, FaPizzaSlice, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
+import { FaUser, FaRandom, FaPizzaSlice, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
 const Navbar = ({ title, image, description }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);

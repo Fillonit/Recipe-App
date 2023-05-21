@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import Navbar from "./Navbar";
+// import Navbar from "./Navbar";
 import { Link } from "react-router-dom";
 
 const schema = yup.object().shape({
