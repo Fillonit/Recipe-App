@@ -24,7 +24,7 @@ const Navbar = ({ title, image, description }) => {
      xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
-            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Recipe App</span>
+            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2 -mt-1">Recipe App</span>
           ) : (
             <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Recipe App</span>
           )}
@@ -50,7 +50,7 @@ const Navbar = ({ title, image, description }) => {
               <a
                 key={index}
                 href={`${item.link}`}
-                className="block mt-4 lg:inline-block lg:mt-0 text-indigo-500 hover:text-indigo-300 mr-4"
+                className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-300 mr-4"
               >
                 <p className="text-lg">{item.icon} {item.label}</p>
               </a>
