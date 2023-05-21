@@ -6,12 +6,12 @@ export default function Register() {
 
   async function handleRegistration() {
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch('http://localhost:5000/api/user', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username, password: password }),
       });
 
       const data = await response.json();
@@ -27,15 +27,19 @@ export default function Register() {
 
   async function handleLogin() {
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await fetch('http://localhost:5000/api/user/login', {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: username, password: password }),
       });
-
       const data = await response.json();
+      const { accUsername, role, auth } = data;
+      localStorage.setItem('token', auth);
+      localStorage.setItem('username', accUsername);
+      localStorage.setItem('role', role);
+      alert("Token set: " + localStorage.getItem('token'));
 
       // Do something with the response data, e.g. show a success message
       alert(`Here is the user data: ${JSON.stringify(data)}`)
@@ -101,8 +105,8 @@ export default function Register() {
           >
             Login
           </button>
-    </div>
-    </div>
+        </div>
+      </div>
     </div>
 
   );
