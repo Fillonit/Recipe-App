@@ -1,0 +1,16 @@
+.tagContainer{
+    height: 20%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-rows: auto;
+    gap: 5px;
+}
+.ingredientContainer{
+    height: 80%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 100px);
+    grid-template-rows: auto;
+    gap: 5px;
+}

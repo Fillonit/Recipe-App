@@ -16,7 +16,7 @@ const config = {
 
 const unfollowChef = asyncHandler(async (req, res) => {
     const token = req.body.auth;
-    let userId = null, role = null;
+    let userId = null, role = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -32,7 +32,9 @@ const unfollowChef = asyncHandler(async (req, res) => {
         }
         userId = decoded.userId;
         role = decoded.role;
+        isValid = true;
     });
+    if (!isValid) return;
     sql.connect(config, async (error) => {
         if (error) {
             handler(error, req, res, ""); // im not sure what next is
@@ -40,59 +42,67 @@ const unfollowChef = asyncHandler(async (req, res) => {
         }
 
         const followerId = userId, followeeId = req.params.id;
-
-        const chefQuery = `SELECT COUNT(*) AS count FROM Chef WHERE ChefId = ${followeeId}`;
         const request = new sql.Request();
+        request.input('follower', sql.Int, followerId);
+        request.input('followee', sql.Int, followeeId);
+        const d = new Date();
+        const date = d.toISOString().slice(0, 10);
+        const QUERY = `BEGIN TRANSACTION;
+                        BEGIN TRY
+                         DECLARE @FollowingCount INT;
+                         
+                         SELECT @FollowingCount = COUNT(*)
+                         FROM Followers
+                         WHERE FollowerId = @follower AND @FolloweeId = @followee; 
+                         
+                         IF(@FollowingCount = 0)
+                          BEGIN
+                           INSERT INTO Followers(FollowerId, FolloweeId) VALUES (@follower, @followee);
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee, @follower+' just followed you!', '${date}');
 
-        await request.query(chefQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(403).json({ message: "Could not find the chef provided." });
-                return;
-            }
-        });
+                           UPDATE Chef
+                           SET FollowersCount = FollowersCount + 1
+                           WHERE ChefId = @followee;
+                           
+                           UPDATE Following
+                           SET FollowingCount = FollowingCount + 1
+                           WHERE UserId = @follower;
+                           DECLARE @NotificationCount INT;
 
-        const followingQuery = `SELECT COUNT(*) AS count FROM Followers WHERE FolloweeId = ${followeeId} AND FollowerId = ${followerId}`;
-        request.query(followingQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(409).json({ message: "Conflict, user cannot unfollow someone they are not following." });
-                return;
-            }
-        });
-        const tableToUpdate = {
-            user: ["Normal_User", "NormalUserId"],
-            chef: ["Chef", "ChefId"]
-        }/*^ Explanation about this:
-            When user X follows someone else, then it means that user X FollowingCount must be incremented
-            by 1, because they now follow one more chef, and the table in which I have to increment the follower count, depends on what role the 
-            one who wants to follow has, for example:
-              1. if the user who wants to follow the chef
-                     is a normal user, then I want to increment 
-                     the FollowingCount in the Normal_User table
-              2. If the user who wants to follow the chef
-                     is a chef, then I want to increment 
-                     the FollowingCount in the Chef table
-        */
-        let queriesList = `
-        BEGIN TRANSACTION
-        DELETE FROM Followers WHERE FolloweeId = ${followeeId} AND FollowerId = ${followerId};
-        UPDATE Chef SET FollowersCount = FollowersCount - 1 WHERE ChefId = ${followeeId};
-        UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount - 1 WHERE ${tableToUpdate[role][1]} = ${userId};
-        COMMIT`;
+                           SELECT @NotificationCount = COUNT(*)
+                           FROM Notifications
+                           WHERE UserId = @followee;
+                           
+                           IF(@NotificationCount >= 20)
+                           BEGIN 
+                             DECLARE @EarliestNotification INT;
+                             DECLARE @EarliestDate DATE;
+
+                             SELECT @EarliestDate = MIN(ReceivedAt)
+                             FROM Notifications;
+                             
+                             SELECT @EarliestNotification = NotificationId
+                             FROM Notifications
+                             WHERE ReceivedAt = @EarliestDate;
+
+                             DELETE FROM Notifications
+                             WHERE NotificationId = @EarliestNotification
+                           END
+                          END
+                        END TRY
+                        BEGIN CATCH
+                         THROW;
+                         ROLLBACK;
+                        END CATCH;
+                       COMMIT;`;
+
         request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
                 return;
             }
         });
-        res.status(204).json({ message: "Successfully updated resource." });
+        res.status(200).json({ message: "Successfully updated resource." });
     });
 });
 const followChef = asyncHandler(async (req, res) => {
@@ -121,53 +131,37 @@ const followChef = asyncHandler(async (req, res) => {
         }
 
         const followerId = userId, followeeId = req.params.id;
-
-        const chefQuery = `SELECT COUNT(*) AS count FROM Chef WHERE ChefId = ${followeeId}`;
         const request = new sql.Request();
+        request.input('follower', sql.Int, followerId);
+        request.input('followee', sql.Int, followeeId);
+        const QUERY = `BEGIN TRANSACTION;
+                          BEGIN TRY
+                            DECLARE @FollowingCount INT;
+         
+                            SELECT @FollowingCount = COUNT(*)
+                            FROM Followers
+                            WHERE FollowerId = @follower AND @FolloweeId = @followee;
+         
+                            IF(@FollowingCount = 1)
+                             BEGIN
+                              DELETE FROM Followers
+                              WHERE FollowerId = @follower AND @FolloweeId = @followee;
 
-        request.query(chefQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(403).json({ message: "Could not find the chef provided." });
-                return;
-            }
-        });
+                              UPDATE Chef
+                              SET FollowersCount = FollowersCount - 1
+                              WHERE ChefId = @followee;
+           
+                              UPDATE Following
+                              SET FollowingCount = FollowingCount - 1
+                              WHERE UserId = @follower;
+                             END
+                          END TRY
+                          BEGIN CATCH
+                           THROW;
+                           ROLLBACK;
+                          END CATCH;
+                      COMMIT;`;
 
-        const followingQuery = `SELECT COUNT(*) AS count FROM Followers WHERE FolloweeId = ${followeeId} AND FollowerId = ${followerId}`;
-        request.query(followingQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length !== 0) {
-                res.status(409).json({ message: "Conflict, user is already following the chef in question." });
-                return;
-            }
-        });
-        const tableToUpdate = {
-            user: ["Normal_User", "NormalUserId"],
-            chef: ["Chef", "ChefId"]
-        }/*^ Explanation about this:
-            When user X follows someone else, then it means that user X FollowingCount must be incremented
-            by 1, because they now follow one more chef, and the table in which I have to increment the follower count, depends on what role the 
-            one who wants to follow has, for example:
-              1. if the user who wants to follow the chef
-                     is a normal user, then I want to increment 
-                     the FollowingCount in the Normal_User table
-              2. If the user who wants to follow the chef
-                     is a chef, then I want to increment 
-                     the FollowingCount in the Chef table
-        */
-        const queries = [];
-        queries.push(`INSERT INTO Followers(FolloweeId, FollowerId) VALUES (${followeeId}, ${followerId})`);
-        queries.push(`UPDATE Chef SET FollowersCount = FollowersCount + 1 WHERE ChefId = ${followeeId}`);
-        queries.push(`UPDATE ${tableToUpdate[role][0]} SET FollowingCount = FollowingCount + 1 WHERE ${tableToUpdate[role][1]} = ${userId}`);
-        queries.unshift(`BEGIN TRANSACTION`);
-        queries.push(`COMMIT`);
-        const QUERY = queries.join("; ") + ";";
         request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");

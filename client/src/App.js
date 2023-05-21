@@ -11,6 +11,7 @@ import Recipe from './pages/Recipe';
 import Footer from './components/Footer';
 import Contact from './components/Contact';
 import LogIn from './components/Register';
+import PublishRecipe from './components/PublishRecipe';
 
 const recipes = [
   {
@@ -44,6 +45,7 @@ function App() {
         <Route path="/recipe" element={<Recipe />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<LogIn />} />
+        <Route path='/publishRecipe' element={<PublishRecipe />} />
       </Routes>
     </Router>
   );
