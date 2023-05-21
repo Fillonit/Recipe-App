@@ -21,7 +21,7 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
             form.append('tags', Object.keys(recipeTags));
             form.append('image', image.current.files[0]);
 
-            const response = await fetch("http://localhost:5000/api/recipes", {
+            const response = await fetch("http://localhost:5000/api/recipes/add", {
                 method: "POST",
                 body: form
             });

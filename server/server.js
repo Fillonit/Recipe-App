@@ -24,8 +24,8 @@ app.use(express.urlencoded({
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/api/users', userRouter);
-app.use('/api/recipes', recipeRouter);
+app.use('/api/user', userRouter);
+app.use('/api/recipe', recipeRouter);
 app.use('/images', express.static(uploadDirectory));
 
 app.use(errorHandler);

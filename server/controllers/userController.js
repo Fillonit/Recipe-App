@@ -14,9 +14,9 @@ const {
 } = process.env;
 
 const config = {
-    database: process.env.MSSQL_DATABASE_NAME,
-    server: process.env.MSSQL_SERVER_NAME,
-    driver: process.env.MSSQL_DRIVER,
+    database: MSSQL_DATABASE_NAME,
+    server: MSSQL_SERVER_NAME,
+    driver: MSSQL_DRIVER,
     options: {
         trustedConnection: true
     }
@@ -67,9 +67,10 @@ const getUsers = asyncHandler(async (req, res) => {
 // @route: GET /api/users/:id
 // @access: Private
 const getUser = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
+    const token = req.headers['r-a-token'];
     let username = null;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    let userToGet = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -78,9 +79,15 @@ const getUser = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token expired" });
             return;
         }
+        console.log(decoded);
         username = decoded.username;
+        userToGet = decoded.userId;
     });
-    const userToGet = req.params.id;
+    if (req.params.id !== undefined) {
+        userToGet = req.params.id;
+    }
+    console.log(userToGet);
+    console.log(username);
     if (isNaN(Number(userToGet))) {
         res.status(401).json({
             message: "Expected integer, instead got else"
@@ -94,7 +101,11 @@ const getUser = asyncHandler(async (req, res) => {
         }
         const request = new sql.Request();
         request.input('username', sql.Int, userToGet);
-        const QUERY = 'SELECT * FROM Users WHERE UserId = @username';
+        const QUERY = `SELECT * 
+                       FROM Users u
+                         INNER JOIN Following f
+                         ON f.UserId = u.UserId
+                       WHERE u.UserId = @username;`;
 
         request.query(QUERY, (err, result) => {
             if (err) {
@@ -105,7 +116,7 @@ const getUser = asyncHandler(async (req, res) => {
                 res.status(404).json({ message: "No such user was found." });
                 return;
             }
-            res.status(200).json({ message: "Successfully fetched user.", response: result.recordset[0] });
+            res.status(200).json({ message: "Successfully fetched user.", response: { ...result.recordset[0], UserId: result.recordset[0].UserId[0] } });
         });
     });
 });
@@ -137,7 +148,6 @@ const logUserIn = asyncHandler(async (req, res) => {
         const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
         const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();
-        let userType, userId;
         request.query(userQuery, (err, result) => {
             if (err) {
                 errorHandler(err, req, res, "");
@@ -146,12 +156,12 @@ const logUserIn = asyncHandler(async (req, res) => {
             if (result.recordset.length === 0) {
                 res.status(401).json({ message: "Password doesn't match." });
                 return;
-            }
-            userId = result.recordset[0].UserId;
-            userType = result.recordset[0].userType; //<= more joins are required but this is just the general idea.
+            } userId = result.recordset[0].UserId;
+            userType = result.recordset[0].Role;
+            usern = result.recordset[0].Username;
+            const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
+            res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, accUsername: result.recordset[0].Username });
         });
-        const token = jwt.sign({ userId: userId, username: username, role: userType, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, tokenKey);
-        res.status(200).json({ message: "The log in process was successful.", auth: token });
     })
 });
 // @desc: User self-edit data
@@ -352,7 +362,14 @@ const register = asyncHandler(async (req, res) => {
         request.input('username', sql.VarChar, username);
         request.input('password', sql.VarChar, hashedPassword);
 
-        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user')`;
+        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user');
+                       DECLARE @UserId INT;
+
+                       SELECT @UserId = UserId
+                       FROM Users
+                       WHERE Username = @username
+
+                       INSERT INTO Following(UserId) VALUES(@UserId);`;
 
         request.query(QUERY, (err, result) => {
             if (err) {

@@ -19,12 +19,12 @@ const {
     addRecipe,
     getRecipes,
     getRecipe,
-    editRecipe
+    // editRecipe
 } = require('../controllers/recipeController');
 
-router.route('/add/:id').post(addRecipe);
-router.route('/delete/:id').delete(deleteRecipe, uploads.single('file'));
-router.route('/edit/:id').post(editRecipe);
+router.route('/add').post(addRecipe, upload.single('image'));
+router.route('/delete/:id').delete(deleteRecipe);
+// router.route('/edit/:id').post(editRecipe);
 router.route('/get/:id').get(getRecipe);
 router.route('/get').get(getRecipes);
 

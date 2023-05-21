@@ -495,5 +495,6 @@ const filterRecipes = asyncHandler(async (req, res) => {
 module.exports = {
     deleteRecipe,
     addRecipe,
-    getRecipe
+    getRecipe,
+    getRecipes
 }
