@@ -37,14 +37,14 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                     ref={title}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     type="text"
-                    placeholder="Recipe title..."
+                    placeholder="Title"
                 />
             </div>
             <div className="mb-4">
                 <textarea
                     ref={description}
                     className="max-h-44 min-h-22 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="Recipe description..."
+                    placeholder="Description"
                 ></textarea>
             </div>
             <div className="mb-4">
@@ -55,7 +55,7 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                     }}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     type="number"
-                    placeholder="Recipe servings"
+                    placeholder="Servings"
                 />
             </div>
             <div className="mb-4">
@@ -66,7 +66,7 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                     ref={cookTime}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     type="number"
-                    placeholder="Recipe cook time (in minutes)"
+                    placeholder="Cook time (minutes)"
                 />
             </div>
             <div className="mb-4">
@@ -74,7 +74,7 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                     ref={prepTime}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     type="number"
-                    placeholder="Recipe preparation time (in minutes)"
+                    placeholder="Preparation time (minutes)"
                 />
             </div>
             <div className="mb-4">

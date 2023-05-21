@@ -1,30 +1,3 @@
-// import { json } from "express";
-// import { useRef } from "react";
-// export default function LogIn() {
-//     const username = useRef();
-//     const password = useRef();
-//     async function add() {
-//         const response = await fetch(`http://localhost:5000/user`, {
-//             method: "POST",
-//             headers: {
-//                 'Content-type': 'application/json'
-//             },
-//             body: JSON.stringify({
-//                 username: username.current.value,
-//                 password: password.current.value
-//             })
-//         });
-
-//     }
-//     return (
-//         <div>
-//             <input ref={username} type="text" placeholder="username" value={"user"} />
-//             <input ref={password} type="text" placeholder="password" value={"password"} />
-//             <button onClick={add}>REGISTER</button>
-//         </div>
-//     )
-// }
-
 import { useState } from "react";
 
 export default function Register() {
@@ -83,10 +56,54 @@ export default function Register() {
 
   return (
     <div className={"mt-32 flex justify-center items-center"}>
-      <input type="text" placeholder="Username" value={username} onChange={handleUsernameChange} />
-      <input type="text" placeholder="Password" value={password} onChange={handlePasswordChange} />
-      <button onClick={handleRegistration}>Register</button>
-      <button onClick={handleLogin}>LOG IN</button>
+      <div className={"flex flex-col"}>
+        <div className={"flex flex-col items-center"}>
+          <h1 className={"text-4xl font-bold"}>Register</h1>
+          <input
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={handleUsernameChange}
+          />
+          <input
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+          <button
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            onClick={handleRegistration}
+          >
+            Register
+          </button>
+
+          <h1 className={"text-4xl font-bold"}>Login</h1>
+          <input
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={handleUsernameChange}
+          />
+          <input
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+          <button
+            className={"border-2 border-gray-400 rounded-lg p-2 m-2"}
+            onClick={handleLogin}
+          >
+            Login
+          </button>
     </div>
+    </div>
+    </div>
+
   );
 }
