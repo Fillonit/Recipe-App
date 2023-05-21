@@ -186,16 +186,16 @@ const editUser = asyncHandler(async (req, res) => {
         UPDATE Users 
         SET Username = '${usernameToUpdate}', Password = '${password}', Description = '${description}', Email = '${email}', Name = '${name}', ProfilePicture = '${profilePicture}'
         WHERE Username = '${username}';`;
-        request.query(QUERY, (err, result)=>{
+        request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error ocurred in our part." });
                 return;
             }
-            if(result.rowsAffected === 0){
-                res.status(401).json({message:"The data provided conflicts with our database"});
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
                 return;
             }
-            res.status(204).json({message: "Updated resource successfully."});
+            res.status(204).json({ message: "Updated resource successfully." });
         })
     });
 });
@@ -369,6 +369,98 @@ const register = asyncHandler(async (req, res) => {
 const testError = asyncHandler(async (req, res, next) => {
     const err = new Error("This is a test error.");
     next(err);
+});
+const promoteToChef = asyncHandler(async (req, res) => {
+    const token = req.params.auth;
+    let role = null, isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        role = decoded.role;
+    });
+    if (!isValid) return;
+    if (role !== 'admin') {
+        res.status(403).json({ message: "You are not authorized to access this resource." });
+        return;
+    }
+    const { userToPromote, experience, worksAt } = req.body;
+    if (isNaN(Number(userToPromote)) || Number(userToPromote) != Math.floor(Number(userToPromote))) {
+        res.status(401).json({ message: "Expected integer for user id." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred in our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('@userId', sql.Int, userToPromote);
+        request.input('@experience', sql.Float, experience);
+        request.input('@worksAt', sql.VarChar, worksAt);
+        const d = new Date();
+        const date = d.toISOString().slice(0, 10);
+        const QUERY = `BEGIN TRANSACTION;
+                        BEGIN TRY
+                         DECLARE @Count INT;
+                         
+                         SELECT @Count = COUNT(*)
+                         FROM Normal_User
+                         WHERE NormalUserId = @userId;
+
+                         IF(@Count = 0)
+                          BEGIN
+                           INSERT INTO Chef(ChefId, Experience, WorksAt) VALUES (@userId, @experience, @worksAt);
+
+                           DELETE FROM Normal_User
+                           WHERE NormalUserId = @UserId;
+                           
+                           UPDATE Users
+                           SET Role = 'Chef'
+                           WHERE UserId = @userId;
+
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@userId,'Your chef application was successful, you are now a chef!', '${date}');
+                           DECLARE @NotificationCount INT;
+
+                           SELECT @NotificationCount = COUNT(*)
+                           FROM Notifications
+                           WHERE UserId = @followee;
+                           
+                           IF(@NotificationCount >= 20)
+                           BEGIN 
+                             DECLARE @EarliestNotification INT;
+                             DECLARE @EarliestDate DATE;
+
+                             SELECT @EarliestDate = MIN(ReceivedAt)
+                             FROM Notifications;
+                             
+                             SELECT @EarliestNotification = NotificationId
+                             FROM Notifications
+                             WHERE ReceivedAt = @EarliestDate;
+
+                             DELETE FROM Notifications
+                             WHERE NotificationId = @EarliestNotification
+                           END
+                          END
+                        END TRY`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error ocurred in our part." });
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
+                return;
+            }
+            res.status(204).json({ message: "Updated resource successfully." });
+        })
+    });
 });
 
 
