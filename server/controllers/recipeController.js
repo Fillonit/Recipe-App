@@ -249,92 +249,83 @@ const addRecipe = asyncHandler(async (req, res) => {
         });
     });
 });
-const getRecipe = asyncHandler(async (req, res) => {
-    const token = req.params.auth;
-    let isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+
+const getRecipes = asyncHandler(async (req, res, next) => {
+    const { page, pageSize, cuisineId, title, ingredients, sortBy, sortOrder } = req.query;
+    const { userId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    let chefId = null;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Token is invalid" });
+            res.status(401).json({ message: "Not authorized to view recipes." });
             return;
         }
-        if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        isValid = true;
+        chefId = token.userId;
     });
-    if (!isValid) return;
-    const recipeId = req.params.id;
+    if (page === undefined || pageSize === undefined || cuisineId === undefined || title === undefined || ingredients === undefined || sortBy === undefined || sortOrder === undefined) {
+        res.status(400).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (typeof page != 'number' || typeof pageSize != 'number' || typeof cuisineId != 'number' || typeof title != 'string' || typeof ingredients != 'object' || typeof sortBy != 'string' || typeof sortOrder != 'string') {
+        res.status(400).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (page < 0 || pageSize <= 0 || cuisineId < 0 || title.length > 100 || Object.keys(ingredients).length === 0 || (sortBy != 'title' && sortBy != 'createdAt') || (sortOrder != 'asc' && sortOrder != 'desc')) {
+        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
     sql.connect(config, (err) => {
         if (err) {
             handler(err, req, res, "");
             return;
         }
         const request = new sql.Request();
-        request.input('recipeId', sql.Int, recipeId);
-        const QUERY = `BEGIN TRANSACTION;
-                          BEGIN TRY
-                            DECLARE @TotalProteinGr INT;
-                            DECLARE @TotalCarbsGr INT;
-                            DECLARE @TotalFatsGr INT;
-                            DECLARE @TotalCals INT;
-
-                            SELECT @TotalProteinGr = SUM(ri.Amount * i.ProteinsInGramsPerBase * u.ValueInStandardUnit),
-                                   @TotalCarbsGr = SUM(ri.Amount * i.CarbsInGramsPerBase * u.ValueInStandardUnit),
-                                   @TotalFatsGr = SUM(ri.Amount * i.FatsInGramsPerBase * u.ValueInStandardUnit),
-                                   @TotalCals = SUM(ri.Amount * i.CaloriesPerBase * u.ValueInStandardUnit)
-                            FROM RecipeIngredients ri
-                               JOIN Ingredients i
-                               ON i.RecipeId = ri.RecipeId
-                                  JOIN Units u
-                                  ON u.Unit = ri.Unit
-                            WHERE ri.RecipeId = @recipeId
-
-                            SELECT r.Title, r.Description, r.ImageUrl, r, r.Rating, r.NumberOfRatings, r.Views, u.Username, c.Name,
-                            @TotalProteinGr AS TotalProteinGr, @TotalCarbsGr AS TotalCarbsGr, @TotalFatsGr AS TotalFatsGr, @TotalCals AS TotalCals 
-                            FROM Recipes r
-                               JOIN Cuisine c
-                               ON c.RecipeId = r.RecipeId
-                                  JOIN Users u
-                                  ON u.UserId = r.ChefId
-                            
-                            SELECT StepNumber, StepDescription
-                            FROM Steps 
-                            WHERE RecipeId = @recipeId;
-                            
-                          END TRY
-                          BEGIN CATCH
-                            THROW;
-                            ROLLBACK;
-                          END CATCH;
-                        COMMIT;`
-        request.query(QUERY, (err, result) => {
+        const queries = [];
+        const queryList = `
+        SELECT * FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%' ORDER BY ${sortBy} ${sortOrder} OFFSET ${page * pageSize} ROWS FETCH NEXT ${pageSize} ROWS ONLY;
+        SELECT COUNT(*) AS Total FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%';
+        `;
+        queries.push(queryList);
+        request.query(queryList, (err, result) => {
             if (err) {
                 handler(err, req, res, "");
                 return;
             }
-            res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            if (result.recordset.length === 0) {
+                handler(err, req, res, "");
+                return;
+            }
+            const recipes = result.recordset[0];
+            const total = result.recordset[1];
+            res.status(200).json({ recipes, total });
             return;
-        })
-    })
-});
-const addToFavorite = asyncHandler(async (req, res) => {
-    const token = req.params.auth;
-    let userId = null, isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
-        if (err) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        isValid = true;
-        userId = decoded.userId;
+        });
     });
-    if (!isValid) return;
-    const recipeId = req.body.id;
+});
+
+const getRecipe = asyncHandler(async (req, res, next) => {
+    const { recipeId } = req.params;
+    const token = req.headers.authorization.split(" ")[1];
+    let chefId = null;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        chefId = token.userId;
+    });
+    if (recipeId === undefined) {
+        res.status(400).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (typeof recipeId != 'number') {
+        res.status(400).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (recipeId < 0) {
+        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
     sql.connect(config, (err) => {
         if (err) {
             handler(err, req, res, "");

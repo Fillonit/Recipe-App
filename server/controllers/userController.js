@@ -30,19 +30,21 @@ const salt = process.env.SALT, iterations = 1000, keylen = 64, digest = "sha512"
 // @route: GET /api/users
 // @access: Private
 const getUsers = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
+    // const token = req.body.auth;
 
-    // getUsers osht GET request, pra nuk ka body, ka vetem params
-    jwt.verify(token, tokenKey, (err, decoded) => {
-        if (err) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-    })
+    // // getUsers osht GET request, pra nuk ka body, ka vetem params
+    // jwt.verify(token, tokenKey, (err, decoded) => {
+    //     if (err) {
+    //         res.status(401).json({ message: "Token is invalid" });
+    //         return;
+    //     }
+    //     if (Date.now() / 1000 > decoded.exp) {
+    //         res.status(401).json({ message: "Token is invalid" });
+    //         return;
+    //     }
+    // })
+
+    // temporarily disabled jwt token verification due to small issues
     sql.connect(config, (error) => {
         if (error) {
             errorHandler(error, req, res, "");//im not sure what next is
@@ -130,7 +132,8 @@ const logUserIn = asyncHandler(async (req, res) => {
             errorHandler(err, req, res, "");
             return;
         }
-        const username = req.body.username, password = req.body.password;
+        // const username = req.body.username, password = req.body.password;
+        const { username, password } = req.body;
         const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
         const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();

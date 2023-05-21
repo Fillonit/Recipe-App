@@ -7,10 +7,14 @@ const {
     addComment,
     deleteComment,
     likeComment,
-    unlikeComment
+    unlikeComment,
+    editComment,
+    getComment
 } = require('../controllers/commentController.js');
 
 router.route('/:id').post(addComment).delete(deleteComment);
 router.route('/like/:id').post(likeComment).delete(unlikeComment);
+router.route('/edit/:id').post(editComment);
+router.route('/get/:id').get(getComment);
 
 module.exports = router;

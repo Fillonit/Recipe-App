@@ -233,9 +233,116 @@ const unlikeComment = asyncHandler(async (req, res) => {
     });
 });
 
+const editComment = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let userId = null, role = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        userId = decoded.userId;
+        role = decoded.role;
+    });
+    sql.connect(config, (error) => {
+        if (error) {
+            handler(error, req, res, ""); // im not sure what next is
+            return;
+        }
+
+        const commentId = req.params.id;
+        if (isNaN(Number(commentId))) {
+            res.status(400).json({ message: "Expected integer but instead got string for commentId." });
+            return;
+        }
+        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        const request = new sql.Request();
+
+        request.query(existsQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+            if (result.recordset.UserId != userId) {
+                res.status(403).json({ message: "You don't have permission to edit that comment." });
+                return;
+            }
+        });
+        const editQuery = `UPDATE Comments SET Comment = '${req.body.comment}' WHERE CommentId = ${commentId}`;
+        request.query(editQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+        });
+        res.status(204).json({ message: "Successfully edited resource." });
+    });
+});
+
+const getComment = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let userId = null, role = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        userId = decoded.userId;
+        role = decoded.role;
+    });
+    sql.connect(config, (error) => {
+        if (error) {
+            handler(error, req, res, ""); // im not sure what next is
+            return;
+        }
+
+        const commentId = req.params.id;
+        if (isNaN(Number(commentId))) {
+            res.status(400).json({ message: "Expected integer but instead got string for commentId." });
+            return;
+        }
+        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        const request = new sql.Request();
+
+        request.query(existsQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+        });
+        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId}`;
+        request.query(getQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+        });
+        res.status(200).json({ message: "Successfully retrieved resource." });
+    });
+});
+
+
 module.exports = {
     addComment,
     deleteComment,
     likeComment,
-    unlikeComment
+    unlikeComment,
+    editComment,
+    getComment
 };

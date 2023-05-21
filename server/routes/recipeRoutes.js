@@ -16,11 +16,17 @@ const upload = multer({ storage: storage });
 
 const {
     deleteRecipe,
-    addRecipe
+    addRecipe,
+    getRecipes,
+    getRecipe,
+    editRecipe
 } = require('../controllers/recipeController');
 
-router.post('/', upload.single('image'), addRecipe);
-router.route('/delete/:id').delete(deleteRecipe);
+router.route('/add/:id').post(addRecipe);
+router.route('/delete/:id').delete(deleteRecipe, uploads.single('file'));
+router.route('/edit/:id').post(editRecipe);
+router.route('/get/:id').get(getRecipe);
+router.route('/get').get(getRecipes);
 
 
 module.exports = router;
