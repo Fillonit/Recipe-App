@@ -12,11 +12,11 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="w-1/6 bg-gray-900 text-white pt-6">
-        <div className="p-4 pl-6">
-          <h2 className="text-2xl font-bold mb-8">Dashboard</h2>
+      <div className="w-1/6 bg-gray-900 text-white pt-3">
+        <div className="p-6 pl-6">
+          <h2 className="text-3xl font-bold mb-12 px-3">Magnolia</h2>
           <ul className="space-y-4">
-            <li>
+            <li className="py-4 rounded-lg bg-gray-800">
               <a
                 href="/"
                 className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
