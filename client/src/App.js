@@ -8,6 +8,8 @@ import HomePage from './components/HomePage';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import Recipe from './pages/Recipe';
+import Dashboard from './pages/Dashboard';
+import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
 import Contact from './components/Contact';
 import LogIn from './components/Register';
@@ -37,7 +39,11 @@ import PublishRecipe from './components/PublishRecipe';
 function App() {
   return (
     <Router>
+      { 
+      //check if route is not dashboard
+      !window.location.pathname.includes('/dashboard') &&
       <Navbar />
+    }
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
@@ -45,6 +51,8 @@ function App() {
         <Route path="/recipe" element={<Recipe />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<LogIn />} />
+        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
       </Routes>
     </Router>

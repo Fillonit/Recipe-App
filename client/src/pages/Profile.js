@@ -10,14 +10,6 @@ import React, { useState, useEffect } from 'react';
 
 const Profile = () => {
   const [data, setData] = useState(undefined);
-  const getLocalStorage = () => {
-    let username = localStorage.getItem('username');
-    if (username) {
-      return JSON.parse(username);
-    } else {
-      return [];
-    }
-  };
 
   async function setComponents() {
     try {
@@ -70,7 +62,7 @@ const Profile = () => {
                   }
 
                   <div className="p-3 text-center">
-                    <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowingCount !== undefined ? data.FollowingCount : '3489348'}</span>
+                    <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowingCount !== undefined ? data.FollowingCount : '?'}</span>
                     <span className="text-sm text-slate-400">Following</span>
                   </div>
                 </div>
