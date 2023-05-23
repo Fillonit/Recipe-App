@@ -22,26 +22,25 @@ const config = {
 };
 
 const getCuisines = asyncHandler(async (req, res) => {
-    // const token = req.params.auth;
-
-    // let isValid = false;
-    // jwt.verify(token, TOKEN_KEY, (err, decoded) => {
-    //     if (err) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (Date.now() / 1000 > decoded.exp) {
-    //         res.status(401).json({ message: "Token is expired" });
-    //         return;
-    //     }
-    //     if (decoded.role != 'chef') {
-    //         res.status(403).json({ message: "You do not have permission to add this resource." });
-    //         return;
-    //     }
-    //     isValid = true;
-    // })
-    // if (!isValid) return;
-
+    const token = req.headers['r-a-token'];
+    console.log(token);
+    let isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired" });
+            return;
+        }
+        if (decoded.role != 'chef') {
+            res.status(403).json({ message: "You do not have permission to add this resource." });
+            return;
+        }
+        isValid = true;
+    })
+    if (!isValid) return;
     sql.connect(config, (error) => {
         if (error) {
             errorHandler(error, req, res, "");

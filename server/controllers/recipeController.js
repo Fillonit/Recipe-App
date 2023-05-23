@@ -12,11 +12,12 @@ const config = {
         trustedConnection: true
     }
 };
+const TOKEN_KEY = process.env.TOKEN_KEY;
 
 const deleteRecipe = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let userId, isAdmin;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -109,33 +110,31 @@ const deleteRecipe = asyncHandler(async (req, res) => {
 });
 
 const addRecipe = asyncHandler(async (req, res) => {
-    // const token = req.body.auth;
-    // let chefId, isValid = false;
-    // jwt.verify(token, tokenKey, (err, decoded) => {
-    //     if (err) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (Date.now() / 1000 > decoded.exp) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (token.role === 'user') {
-    //         res.status(403).json({ message: "Not authorized to add a recipe." });
-    //         return;
-    //     }
-    //     chefId = token.userId;
-    //     isValid = true;
-    // });
-    // if (!isValid) return;
+    const token = req.headers['r-a-token'];
+    let chefId, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (decoded.role !== 'chef') {
+            res.status(403).json({ message: "Not authorized to add a recipe." });
+            return;
+        }
+        chefId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
     /*req.body.ingredients = {
         (int)ingredientId: [(int)amount, (string)unitId]
 
         ** reminder that unitIds are "KG", "GR" etc**
     }*/
     /*req.body.steps = [step1, step2, step3 ...]*/
-    // const fileType = require('file-type');
-
     if (req.file === undefined) {
         res.status(401).json({ message: "Image was not provided." });
         return;
@@ -229,12 +228,6 @@ const addRecipe = asyncHandler(async (req, res) => {
                         COMMIT;`
         request.query(QUERY, (err, result) => {
             if (err) {
-                // const fs = require('fs');
-                // const fp = `./uploads/${fileName}`;
-                // fs.unlink(fp, (err) => {
-                //     if (err) console.error(err);
-                //     else console.log(`Deleted file: ${fp}`);
-                // });
                 console.log(err);
                 res.status(500).json({ message: err });
                 return;
@@ -397,7 +390,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
 const getFavorites = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let userId = null, isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -438,7 +431,7 @@ const getFavorites = asyncHandler(async (req, res) => {
 const filterRecipes = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;

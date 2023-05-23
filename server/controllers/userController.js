@@ -156,9 +156,7 @@ const logUserIn = asyncHandler(async (req, res) => {
             if (result.recordset.length === 0) {
                 res.status(401).json({ message: "Password doesn't match." });
                 return;
-            } userId = result.recordset[0].UserId;
-            userType = result.recordset[0].Role;
-            usern = result.recordset[0].Username;
+            }
             const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
             res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, accUsername: result.recordset[0].Username });
         });
@@ -362,7 +360,7 @@ const register = asyncHandler(async (req, res) => {
         request.input('username', sql.VarChar, username);
         request.input('password', sql.VarChar, hashedPassword);
 
-        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user');
+        const QUERY = `INSERT INTO Users(Username, Password, Role, CreatedAt) VALUES(@username, @password, 'user', GETDATE());
                        DECLARE @UserId INT;
 
                        SELECT @UserId = UserId
