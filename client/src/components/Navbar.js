@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUser, FaRandom, FaPizzaSlice, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
+import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes, FaLongArrowAltRight } from "react-icons/fa";
 
 const Navbar = ({ title, image, description }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -10,7 +10,7 @@ const Navbar = ({ title, image, description }) => {
 
   const navItems = [
     // { label: "Home", icon: <FaHome className="inline-block mr-1 ml-4 text-lg"/>, link: "/" },
-    { label: "Recipes", icon: <FaPizzaSlice className="inline-block mr-1 ml-4 text-lg" />, link: "/recipes" },
+    { label: "Recipes", icon: <FaUtensils className="inline-block mr-1 ml-4 text-kg" />, link: "/recipes" },
     { label: "Random", icon: <FaRandom className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
@@ -59,7 +59,7 @@ const Navbar = ({ title, image, description }) => {
           <div>
             <a
               href="/login"
-              className="inline-block text-base mr-2 px-4 py-2 leading-none border rounded text-indigo-500 border-indigo-500 hover:border-transparent hover:text-white hover:bg-indigo-500 mt-4 lg:mt-0 font-bold"
+              className="inline-block text-base mr-2 px-4 py-2 leading-none border rounded bg-indigo-500 text-white border-indigo-500 hover:border-transparent hover:text-white hover:bg-indigo-800 mt-4 lg:mt-0 font-bold rounded-full"
             >
               Login
             </a>

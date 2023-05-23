@@ -32,7 +32,7 @@ const recipes = [
 function App() {
     return (
       <div className="-mt-2">
-        <Navbar />
+        {/* <Navbar /> */}
         <Hero />
         {/* <Wave /> */}
         <div className="relative">
