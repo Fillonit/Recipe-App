@@ -30,7 +30,7 @@ const addComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
         const json = JSON.parse(req.body);
@@ -77,7 +77,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
         const commentId = req.params.id;
@@ -148,7 +148,7 @@ const likeComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
 
@@ -200,7 +200,7 @@ const unlikeComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
 
@@ -232,7 +232,6 @@ const unlikeComment = asyncHandler(async (req, res) => {
         res.status(204).json({ message: "Successfully deleted resource." });
     });
 });
-
 const editComment = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let userId = null, role = null;
@@ -250,7 +249,7 @@ const editComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
 
@@ -286,7 +285,6 @@ const editComment = asyncHandler(async (req, res) => {
         res.status(204).json({ message: "Successfully edited resource." });
     });
 });
-
 const getComment = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let userId = null, role = null;
@@ -304,7 +302,7 @@ const getComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            handler(error, req, res, ""); 
             return;
         }
 
@@ -336,6 +334,103 @@ const getComment = asyncHandler(async (req, res) => {
         res.status(200).json({ message: "Successfully retrieved resource." });
     });
 });
+ const getComments = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let userId = null, role = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        userId = decoded.userId;
+        role = decoded.role;
+    });
+    sql.connect(config, (error) => {
+        if (error) {
+            handler(error, req, res, ""); 
+            return;
+        }
+
+        const commentId = req.params.id;
+        if (isNaN(Number(commentId))) {
+            res.status(400).json({ message: "Expected integer but instead got string for commentId." });
+            return;
+        }
+        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        const request = new sql.Request();
+        
+        request.query(existsQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+        });
+        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId}`;
+        request.query(getQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+        });
+        res.status(200).json({ message: "Successfully retrieved resource." });
+    });
+});
+const getCommentsForRecipe = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let recipeId = req.params.id;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        userId = decoded.userId;
+        role = decoded.role;
+    });
+    sql.connect(config, (error) => {
+        if (error) {
+            handler(error, req, res, ""); 
+            return;
+        }
+
+        if (isNaN(Number(recipeId))) {
+            res.status(400).json({ message: "Expected integer but instead got string for recipeId." });
+            return;
+        }
+        const existsQuery = `SELECT COUNT(*) FROM Recipes WHERE RecipeId = ${recipeId}`;
+        const request = new sql.Request();
+
+        request.query(existsQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+        });
+        const getQuery = `SELECT * FROM Comments WHERE RecipeId = ${recipeId}`;
+        request.query(getQuery, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+        });
+        res.status(200).json({ message: "Successfully retrieved resource." });
+    });
+});
 
 
 module.exports = {
@@ -344,5 +439,7 @@ module.exports = {
     likeComment,
     unlikeComment,
     editComment,
-    getComment
+    getComment,
+    getComments,
+    getCommentsForRecipe
 };

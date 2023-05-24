@@ -386,10 +386,6 @@ const register = asyncHandler(async (req, res) => {
     })
 });
 
-const testError = asyncHandler(async (req, res, next) => {
-    const err = new Error("This is a test error.");
-    next(err);
-});
 const promoteToChef = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let role = null, isValid = false;
@@ -492,6 +488,5 @@ module.exports = {
     editUser,
     deleteUser,
     logUserIn,
-    updateUser,
-    testError
+    updateUser
 };

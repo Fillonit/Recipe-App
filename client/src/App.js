@@ -14,6 +14,7 @@ import Dashboard2 from './pages/Dashboard2';
 import Contact from './components/Contact';
 import LogIn from './components/Register';
 import PublishRecipe from './components/PublishRecipe';
+import Footer from './components/Footer';
 
 // const recipes = [
 //   {
@@ -55,6 +56,7 @@ function App() {
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }

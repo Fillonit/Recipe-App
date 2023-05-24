@@ -492,9 +492,74 @@ const filterRecipes = asyncHandler(async (req, res) => {
         })
     })
 });
+
+const updateRecipe = asyncHandler(async (req, res) => {
+    const token = req.params.auth;
+    let userId = null, isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
+    const recipeId = req.params.id;
+    const { title, description, ingredients, steps, cuisineId, image } = req.body;
+    const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        request.input('recipeId', sql.Int, recipeId);
+        request.input('title', sql.VarChar, title);
+        request.input('description', sql.VarChar, description);
+        request.input('ingredients', sql.VarChar, ingredients);
+        request.input('steps', sql.VarChar, steps);
+        request.input('cuisineId', sql.Int, cuisineId);
+        request.input('image', sql.VarChar, image);
+        request.input('date', sql.DateTime, date);
+        request.input('userId', sql.Int, userId);
+
+        const QUERY = `UPDATE Recipes
+                          SET Title = @title,
+                                Description = @description,
+                                Ingredients = @ingredients,
+                                Steps = @steps,
+                                CuisineId = @cuisineId,
+                                Image = @image,
+                                UpdatedAt = @date,
+                                UpdatedBy = @userId
+                            WHERE RecipeId = @recipeId;`
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            if (result.rowsAffected[0] == 0) {
+                res.status(404).json({ message: "Recipe not found." });
+                return;
+            }
+            res.status(200).json({ message: "Recipe updated successfully." });
+            return;
+        })
+    })
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe,
     getRecipe,
-    getRecipes
+    getRecipes,
+    getFavorites,
+    filterRecipes,
+    updateRecipe    
 }
