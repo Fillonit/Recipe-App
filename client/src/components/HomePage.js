@@ -1,6 +1,6 @@
 import React from 'react';
 import RecipeList from './RecipeList';
-import Navbar from './Navbar';
+// import Navbar from './Navbar';
 import Hero from './Hero';
 // import ProfilePage from './ProfilePage';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';

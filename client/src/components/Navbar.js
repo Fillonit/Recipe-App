@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes, FaLongArrowAltRight } from "react-icons/fa";
+import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
 const Navbar = ({ title, image, description }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -50,7 +50,7 @@ const Navbar = ({ title, image, description }) => {
               <a
                 key={index}
                 href={`${item.link}`}
-                className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-300 mr-4"
+                className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-900 mr-4"
               >
                 <p className="text-lg">{item.icon} {item.label}</p>
               </a>
@@ -59,7 +59,7 @@ const Navbar = ({ title, image, description }) => {
           <div>
             <a
               href="/login"
-              className="inline-block text-base mr-2 px-4 py-2 leading-none border rounded bg-indigo-500 text-white border-indigo-500 hover:border-transparent hover:text-white hover:bg-indigo-800 mt-4 lg:mt-0 font-bold rounded-full"
+              className="inline-block text-base mr-2 px-4 py-2 leading-none border bg-indigo-500 text-white border-indigo-500 hover:border-transparent hover:text-white hover:bg-indigo-800 mt-4 lg:mt-0 font-bold rounded-full"
             >
               Login
             </a>
