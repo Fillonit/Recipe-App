@@ -171,7 +171,47 @@ const followChef = asyncHandler(async (req, res) => {
         res.status(204).json({ message: "Successfully updated resource." });
     });
 });
+
+const getFollowers = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let chefId = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        chefId = decoded.userId;
+    });
+    sql.connect(config, (error) => {
+        if (error) {
+            handler(error, req, res, ""); // im not sure what next is
+            return;
+        }
+        
+        const request = new sql.Request();
+        request.input('chefId', sql.Int, chefId);
+        
+        const QUERY = `SELECT Users.UserId, Users.Username, Users.FirstName, Users.LastName, Users.ProfilePicture
+                          FROM Users
+                            INNER JOIN Followers
+                                ON Followers.FollowerId = Users.UserId
+                            WHERE Followers.FolloweeId = @chefId;`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                handler(error, req, res, "");
+                return;
+            }
+            res.status(200).json(result.recordset);
+        });
+    });
+});
 module.exports = {
     followChef,
-    unfollowChef
+    unfollowChef,
+    getFollowers
 };

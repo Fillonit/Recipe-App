@@ -1,10 +1,10 @@
 import React from 'react';
 import RecipeList from './RecipeList';
-import Navbar from './Navbar';
+// import Navbar from './Navbar';
 import Hero from './Hero';
 // import ProfilePage from './ProfilePage';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Footer from './Footer';
+// import Footer from './Footer';
 // import Wave from './Wave';
 // import Content from './Content';
 
@@ -42,11 +42,8 @@ function App() {
           
             {/* <ProfilePage /> */}
           </div>
-          <div className="absolute bottom-0 left-0 w-full">
-            {/* <WaveAnimation /> */}
-          </div>
         </div>
-        <Footer />
+        {/* <Footer /> */}
       </div>
       
     );

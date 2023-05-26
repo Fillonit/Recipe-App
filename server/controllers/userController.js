@@ -349,10 +349,6 @@ const register = asyncHandler(async (req, res) => {
     })
 });
 
-const testError = asyncHandler(async (req, res, next) => {
-    const err = new Error("This is a test error.");
-    next(err);
-});
 const promoteToChef = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let role = null, isValid = false;
@@ -511,6 +507,78 @@ const getUsers = asyncHandler(async (req, res) => {
         });
     })
 });
+const getAllUserData = asyncHandler(async (req, res) => {
+    const token = req.body.auth;
+    let username = null;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        username = decoded.username;
+    })
+    sql.connect(config, async (err) => {
+        if (err) {
+            errorHandler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        //get from other tables too, following, followers, favorites, etc.
+        const QUERY = `SELECT * FROM Users WHERE Username = '${username}'`;
+        const userQuery = `SELECT * FROM Users WHERE Username = '${username}'`;
+        const followingQuery = `SELECT * FROM Following WHERE Username = '${username}'`;
+        const followersQuery = `SELECT * FROM Followers WHERE Username = '${username}'`;
+        const favoritesQuery = `SELECT * FROM Favorites WHERE Username = '${username}'`;
+        const postsQuery = `SELECT * FROM Posts WHERE Username = '${username}'`;
+        const commentsQuery = `SELECT * FROM Comments WHERE Username = '${username}'`;
+        const likesQuery = `SELECT * FROM Likes WHERE Username = '${username}'`;
+
+        await request.query(QUERY, (err, result) => {
+            if (err) {
+                errorHandler(err, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "User not found." });
+                return;
+            }
+            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
+        });
+
+        await request.query(userQuery, (err, result) => {
+            if (err) {
+                errorHandler(err, req, res, "");
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(404).json({ message: "User not found." });
+                return;
+            }
+            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
+        }
+        );
+        await request.query(followingQuery, (err, result) => {
+            if (err) {
+                errorHandler(err, req, res, "");
+                return;
+            }
+            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
+        }
+        );
+        await request.query(followersQuery, (err, result) => {
+            if (err) {
+                errorHandler(err, req, res, "");
+                return;
+            }
+            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
+        }
+        );
+    });
+});
 
 module.exports = {
     getUsers,
@@ -520,6 +588,5 @@ module.exports = {
     editUser,
     deleteUserr,
     logUserIn,
-    updateUser,
-    testError
+    updateUser
 };
