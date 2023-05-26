@@ -26,43 +26,6 @@ const tokenKey = process.env.TOKEN_KEY;
 
 const salt = process.env.SALT, iterations = 1000, keylen = 64, digest = "sha512";
 
-// @desc: Get all users from the database
-// @route: GET /api/users
-// @access: Private
-const getUsers = asyncHandler(async (req, res) => {
-    // const token = req.body.auth;
-
-    // // getUsers osht GET request, pra nuk ka body, ka vetem params
-    // jwt.verify(token, tokenKey, (err, decoded) => {
-    //     if (err) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (Date.now() / 1000 > decoded.exp) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    // })
-
-    // temporarily disabled jwt token verification due to small issues
-    sql.connect(config, (error) => {
-        if (error) {
-            errorHandler(error, req, res, "");//im not sure what next is
-            return;
-        }
-        const QUERY = "SELECT * FROM Users";
-        const request = new sql.Request();
-        request.query(QUERY, (err, result) => {
-            if (err) {
-                errorHandler(error, req, res, "");
-                return;
-            }
-            const object = result.recordset[0];
-            res.status(200).json({ result: object });
-        });
-    })
-});
-
 // @desc: Get user from the database
 // @route: GET /api/users/:id
 // @access: Private
@@ -86,8 +49,7 @@ const getUser = asyncHandler(async (req, res) => {
     if (req.params.id !== undefined) {
         userToGet = req.params.id;
     }
-    console.log(userToGet);
-    console.log(username);
+
     if (isNaN(Number(userToGet))) {
         res.status(401).json({
             message: "Expected integer, instead got else"
@@ -156,9 +118,7 @@ const logUserIn = asyncHandler(async (req, res) => {
             if (result.recordset.length === 0) {
                 res.status(401).json({ message: "Password doesn't match." });
                 return;
-            } userId = result.recordset[0].UserId;
-            userType = result.recordset[0].Role;
-            usern = result.recordset[0].Username;
+            }
             const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
             res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, accUsername: result.recordset[0].Username });
         });
@@ -270,9 +230,9 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc: Delete user from the database
 // @route: DELETE /api/users
 // @access: Private
-const deleteUser = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let username = null;
+const deleteUserr = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let username = null, isValid = false, role;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -282,8 +242,11 @@ const deleteUser = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
+        isValid = true;
         username = decoded.username;
+        role = decoded.role
     })
+    if (!isValid) return;
     if (!req.body.password) {
         req.status(400).json({ message: "Password not provided." });
         return;
@@ -294,22 +257,22 @@ const deleteUser = asyncHandler(async (req, res) => {
             errorHandler(err, req, res, "");
             return;
         }
-        const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
-        const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();
-
-        await request.query(userQuery, (err, result) => {
-            if (err) {
-                errorHandler(err, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(401).json({ message: "Password doesn't match." });
-                return;
-            }
-        });
-        const deleteQuery = `DELETE FROM Users WHERE Username = '${username}'`;
-        await request.query(deleteQuery, (err, result) => {
+        const hashedPassword = password === undefined ? "" : crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
+        request.input('password', sql.VarChar, hashedPassword);
+        request.input('username', sql.VarChar, username);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                          DECLARE @Count INT;
+                          
+                          SELECT @Count = COUNT(*)
+                          FROM Users
+                          WHERE Username = @username AND Password = @password OR (Username = @username AND Role = 'admin');
+                          
+                          IF(@Count = 1)
+                           BEGIN
+                            DELETE FROM Users`;
+        request.query(QUERY, (err, result) => {
             if (err) {
                 errorHandler(err, req, res, "");
                 return;
@@ -362,7 +325,7 @@ const register = asyncHandler(async (req, res) => {
         request.input('username', sql.VarChar, username);
         request.input('password', sql.VarChar, hashedPassword);
 
-        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user');
+        const QUERY = `INSERT INTO Users(Username, Password, Role, CreatedAt) VALUES(@username, @password, 'user', GETDATE());
                        DECLARE @UserId INT;
 
                        SELECT @UserId = UserId
@@ -435,7 +398,7 @@ const promoteToChef = asyncHandler(async (req, res) => {
                            INSERT INTO Chef(ChefId, Experience, WorksAt) VALUES (@userId, @experience, @worksAt);
 
                            DELETE FROM Normal_User
-                           WHERE NormalUserId = @UserId;
+                           WHERE NormalUserId = @userId;
                            
                            UPDATE Users
                            SET Role = 'Chef'
@@ -478,7 +441,72 @@ const promoteToChef = asyncHandler(async (req, res) => {
         })
     });
 });
+const getUsers = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    const page = req.headers['page'];
+    let isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired" });
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "Forbidden, you don't have access to this resource." });
+            return;
+        }
+        isValid = true;
+    })
 
+    if (!isValid) return;
+
+    if (isNaN(Number(page)) || page <= 0) {
+        res.status(401).json({ message: "Expected integer for the page, instead got: " + (typeof page) });
+        return;
+    }
+    sql.connect(config, (error) => {
+        if (error) {
+            console.log(error);
+            res.status(500).json({ message: "An error occurred on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('offset', sql.Int, (page - 1) * 4);
+        const QUERY = `BEGIN TRANSACTION
+                         BEGIN TRY
+                          DECLARE @UserTable TABLE(
+                            UserId INT,
+                            Username VARCHAR(50),
+                            Email VARCHAR(200),
+                            RowNum INT
+                          );
+                          INSERT INTO @UserTable(UserId, Username, Email, RowNum)
+                          SELECT UserId, Username, Email, ROW_NUMBER() OVER (ORDER BY UserId) AS RowNum
+                          FROM Users
+                          WHERE Role <> 'admin';
+                          
+                          SELECT UserId, Username, Email
+                          FROM @UserTable
+                          WHERE RowNum > @offset AND RowNum <= (@offset + 4);
+                         END TRY
+                         BEGIN CATCH
+                           THROW;
+                           ROLLBACK;
+                         END CATCH;
+                       COMMIT;`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            res.status(200).json({ message: "Resource fetched successfully.", response: result.recordset });
+        });
+    })
+});
 const getAllUserData = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let username = null;
@@ -622,7 +650,7 @@ module.exports = {
     getUser,
     setUser,
     editUser,
-    deleteUser,
+    deleteUserr,
     logUserIn,
     updateUser
 };

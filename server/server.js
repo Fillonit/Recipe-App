@@ -11,11 +11,16 @@ const {
 
 const userRouter = require('./routes/userRoutes');
 const recipeRouter = require('./routes/recipeRoutes');
-
+const cuisineRouter = require('./routes/cuisineRoutes');
+const unitRouter = require('./routes/unitRoutes');
+const tagRouter = require('./routes/tagRoutes');
+const ingredientRouter = require('./routes/ingredientRoutes');
+// const contactRouter = require('./routes/contactRoutes');
+const adminRouter = require('./routes/adminRoutes');
 
 const app = express();
 const uploadDirectory = path.join(__dirname, 'uploads');
-console.log(uploadDirectory);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({
@@ -26,6 +31,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/api/user', userRouter);
 app.use('/api/recipe', recipeRouter);
+app.use('/api/cuisines', cuisineRouter);
+app.use('/api/units', unitRouter);
+app.use('/api/tags', tagRouter);
+app.use('/api/ingredients', ingredientRouter);
+app.use('/api/admin', adminRouter);
+// app.use('/api/contacts', contactRouter);
+
 app.use('/images', express.static(uploadDirectory));
 
 app.use(errorHandler);

@@ -22,7 +22,7 @@ const {
     // editRecipe
 } = require('../controllers/recipeController');
 
-router.route('/add').post(addRecipe, upload.single('image'));
+router.route('/add').post(upload.single('image'), addRecipe);
 router.route('/delete/:id').delete(deleteRecipe);
 // router.route('/edit/:id').post(editRecipe);
 router.route('/get/:id').get(getRecipe);

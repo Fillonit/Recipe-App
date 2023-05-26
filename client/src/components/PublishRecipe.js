@@ -28,22 +28,35 @@ export default function PublishRecipe() {
     }
     async function setComponents() {
         const unitResponse = await fetch("http://localhost:5000/api/units", {
-            method: "GET"
+            method: "GET",
+            headers: {
+                'R-A-Token': localStorage.getItem('token')
+            }
         });
         const ingredientResponse = await fetch("http://localhost:5000/api/ingredients", {
-            method: "GET"
+            method: "GET",
+            headers: {
+                'R-A-Token': localStorage.getItem('token')
+            }
         })
         const tagResponse = await fetch("http://localhost:5000/api/tags", {
-            method: "GET"
+            method: "GET",
+            headers: {
+                'R-A-Token': localStorage.getItem('token')
+            }
         })
         const cuisineResponse = await fetch("http://localhost:5000/api/cuisines", {
-            method: "GET"
+            method: "GET",
+            headers: {
+                'R-A-Token': localStorage.getItem('token')
+            }
         })
         const ingredientObj = {}, unitObj = {};
         const unitJson = await unitResponse.json();
         const ingredientJson = await ingredientResponse.json();
         const tagJson = await tagResponse.json();
         const cuisineJson = await cuisineResponse.json();
+        console.log(cuisineJson);
         for (const element of ingredientJson.response)
             ingredientObj[element.IngredientId] = element;
         for (const element of unitJson.response)

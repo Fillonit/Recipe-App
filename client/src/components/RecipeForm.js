@@ -21,8 +21,11 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
             form.append('tags', Object.keys(recipeTags));
             form.append('image', image.current.files[0]);
 
-            const response = await fetch("http://localhost:5000/api/recipes/add", {
+            const response = await fetch("http://localhost:5000/api/recipe/add", {
                 method: "POST",
+                headers: {
+                    'R-A-Token': localStorage.getItem('token')
+                },
                 body: form
             });
             console.log(response.status);

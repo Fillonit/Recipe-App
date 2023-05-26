@@ -12,11 +12,12 @@ const config = {
         trustedConnection: true
     }
 };
+const TOKEN_KEY = process.env.TOKEN_KEY;
 
 const deleteRecipe = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let userId, isAdmin;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -109,33 +110,31 @@ const deleteRecipe = asyncHandler(async (req, res) => {
 });
 
 const addRecipe = asyncHandler(async (req, res) => {
-    // const token = req.body.auth;
-    // let chefId, isValid = false;
-    // jwt.verify(token, tokenKey, (err, decoded) => {
-    //     if (err) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (Date.now() / 1000 > decoded.exp) {
-    //         res.status(401).json({ message: "Token is invalid" });
-    //         return;
-    //     }
-    //     if (token.role === 'user') {
-    //         res.status(403).json({ message: "Not authorized to add a recipe." });
-    //         return;
-    //     }
-    //     chefId = token.userId;
-    //     isValid = true;
-    // });
-    // if (!isValid) return;
+    const token = req.headers['r-a-token'];
+    let chefId, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (decoded.role != 'chef') {
+            res.status(403).json({ message: "Not authorized to add a recipe." });
+            return;
+        }
+        chefId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
     /*req.body.ingredients = {
         (int)ingredientId: [(int)amount, (string)unitId]
 
         ** reminder that unitIds are "KG", "GR" etc**
     }*/
     /*req.body.steps = [step1, step2, step3 ...]*/
-    // const fileType = require('file-type');
-
     if (req.file === undefined) {
         res.status(401).json({ message: "Image was not provided." });
         return;
@@ -165,19 +164,17 @@ const addRecipe = asyncHandler(async (req, res) => {
     }
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            res.status(500).json({ message: err });
             return;
         }
         const request = new sql.Request();
-
         request.input('title', sql.VarChar, title);
         request.input('description', sql.VarChar, description);
         request.input('cookTime', sql.Int, cookTime);
         request.input('servings', sql.Int, servings);
         request.input('preparationTime', sql.Int, prepTime);
         request.input('cuisineId', sql.Int, cuisineId);
-        request.input('chefId', sql.Int, 1);
-        request.input('currentDate', sql.DateTime, new Date());
+        request.input('chefId', sql.Int, chefId);
         request.input('imageUrl', sql.VarChar, `localhost:5000/images/${req.file.filename}`);
 
         let QUERY = `BEGIN TRANSACTION;
@@ -193,13 +190,12 @@ const addRecipe = asyncHandler(async (req, res) => {
                           DECLARE @CurrentRecipeId INT;
                 
                           INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ImageUrl, CreatedAt, CuisineId, ChefId)
-                          VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,@currentDate, @cuisineId, @chefId);
+                          VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,GETDATE(), @cuisineId, @chefId);
                           
                           SELECT @CurrentRecipeId = MAX(RecipeId)
                           FROM Recipes;`;
         let i = 0;
         for (const ingredient of ingredients) {
-            console.log(`key: ${ingredient[0]}, amount:${ingredient[1]}, unit: ${ingredient[2]}`);
             request.input('ingredient' + i, sql.Int, ingredient[0]);
             request.input('amount' + i, sql.Int, ingredient[1]);
             request.input('unit' + i, sql.VarChar, ingredient[2]);
@@ -229,12 +225,6 @@ const addRecipe = asyncHandler(async (req, res) => {
                         COMMIT;`
         request.query(QUERY, (err, result) => {
             if (err) {
-                // const fs = require('fs');
-                // const fp = `./uploads/${fileName}`;
-                // fs.unlink(fp, (err) => {
-                //     if (err) console.error(err);
-                //     else console.log(`Deleted file: ${fp}`);
-                // });
                 console.log(err);
                 res.status(500).json({ message: err });
                 return;
@@ -243,7 +233,7 @@ const addRecipe = asyncHandler(async (req, res) => {
                 res.status(401).json({ message: "Invalid information." })
                 return;
             }
-
+            console.log("Rows affected: " + result.rowsAffected);
             res.status(201).json({ message: "Recipe was successfully added." });
             return;
         });
@@ -397,7 +387,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
 const getFavorites = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let userId = null, isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -438,7 +428,7 @@ const getFavorites = asyncHandler(async (req, res) => {
 const filterRecipes = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;

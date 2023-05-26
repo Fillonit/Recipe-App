@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,10 +13,12 @@ const schema = yup.object().shape({
 
 const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+    getValues
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -25,7 +27,26 @@ const Contact = () => {
     console.log(data);
     setSubmitted(true);
   };
-
+  async function sendContact() {
+    try {
+      const values = getValues();
+      const response = await fetch('http://localhost:5000/api/contacts', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'R-A-Token': localStorage.getItem('token')
+        },
+        body: JSON.stringify({
+          name: values.name,
+          email: values.email,
+          description: values.message
+        })
+      });
+      if (response.status === 201) alert("Sent contact successfully.");
+    } catch (err) {
+      console.log(err);
+    }
+  }
   return (
     <div id="Contact" className="bg-gradient-to-b from-blue-900 to-blue-600 text-white w-full h-screen flex justify-center items-center">
       <div className="max-w-screen-lg p-4 mx-auto w-full">
@@ -82,6 +103,7 @@ const Contact = () => {
               <button
                 type="submit"
                 className="bg-white text-blue-900 py-2 px-4 rounded hover:bg-gray-300 transition-colors duration-150focus:outline-none"
+                onClick={sendContact}
               >
                 Submit
               </button>

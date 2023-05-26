@@ -8,14 +8,14 @@ const {
     getUser,
     register,
     editUser,
-    deleteUser,
+    deleteUserr,
     logUserIn,
     updateUser,
     testError
 } = require('../controllers/userController');
 
-router.route('/').get(getUser).post(register);
-router.route('/:id').get(getUser).put(editUser).delete(deleteUser).patch(updateUser);
+router.route('/').get(getUsers).post(register);
+router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);
 router.route('/login').post(logUserIn);
 router.route('/test').get(testError);
 module.exports = router;
