@@ -34,6 +34,7 @@ export default function Register() {
         },
         body: JSON.stringify({ username: username, password: password }),
       });
+      if (response.status !== 200) return;
       const data = await response.json();
       const { accUsername, role, auth } = data;
       localStorage.setItem('token', auth);
