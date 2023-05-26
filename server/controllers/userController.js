@@ -552,6 +552,70 @@ const getAllUserData = asyncHandler(async (req, res) => {
     });
 });
 
+const editUsers = asyncHandler(async (req, res) => {
+    //edit users data including role
+    const token = req.body.auth;
+    let adminUsername = null;
+    let adminRole = null;
+    let isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        adminUsername = decoded.username;
+        adminRole = decoded.role;
+        isValid = true;
+    })
+    if (!isValid) {
+        res.status(401).json({ message: "Token is invalid" });
+        return;
+    }
+    const userToEdit = req.params.id;
+    if (isNaN(userToEdit)) {
+        res.status(400).json({ message: "Invalid id." });
+        return;
+    }
+    const { username, password, email, role } = req.body;
+    if (!username || !password || !email || !role) {
+        res.status(400).json({ message: "Invalid data." });
+        return;
+    }
+    if (role !== "Admin" && role !== "Normal" && role !== "Chef") {
+        res.status(400).json({ message: "Invalid role." });
+        return;
+    }
+    if (role === "Admin" && adminRole !== "Admin") {
+        res.status(401).json({ message: "You are not authorized to do this." });
+        return;
+    }
+
+    sql.connect(config, async (err) => {
+        if (err) {
+            errorHandler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        const QUERY = `UPDATE Users SET Username = '${username}', Password = '${password}', Email = '${email}', Role = '${role}' WHERE UserId = ${userToEdit}`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                errorHandler(err, req, res, "");
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(404).json({ message: "User not found." });
+                return;
+            }
+            res.status(204).json({ message: "Updated resource successfully." });
+        })
+    });
+});
+
+
 module.exports = {
     getUsers,
     register,
