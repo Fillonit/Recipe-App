@@ -1,13 +1,14 @@
 import React from 'react';
 import { FaCheck } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+// import Footer from '../components/Footer';
 
 const About = () => {
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 pt-32">
+    <div className="bg-white h-max">
+    <div className="flex flex-col items-center justify-center pt-32 h-screen">
         <Navbar/>
-      <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-md">
+      <div className="w-full max-w-4xl p-8 bg-gray-100 rounded-lg shadow-md">
         <h1 className="text-4xl font-bold mb-4 text-indigo-600">About</h1>
         <div className="flex flex-col md:flex-row items-center">
           <img
@@ -75,11 +76,12 @@ const About = () => {
               <p>Role</p>
             </div>
           </div>
-          {/* Add more cards for each team member */}
         </div>
       </div>
-        <Footer/>
+        {/* <Footer/> */}
     </div>
+    <div className="pb-8"/>
+  </div>
   );
 };
 

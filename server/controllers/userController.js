@@ -14,9 +14,9 @@ const {
 } = process.env;
 
 const config = {
-    database: process.env.MSSQL_DATABASE_NAME,
-    server: process.env.MSSQL_SERVER_NAME,
-    driver: process.env.MSSQL_DRIVER,
+    database: MSSQL_DATABASE_NAME,
+    server: MSSQL_SERVER_NAME,
+    driver: MSSQL_DRIVER,
     options: {
         trustedConnection: true
     }
@@ -67,9 +67,10 @@ const getUsers = asyncHandler(async (req, res) => {
 // @route: GET /api/users/:id
 // @access: Private
 const getUser = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
+    const token = req.headers['r-a-token'];
     let username = null;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    let userToGet = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -78,9 +79,15 @@ const getUser = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token expired" });
             return;
         }
+        console.log(decoded);
         username = decoded.username;
+        userToGet = decoded.userId;
     });
-    const userToGet = req.params.id;
+    if (req.params.id !== undefined) {
+        userToGet = req.params.id;
+    }
+    console.log(userToGet);
+    console.log(username);
     if (isNaN(Number(userToGet))) {
         res.status(401).json({
             message: "Expected integer, instead got else"
@@ -94,7 +101,11 @@ const getUser = asyncHandler(async (req, res) => {
         }
         const request = new sql.Request();
         request.input('username', sql.Int, userToGet);
-        const QUERY = 'SELECT * FROM Users WHERE UserId = @username';
+        const QUERY = `SELECT * 
+                       FROM Users u
+                         INNER JOIN Following f
+                         ON f.UserId = u.UserId
+                       WHERE u.UserId = @username;`;
 
         request.query(QUERY, (err, result) => {
             if (err) {
@@ -105,7 +116,7 @@ const getUser = asyncHandler(async (req, res) => {
                 res.status(404).json({ message: "No such user was found." });
                 return;
             }
-            res.status(200).json({ message: "Successfully fetched user.", response: result.recordset[0] });
+            res.status(200).json({ message: "Successfully fetched user.", response: { ...result.recordset[0], UserId: result.recordset[0].UserId[0] } });
         });
     });
 });
@@ -137,7 +148,6 @@ const logUserIn = asyncHandler(async (req, res) => {
         const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
         const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();
-        let userType, userId;
         request.query(userQuery, (err, result) => {
             if (err) {
                 errorHandler(err, req, res, "");
@@ -146,12 +156,12 @@ const logUserIn = asyncHandler(async (req, res) => {
             if (result.recordset.length === 0) {
                 res.status(401).json({ message: "Password doesn't match." });
                 return;
-            }
-            userId = result.recordset[0].UserId;
-            userType = result.recordset[0].userType; //<= more joins are required but this is just the general idea.
+            } userId = result.recordset[0].UserId;
+            userType = result.recordset[0].Role;
+            usern = result.recordset[0].Username;
+            const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
+            res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, accUsername: result.recordset[0].Username });
         });
-        const token = jwt.sign({ userId: userId, username: username, role: userType, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, tokenKey);
-        res.status(200).json({ message: "The log in process was successful.", auth: token });
     })
 });
 // @desc: User self-edit data
@@ -189,16 +199,16 @@ const editUser = asyncHandler(async (req, res) => {
         UPDATE Users 
         SET Username = '${usernameToUpdate}', Password = '${password}', Description = '${description}', Email = '${email}', Name = '${name}', ProfilePicture = '${profilePicture}'
         WHERE Username = '${username}';`;
-        request.query(QUERY, (err, result)=>{
+        request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error ocurred in our part." });
                 return;
             }
-            if(result.rowsAffected === 0){
-                res.status(401).json({message:"The data provided conflicts with our database"});
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
                 return;
             }
-            res.status(204).json({message: "Updated resource successfully."});
+            res.status(204).json({ message: "Updated resource successfully." });
         })
     });
 });
@@ -352,7 +362,14 @@ const register = asyncHandler(async (req, res) => {
         request.input('username', sql.VarChar, username);
         request.input('password', sql.VarChar, hashedPassword);
 
-        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user')`;
+        const QUERY = `INSERT INTO Users(Username, Password, Role) VALUES(@username, @password, 'user');
+                       DECLARE @UserId INT;
+
+                       SELECT @UserId = UserId
+                       FROM Users
+                       WHERE Username = @username
+
+                       INSERT INTO Following(UserId) VALUES(@UserId);`;
 
         request.query(QUERY, (err, result) => {
             if (err) {
@@ -369,9 +386,9 @@ const register = asyncHandler(async (req, res) => {
     })
 });
 
-const getAllUserData = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let username = null;
+const promoteToChef = asyncHandler(async (req, res) => {
+    const token = req.params.auth;
+    let role = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -381,69 +398,85 @@ const getAllUserData = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        username = decoded.username;
-    })
-    sql.connect(config, async (err) => {
+        isValid = true;
+        role = decoded.role;
+    });
+    if (!isValid) return;
+    if (role !== 'admin') {
+        res.status(403).json({ message: "You are not authorized to access this resource." });
+        return;
+    }
+    const { userToPromote, experience, worksAt } = req.body;
+    if (isNaN(Number(userToPromote)) || Number(userToPromote) != Math.floor(Number(userToPromote))) {
+        res.status(401).json({ message: "Expected integer for user id." });
+        return;
+    }
+    sql.connect(config, (err) => {
         if (err) {
-            errorHandler(err, req, res, "");
+            res.status(500).json({ message: "An error ocurred in our part." });
             return;
         }
         const request = new sql.Request();
-        //get from other tables too, following, followers, favorites, etc.
-        const QUERY = `SELECT * FROM Users WHERE Username = '${username}'`;
-        const userQuery = `SELECT * FROM Users WHERE Username = '${username}'`;
-        const followingQuery = `SELECT * FROM Following WHERE Username = '${username}'`;
-        const followersQuery = `SELECT * FROM Followers WHERE Username = '${username}'`;
-        const favoritesQuery = `SELECT * FROM Favorites WHERE Username = '${username}'`;
-        const postsQuery = `SELECT * FROM Posts WHERE Username = '${username}'`;
-        const commentsQuery = `SELECT * FROM Comments WHERE Username = '${username}'`;
-        const likesQuery = `SELECT * FROM Likes WHERE Username = '${username}'`;
+        request.input('@userId', sql.Int, userToPromote);
+        request.input('@experience', sql.Float, experience);
+        request.input('@worksAt', sql.VarChar, worksAt);
+        const d = new Date();
+        const date = d.toISOString().slice(0, 10);
+        const QUERY = `BEGIN TRANSACTION;
+                        BEGIN TRY
+                         DECLARE @Count INT;
+                         
+                         SELECT @Count = COUNT(*)
+                         FROM Normal_User
+                         WHERE NormalUserId = @userId;
 
-        await request.query(QUERY, (err, result) => {
-            if (err) {
-                errorHandler(err, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "User not found." });
-                return;
-            }
-            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
-        });
+                         IF(@Count = 0)
+                          BEGIN
+                           INSERT INTO Chef(ChefId, Experience, WorksAt) VALUES (@userId, @experience, @worksAt);
 
-        await request.query(userQuery, (err, result) => {
+                           DELETE FROM Normal_User
+                           WHERE NormalUserId = @UserId;
+                           
+                           UPDATE Users
+                           SET Role = 'Chef'
+                           WHERE UserId = @userId;
+
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@userId,'Your chef application was successful, you are now a chef!', '${date}');
+                           DECLARE @NotificationCount INT;
+
+                           SELECT @NotificationCount = COUNT(*)
+                           FROM Notifications
+                           WHERE UserId = @followee;
+                           
+                           IF(@NotificationCount >= 20)
+                           BEGIN 
+                             DECLARE @EarliestNotification INT;
+                             DECLARE @EarliestDate DATE;
+
+                             SELECT @EarliestDate = MIN(ReceivedAt)
+                             FROM Notifications;
+                             
+                             SELECT @EarliestNotification = NotificationId
+                             FROM Notifications
+                             WHERE ReceivedAt = @EarliestDate;
+
+                             DELETE FROM Notifications
+                             WHERE NotificationId = @EarliestNotification
+                           END
+                          END
+                        END TRY`;
+        request.query(QUERY, (err, result) => {
             if (err) {
-                errorHandler(err, req, res, "");
+                res.status(500).json({ message: "An error ocurred in our part." });
                 return;
             }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "User not found." });
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
                 return;
             }
-            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
-        }
-        );
-        await request.query(followingQuery, (err, result) => {
-            if (err) {
-                errorHandler(err, req, res, "");
-                return;
-            }
-            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
-        }
-        );
-        await request.query(followersQuery, (err, result) => {
-            if (err) {
-                errorHandler(err, req, res, "");
-                return;
-            }
-            res.status(200).json({ message: "Successfully retrieved resource.", data: result.recordset });
-        }
-        );
+            res.status(204).json({ message: "Updated resource successfully." });
+        })
     });
-});
-const testError = asyncHandler(async (req, res, next) => {
-    const err = new Error("This is a test error.");
-    next(err);
 });
 
 
@@ -455,6 +488,5 @@ module.exports = {
     editUser,
     deleteUser,
     logUserIn,
-    updateUser,
-    testError
+    updateUser
 };
