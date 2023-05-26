@@ -121,7 +121,7 @@ const addRecipe = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        if (decoded.role !== 'chef') {
+        if (decoded.role != 'chef') {
             res.status(403).json({ message: "Not authorized to add a recipe." });
             return;
         }
@@ -164,19 +164,17 @@ const addRecipe = asyncHandler(async (req, res) => {
     }
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            res.status(500).json({ message: err });
             return;
         }
         const request = new sql.Request();
-
         request.input('title', sql.VarChar, title);
         request.input('description', sql.VarChar, description);
         request.input('cookTime', sql.Int, cookTime);
         request.input('servings', sql.Int, servings);
         request.input('preparationTime', sql.Int, prepTime);
         request.input('cuisineId', sql.Int, cuisineId);
-        request.input('chefId', sql.Int, 1);
-        request.input('currentDate', sql.DateTime, new Date());
+        request.input('chefId', sql.Int, chefId);
         request.input('imageUrl', sql.VarChar, `localhost:5000/images/${req.file.filename}`);
 
         let QUERY = `BEGIN TRANSACTION;
@@ -192,13 +190,12 @@ const addRecipe = asyncHandler(async (req, res) => {
                           DECLARE @CurrentRecipeId INT;
                 
                           INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ImageUrl, CreatedAt, CuisineId, ChefId)
-                          VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,@currentDate, @cuisineId, @chefId);
+                          VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,GETDATE(), @cuisineId, @chefId);
                           
                           SELECT @CurrentRecipeId = MAX(RecipeId)
                           FROM Recipes;`;
         let i = 0;
         for (const ingredient of ingredients) {
-            console.log(`key: ${ingredient[0]}, amount:${ingredient[1]}, unit: ${ingredient[2]}`);
             request.input('ingredient' + i, sql.Int, ingredient[0]);
             request.input('amount' + i, sql.Int, ingredient[1]);
             request.input('unit' + i, sql.VarChar, ingredient[2]);
@@ -236,7 +233,7 @@ const addRecipe = asyncHandler(async (req, res) => {
                 res.status(401).json({ message: "Invalid information." })
                 return;
             }
-
+            console.log("Rows affected: " + result.rowsAffected);
             res.status(201).json({ message: "Recipe was successfully added." });
             return;
         });

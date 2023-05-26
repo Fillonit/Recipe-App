@@ -56,6 +56,7 @@ export default function PublishRecipe() {
         const ingredientJson = await ingredientResponse.json();
         const tagJson = await tagResponse.json();
         const cuisineJson = await cuisineResponse.json();
+        console.log(cuisineJson);
         for (const element of ingredientJson.response)
             ingredientObj[element.IngredientId] = element;
         for (const element of unitJson.response)
