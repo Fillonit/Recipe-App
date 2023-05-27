@@ -543,6 +543,47 @@ const updateRecipe = asyncHandler(async (req, res) => {
     })
 });
 
+const getRecipesByChef = asyncHandler(async (req, res) => {
+    const token = req.params.auth;
+    let userId = null, isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid"});
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
+    const chefId = req.params.id;
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+
+        request.input('chefId', sql.Int, chefId);
+
+        const QUERY = `SELECT *
+                            FROM Recipes
+                            WHERE CreatedBy = @chefId;`
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                handler(err, req, res, "");
+                return;
+            }
+            res.status(200).json({ message: "Recipes fetched successfully.", response: result.recordset });
+            return;
+        })
+    })
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe,

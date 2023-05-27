@@ -148,7 +148,7 @@ const Dashboard = () => {
             </li>
           </ul>
           <div className="absolute bottom-0 py-4 px-8">
-            <p className="text-xs text-gray-400">© 2023 Magnolia. All rights reserved.</p>
+            <p className="text-xs text-gray-400">Â© 2023 Magnolia. All rights reserved.</p>
           </div>
         </div>
       </div>

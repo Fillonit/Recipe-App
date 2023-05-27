@@ -115,11 +115,11 @@ const recipeIncrease = asyncHandler(async (req, res) => {
 
                            SELECT @RecipesToday = COUNT(*)
                            FROM Recipes
-                           WHERE CreatedAt > DATEADD(DAY, -1, GETDATE());
+                           WHERE CreatedAt > DATEADD(MINUTE, -2, GETDATE());
                            
                            SELECT @RecipesYesterday = COUNT(*)
                            FROM Recipes
-                           WHERE CreatedAt < DATEADD(DAY, -1, GETDATE()) AND CreatedAt > DATEADD(DAY, -2, GETDATE());
+                           WHERE CreatedAt < DATEADD(MINUTE, -2, GETDATE()) AND CreatedAt > DATEADD(MINUTE, -4, GETDATE());
                            
                            SET @Percentage = CASE WHEN
                            @RecipesYesterday = 0 THEN 0
@@ -127,7 +127,7 @@ const recipeIncrease = asyncHandler(async (req, res) => {
  
                            SELECT @Percentage AS Percentage, @RecipesToday AS Count
                            FROM Units
-                           WHERE Unit = 'KG'; --The unit kg doesnt have anything to do with the query, but i just need to only include one row for the result.
+                           WHERE Unit = 'KG';
                          END TRY
                          BEGIN CATCH
                            THROW;
@@ -224,7 +224,7 @@ const trafficIncrease = asyncHandler(async (req, res) => {
  
                            SELECT @Percentage AS Percentage, @TrafficThisMonth AS Count
                            FROM Units
-                           WHERE Unit = 'KG'; --The unit kg doesnt have anything to do with the query, but i just need to only include one row for the result.
+                           WHERE Unit = 'KG';
                          END TRY
                          BEGIN CATCH
                            THROW;
@@ -242,6 +242,7 @@ const trafficIncrease = asyncHandler(async (req, res) => {
         });
     })
 });
+
 const deleteUser = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     let isValid = false;
@@ -295,82 +296,10 @@ const deleteUser = asyncHandler(async (req, res) => {
         })
     });
 });
-const getRecipes = asyncHandler(async (req, res) => {
-    const token = req.headers['r-a-token'];
-    const page = req.headers['page'];
-    const pattern = req.headers['query'];
-    const numberOfRows = req.headers['rows'];
-    let isValid = false;
-    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
-        if (err) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is expired" });
-            return;
-        }
-        isValid = true;
-    })
 
-    if (!isValid) return;
-    if (pattern === undefined) {
-        res.status(401).json({ message: "Expeted string for pattern but instead got undefined" });
-        return;
-    }
-    if (isNaN(Number(page)) || page <= 0) {
-        res.status(401).json({ message: "Expected integer for the page, instead got: " + (typeof page) });
-        return;
-    }
-    sql.connect(config, (error) => {
-        if (error) {
-            console.log(error);
-            res.status(500).json({ message: "An error occurred on our part." });
-            return;
-        }
-        const request = new sql.Request();
-        request.input('offset', sql.Int, (page - 1) * numberOfRows);
-        request.input('pattern', sql.VarChar, pattern);
-        const QUERY = `BEGIN TRANSACTION
-                         BEGIN TRY
-                          DECLARE @RecipeTable TABLE(
-                            RecipeId INT,
-                            Title VARCHAR(100),
-                            ImageUrl VARCHAR(200),
-                            CreatedAt DATETIME,
-                            Poster VARCHAR(50),
-                            RowNum INT
-                          );
-                          INSERT INTO @RecipeTable(RecipeId, Title, ImageUrl, CreatedAt, Poster, RowNum)
-                          SELECT r.RecipeId, r.Title, r.ImageUrl, r.CreatedAt, u.Username, ROW_NUMBER() OVER (ORDER BY UserId) AS RowNum
-                          FROM Recipes
-                            JOIN Users u 
-                            ON u.UserId = r.ChefId
-                          WHERE r.Title LIKE CONCAT('%', @pattern, '%') OR r.Description LIKE CONCAT('%', @pattern, '%');
-                          
-                          SELECT RecipeId, Title, ImageUrl, CreatedAt, Poster, RowNum
-                          FROM @RecipeTable
-                          WHERE RowNum > @offset AND RowNum <= (@offset + 4);
-                         END TRY
-                         BEGIN CATCH
-                           THROW;
-                           ROLLBACK;
-                         END CATCH;
-                       COMMIT;`;
-        request.query(QUERY, (err, result) => {
-            if (err) {
-                res.status(500).json({ message: "An error occurred on our part." });
-                console.log(err);
-                return;
-            }
-            res.status(200).json({ message: "Resource fetched successfully.", response: result.recordset });
-        });
-    })
-});
 module.exports = {
     usersIncrease,
     recipeIncrease,
     trafficIncrease,
-    deleteUser,
-    getRecipes
+    deleteUser
 }

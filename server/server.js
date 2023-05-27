@@ -15,7 +15,7 @@ const cuisineRouter = require('./routes/cuisineRoutes');
 const unitRouter = require('./routes/unitRoutes');
 const tagRouter = require('./routes/tagRoutes');
 const ingredientRouter = require('./routes/ingredientRoutes');
-// const contactRouter = require('./routes/contactRoutes');
+const contactRouter = require('./routes/contactRoutes');
 const adminRouter = require('./routes/adminRoutes');
 
 const app = express();
@@ -36,7 +36,7 @@ app.use('/api/units', unitRouter);
 app.use('/api/tags', tagRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/admin', adminRouter);
-// app.use('/api/contacts', contactRouter);
+app.use('/api/contacts', contactRouter);
 
 app.use('/images', express.static(uploadDirectory));
 
