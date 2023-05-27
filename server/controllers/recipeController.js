@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const sql = require("mssql/msnodesqlv8");
 const jwt = require('jsonwebtoken');
 const handler = require("../middleware/errorMiddleware.js");
+const responses = require('../responses');
 
 
 const config = {
@@ -291,61 +292,167 @@ const getRecipes = asyncHandler(async (req, res, next) => {
         });
     });
 });
+// const getRecipe = asyncHandler(async (req, res, next) => {
+//     const { recipeId } = req.params;
+//     const token = req.headers['r-a-token'];
+//     let chefId = null, isValid = false;
+//     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+//         if (err) {
+//             res.status(401).json({ message: "Not authorized to view recipes." });
+//             return;
+//         }
+//         if (Date.now() / 1000 > decoded.exp) {
+//             res.status(401).json({ message: "Token is expired." });
+//             return;
+//         }
+//         chefId = decoded.userId;
+//     });
+//     if (!isValid) return;
+//     if (recipeId === undefined) {
+//         res.status(400).json({ message: "Not all required information was provided." });
+//         return;
+//     }
+//     if (typeof recipeId != 'number') {
+//         res.status(400).json({ message: "Information is not in the expected format." });
+//         return;
+//     }
+//     if (recipeId < 0) {
+//         res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+//         return;
+//     }
+//     sql.connect(config, (err) => {
+//         if (err) {
+//             handler(err, req, res, "");
+//             return;
+//         }
+//         const request = new sql.Request();
+//         request.input('recipeId', sql.Int, recipeId);
+//         request.input('userId', sql.Int, userId);
+//         const QUERY = `BEGIN TRANSACTION;
+//                           BEGIN TRY
+//                              DECLARE @LikesCount INT;
+
+//                              SELECT @LikesCount = COUNT(*)
+//                              FROM Likes
+//                              WHERE RecipeId = @recipeId;
+
+//                              SELECT r.*, u.Username, @LikesCount AS Likes
+//                              FROM Recipes r
+//                                JOIN Users u 
+//                                ON u.UserId = r.ChefId
+//                              WHERE RecipeId = @recipeId;
+                             
+//                              SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
+//                              FROM Comments c
+//                                 JOIN Users u
+//                                 ON u.UserId = c.UserId
+//                              WHERE RecipeId = @recipeId
+//                           END TRY
+//                           BEGIN CATCH
+//                             THROW;
+//                             ROLLBACK;
+//                           END CATCH;
+//                         COMMIT;`
+//         request.query(QUERY, (err, result) => {
+//             if (err) {
+//                 handler(err, req, res, "");
+//                 return;
+//             }
+//             res.status(201).json({ message: "Recipe added successfully." });
+//             return;
+//         })
+//     })
+// });
+
 const getRecipe = asyncHandler(async (req, res, next) => {
-    const { recipeId } = req.params;
+    const { id } = req.params;
     const token = req.headers['r-a-token'];
     let chefId = null, isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Not authorized to view recipes." });
+            responses.tokenNoPermission(res);
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is expired." });
+            responses.tokenExpired(res);
             return;
         }
         chefId = decoded.userId;
+        isValid = true;
     });
     if (!isValid) return;
-    if (recipeId === undefined) {
-        res.status(400).json({ message: "Not all required information was provided." });
+    if (id === undefined) {
+        // res.status(401).json({ message: "Not all required information was provided." });
+        responses.inputsNotProvided(res);
         return;
     }
-    if (typeof recipeId != 'number') {
-        res.status(400).json({ message: "Information is not in the expected format." });
+    if (isNaN(Number(id))) {
+        // res.status(401).json({ message: "Information is not in the expected format." });
+        responses.invalidDataType(res);
         return;
     }
-    if (recipeId < 0) {
-        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+    if (id < 0) {
+        // res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        responses.inputsInvalid(res);
         return;
     }
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            // res.status(500).json({ message: "A mistake happened on our part." });
+            responses.serverError(res);
             return;
         }
         const request = new sql.Request();
-        request.input('recipeId', sql.Int, recipeId);
-        request.input('userId', sql.Int, userId);
+        request.input('recipeId', sql.Int, id);
+
         const QUERY = `BEGIN TRANSACTION;
                           BEGIN TRY
                              DECLARE @LikesCount INT;
+                             DECLARE @Proteins INT;
+                             DECLARE @Calories INT;
+                             DECLARE @Carbs INT;
+                             DECLARE @Fats INT;
+
+                             SELECT @Proteins = SUM(ri.Amount*i.ProteinsInGramsPerBase*u.ValueInStandardUnit),
+                                    @Calories = SUM(ri.Amount*i.CaloriesPerBase*u.ValueInStandardUnit),
+                                    @Carbs = SUM(ri.Amount*i.CarbsInGramsPerBase*u.ValueInStandardUnit),
+                                    @Fats = SUM(ri.Amount*i.FatsInGramsPerBase*u.ValueInStandardUnit)
+                             FROM RecipeIngredients ri
+                                JOIN Ingredients i
+                                ON i.IngredientId = ri.IngredientId
+                                  JOIN Units u 
+                                  ON u.Unit = ri.Unit
+                             WHERE ri.RecipeId = @recipeId
 
                              SELECT @LikesCount = COUNT(*)
                              FROM Likes
                              WHERE RecipeId = @recipeId;
 
-                             SELECT r.*, u.Username, @LikesCount AS Likes
+                             SELECT r.Title, r.Description,r.ImageUrl, u.Username, @LikesCount AS Likes,
+                             @Proteins AS Proteins, @Calories AS Calories, @Carbs AS Carbs, @Fats AS Fats
                              FROM Recipes r
                                JOIN Users u 
                                ON u.UserId = r.ChefId
                              WHERE RecipeId = @recipeId;
                              
-                             SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
+                             SELECT c.Content, u.Username, c.Likes
                              FROM Comments c
                                 JOIN Users u
                                 ON u.UserId = c.UserId
                              WHERE RecipeId = @recipeId
+
+                             SELECT i.Name, ri.Amount, u.UnitName
+                             FROM RecipeIngredients ri
+                               JOIN Ingredients i
+                               ON i.IngredientId = ri.IngredientId
+                                 JOIN Units u
+                                 ON u.Unit = ri.Unit
+                             WHERE ri.RecipeId = @recipeId
+
+                             SELECT StepDescription
+                             FROM Steps
+                             WHERE RecipeId = @recipeId
+                             ORDER BY StepNumber
                           END TRY
                           BEGIN CATCH
                             THROW;
@@ -354,10 +461,13 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                         COMMIT;`
         request.query(QUERY, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                console.log(err);
+                // res.status(500).json({ message: "An error happened on our part." })
+                responses.serverError(res);
                 return;
             }
-            res.status(201).json({ message: "Recipe added successfully." });
+            // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            responses.resourceFetched(res, result.recordsets);
             return;
         })
     })

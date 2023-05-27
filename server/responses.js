@@ -9,10 +9,10 @@ let responses = {
         res.status(403).json({ message: "You do not have permission to access this resource." });
     },
     inputsInvalid: (res) => {
-        res.status(500).json({ message: "Inputs are invalid." });
+        res.status(422).json({ message: "Inputs are invalid." });
     },
     inputsNotProvided: (res) => {
-        res.status(500).json({ message: "Inputs are not provided." });
+        res.status(422).json({ message: "Inputs are not provided." });
     },
     unexpectedDataType: (res) => {
         res.status(422).json({ message: "Unexpected data type." });
@@ -37,6 +37,9 @@ let responses = {
     },
     resourceAlreadyExists: (res, str) => {
         res.status(409).json({ message: `Resource '${str}' already exists.` });
+    },
+    serverError: (res) => {
+        res.status(500).json({ message: "Internal server error." });
     }
 }
 
