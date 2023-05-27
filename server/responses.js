@@ -20,16 +20,24 @@ let responses = {
     invalidDataType: (res) => {
         res.status(422).json({ message: "Invalid data type." });
     },
-    resourceNotFound: (res) => {
-        res.status(404).json({ message: "Resource not found." });
+    resourceNotFound: (res, str) => {
+        res.status(404).json({ message: `Resource '${str}' not found.` });
     },
-    resourceAdded: (res) => {
-        res.status(201).json({ message: "Resource added successfully." });
+    resourceAdded: (res, str) => {
+        res.status(201).json({ message: `Resource '${str}' added successfully.` });
     },
-    resourceUpdated: (res) => {
-        res.status(204).json({ message: "Resource updated successfully." });
+    resourceUpdated: (res, str) => {
+        res.status(204).json({ message: `Resource '${str}' updated successfully.` });
     },
     resourceFetched: (res, response) => {
         res.status(200).json({ message: "Resource fetched successfully.", response: response });
+    },
+    resourceDeleted: (res) => {
+        res.status(204).json({ message: "Resource deleted successfully." });
+    },
+    resourceAlreadyExists: (res, str) => {
+        res.status(409).json({ message: `Resource '${str}' already exists.` });
     }
 }
+
+module.exports = responses;
