@@ -1,4 +1,4 @@
-import "../styles/recipeTags.css";
+import "../../styles/recipeTags.css";
 import RecipeTag from "./RecipeTag";
 import { useRef } from 'react';
 export default function RecipeTags({ tags, recipeTags, setRecipeTags }) {

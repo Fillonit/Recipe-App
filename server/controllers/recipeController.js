@@ -140,7 +140,7 @@ const addRecipe = asyncHandler(async (req, res) => {
         return;
     }
     const title = req.body.title, description = req.body.description;
-    const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;;
+    const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;
     const cookTime = req.body.cookTime, servings = req.body.servings;
     const steps = req.body.steps.split(","), prepTime = req.body.preparationTime;
     const tags = req.body.tags.split(",");
@@ -168,6 +168,7 @@ const addRecipe = asyncHandler(async (req, res) => {
             return;
         }
         const request = new sql.Request();
+        console.log(req.body);
         request.input('title', sql.VarChar, title);
         request.input('description', sql.VarChar, description);
         request.input('cookTime', sql.Int, cookTime);
@@ -292,97 +293,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
     });
 });
 
-const getRecipe = asyncHandler(async (req, res, next) => {
-    const { recipeId } = req.params;
-    const token = req.headers.authorization.split(" ")[1];
-    let chefId = null;
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            res.status(401).json({ message: "Not authorized to view recipes." });
-            return;
-        }
-        chefId = token.userId;
-    });
-    if (recipeId === undefined) {
-        res.status(400).json({ message: "Not all required information was provided." });
-        return;
-    }
-    if (typeof recipeId != 'number') {
-        res.status(400).json({ message: "Information is not in the expected format." });
-        return;
-    }
-    if (recipeId < 0) {
-        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
-        return;
-    }
-    sql.connect(config, (err) => {
-        if (err) {
-            handler(err, req, res, "");
-            return;
-        }
-        const request = new sql.Request();
-        request.input('recipeId', sql.Int, recipeId);
-        request.input('userId', sql.Int, userId);
-        const d = new Date();
-        const date = d.toISOString().slice(0, 10);
-        const QUERY = `BEGIN TRANSACTION;
-                          BEGIN TRY
-                            DECLARE @Count INT;
-                        
-                            SELECT @Count = COUNT(*)
-                            FROM Favorites
-                            WHERE RecipeId = @recipeId AND UserId = @userId
 
-                            IF(@Count = 0)
-                             BEGIN 
-                              INSERT INTO Favorites (UserId, RecipeId) VALUES (@userId, @recipeId);
-                              
-                              DECLARE @RecipeChef INT;
-                              DECLARE @RecipeName VARCHAR;
-
-                              SELECT @RecipeChef = ChefId, @RecipeName = Title
-                              FROM Recipes
-                              WHERE RecipeId = @recipeId;
-
-                              INSERT INTO Notifications (UserId, Content, ReceivedAt) VALUES (@chefId, 'Someone just added '+@RecipeName+' to their favorites!','${date}');
-
-                              DECLARE @NotificationCount INT;
-
-                              SELECT @NotificationCount = COUNT(*)
-                              FROM Notifications
-                              WHERE UserId = @followee;
-                              IF(@NotificationCount >= 20)
-                              BEGIN 
-                                DECLARE @EarliestNotification INT;
-                                DECLARE @EarliestDate DATE;
-   
-                                SELECT @EarliestDate = MIN(ReceivedAt)
-                                FROM Notifications;
-                                
-                                SELECT @EarliestNotification = NotificationId
-                                FROM Notifications
-                                WHERE ReceivedAt = @EarliestDate;
-   
-                                DELETE FROM Notifications
-                                WHERE NotificationId = @EarliestNotification
-                              END
-                             END
-                          END TRY
-                          BEGIN CATCH
-                            THROW;
-                            ROLLBACK;
-                          END CATCH;
-                        COMMIT;`
-        request.query(QUERY, (err, result) => {
-            if (err) {
-                handler(err, req, res, "");
-                return;
-            }
-            res.status(201).json({ message: "Recipe added successfully." });
-            return;
-        })
-    })
-});
 const getFavorites = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let userId = null, isValid = false;
@@ -552,7 +463,7 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid"});
+            res.status(401).json({ message: "Token is invalid" });
             return;
         }
         isValid = true;
@@ -591,5 +502,5 @@ module.exports = {
     getRecipes,
     getFavorites,
     filterRecipes,
-    updateRecipe    
+    updateRecipe
 }

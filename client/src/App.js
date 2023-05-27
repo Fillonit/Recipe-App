@@ -13,7 +13,7 @@ import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
 import Contact from './components/Contact';
 import LogIn from './components/Register';
-import PublishRecipe from './components/PublishRecipe';
+import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
 
 // const recipes = [
@@ -40,16 +40,16 @@ import Footer from './components/Footer';
 function App() {
   return (
     <Router>
-      { 
-      //check if route is not dashboard
-      !window.location.pathname.includes('/dashboard') &&
-      <Navbar />
-    }
+      {
+        //check if route is not dashboard
+        !window.location.pathname.includes('/dashboard') &&
+        <Navbar />
+      }
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
-        <Route path="/recipe" element={<Recipe />} />
+        <Route path="/recipe/:id" element={<Recipe />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<LogIn />} />
         <Route path='/dashboard' element={<Dashboard />} />

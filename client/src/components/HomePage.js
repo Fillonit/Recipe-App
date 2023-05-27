@@ -1,5 +1,5 @@
 import React from 'react';
-import RecipeList from './RecipeList';
+import RecipeList from './Recipe/RecipeList';
 // import Navbar from './Navbar';
 import Hero from './Hero';
 // import ProfilePage from './ProfilePage';
@@ -30,26 +30,26 @@ const recipes = [
 ];
 
 function App() {
-    return (
-      <div className="-mt-2">
-        {/* <Navbar /> */}
-        <Hero />
-        {/* <Wave /> */}
-        <div className="relative">
-          <div className="container mx-auto my-8">
-            <h1 className="text-6xl pb-4 border-b-2 font-bold mb-6 flex justify-center text-indigo-500 border-indigo-300">Recipes</h1>
-            <RecipeList recipes={recipes} />
-          
-            {/* <ProfilePage /> */}
-          </div>
+  return (
+    <div className="-mt-2">
+      {/* <Navbar /> */}
+      <Hero />
+      {/* <Wave /> */}
+      <div className="relative">
+        <div className="container mx-auto my-8">
+          <h1 className="text-6xl pb-4 border-b-2 font-bold mb-6 flex justify-center text-indigo-500 border-indigo-300">Recipes</h1>
+          <RecipeList recipes={recipes} />
+
+          {/* <ProfilePage /> */}
         </div>
-        {/* <Footer /> */}
       </div>
-      
-    );
-  }
-  
-  // WaveAnimation component
+      {/* <Footer /> */}
+    </div>
+
+  );
+}
+
+// WaveAnimation component
 //   const WaveAnimation = () => {
 //     return (
 //       <div className="w-full">
@@ -59,5 +59,5 @@ function App() {
 //       </div>
 //     );
 //   }
-  
-  export default App;
+
+export default App;
