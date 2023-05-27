@@ -3,6 +3,7 @@ const sql = require("mssql/msnodesqlv8");
 const crypto = require("crypto");
 const jwt = require('jsonwebtoken');
 const { errorHandler } = require("../middleware/errorMiddleware.js");
+const { search } = require('../routes/adminRoutes.js');
 const dotenv = require('dotenv').config();
 
 const {
@@ -445,6 +446,8 @@ const promoteToChef = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     const page = req.headers['page'];
+    const pattern = req.headers['query'];
+    const numberOfRows = req.headers['rows'];
     let isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
@@ -463,7 +466,10 @@ const getUsers = asyncHandler(async (req, res) => {
     })
 
     if (!isValid) return;
-
+    if (pattern === undefined) {
+        res.status(401).json({ message: "Expeted string for pattern but instead got undefined" });
+        return;
+    }
     if (isNaN(Number(page)) || page <= 0) {
         res.status(401).json({ message: "Expected integer for the page, instead got: " + (typeof page) });
         return;
@@ -475,7 +481,8 @@ const getUsers = asyncHandler(async (req, res) => {
             return;
         }
         const request = new sql.Request();
-        request.input('offset', sql.Int, (page - 1) * 4);
+        request.input('offset', sql.Int, (page - 1) * numberOfRows);
+        request.input('pattern', sql.VarChar, pattern);
         const QUERY = `BEGIN TRANSACTION
                          BEGIN TRY
                           DECLARE @UserTable TABLE(
@@ -487,7 +494,7 @@ const getUsers = asyncHandler(async (req, res) => {
                           INSERT INTO @UserTable(UserId, Username, Email, RowNum)
                           SELECT UserId, Username, Email, ROW_NUMBER() OVER (ORDER BY UserId) AS RowNum
                           FROM Users
-                          WHERE Role <> 'admin';
+                          WHERE Role <> 'admin' AND Username LIKE CONCAT('%', @pattern, '%');
                           
                           SELECT UserId, Username, Email
                           FROM @UserTable

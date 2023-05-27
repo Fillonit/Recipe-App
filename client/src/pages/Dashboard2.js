@@ -8,6 +8,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
   const [lastPage, setLastPage] = useState(1);
+  const currentSearchString = useRef();
+  const [searchString, setSearchString] = useState('');
   const page = useRef();
 
   async function deleteUser(id) {
@@ -28,7 +30,9 @@ const Dashboard = () => {
       method: "GET",
       headers: {
         'R-A-Token': localStorage.getItem('token'),
-        'page': page
+        'page': page,
+        'query': searchString,
+        'rows': 4
       }
     });
     if (usersResponse.status !== 200) return;
@@ -42,7 +46,9 @@ const Dashboard = () => {
         method: "GET",
         headers: {
           'R-A-Token': localStorage.getItem('token'),
-          'page': 1
+          'page': 1,
+          'query': '',
+          'rows': 4
         }
       })
       const userIncreaseResponse = await fetch(`http://localhost:5000/api/admin/stats/user`, {
@@ -67,7 +73,6 @@ const Dashboard = () => {
       const userIncreaseJson = await userIncreaseResponse.json();
       const recipeIncreaseJson = await recipeIncreaseResponse.json();
       const trafficIncreaseJson = await trafficIncreaseResponse.json();
-      console.log(usersJson);
       const objToAssign = {};
       if (userIncreaseResponse.status === 200) objToAssign['user'] = { increase: userIncreaseJson.response[0].Percentage, count: userIncreaseJson.response[0].Count };
       if (recipeIncreaseResponse.status === 200) objToAssign['recipe'] = { increase: recipeIncreaseJson.response[0].Percentage, count: recipeIncreaseJson.response[0].Count };
@@ -76,6 +81,26 @@ const Dashboard = () => {
       setStats(objToAssign);
     } catch (err) {
       console.log(err);
+    }
+  }
+  async function searchUsers() {
+    try {
+      const response = await fetch('http://localhost:5000/api/user', {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          page: 1,
+          query: currentSearchString.current.value,
+          'rows': 4
+        }
+      });
+      if (response.status !== 200) return;
+      const users = await response.json();
+      setUsers(users.response);
+      setSearchString(currentSearchString.current.value);
+      setLastPage(1);
+    } catch (error) {
+      console.log(error)
     }
   }
   useEffect(() => {
@@ -212,7 +237,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-
+        <input type='text' placeholder='Search user' ref={currentSearchString} /><button onClick={searchUsers}>SEARCH</button>
         <div className="mt-12 mx-6">
           <h2 className="text-4xl font-bold mb-12">User List</h2>
           <table className="w-full bg-white rounded-lg shadow-md">

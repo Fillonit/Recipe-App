@@ -239,7 +239,6 @@ const addRecipe = asyncHandler(async (req, res) => {
         });
     });
 });
-
 const getRecipes = asyncHandler(async (req, res, next) => {
     const { page, pageSize, cuisineId, title, ingredients, sortBy, sortOrder } = req.query;
     const { userId } = req.params;
