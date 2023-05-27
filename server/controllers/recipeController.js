@@ -294,15 +294,20 @@ const getRecipes = asyncHandler(async (req, res, next) => {
 
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { recipeId } = req.params;
-    const token = req.headers.authorization.split(" ")[1];
-    let chefId = null;
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    const token = req.headers['r-a-token'];
+    let chefId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Not authorized to view recipes." });
             return;
         }
-        chefId = token.userId;
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired." });
+            return;
+        }
+        chefId = decoded.userId;
     });
+    if (!isValid) return;
     if (recipeId === undefined) {
         res.status(400).json({ message: "Not all required information was provided." });
         return;
@@ -323,50 +328,25 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         const request = new sql.Request();
         request.input('recipeId', sql.Int, recipeId);
         request.input('userId', sql.Int, userId);
-        const d = new Date();
-        const date = d.toISOString().slice(0, 10);
         const QUERY = `BEGIN TRANSACTION;
                           BEGIN TRY
-                            DECLARE @Count INT;
-                        
-                            SELECT @Count = COUNT(*)
-                            FROM Favorites
-                            WHERE RecipeId = @recipeId AND UserId = @userId
+                             DECLARE @LikesCount INT;
 
-                            IF(@Count = 0)
-                             BEGIN 
-                              INSERT INTO Favorites (UserId, RecipeId) VALUES (@userId, @recipeId);
-                              
-                              DECLARE @RecipeChef INT;
-                              DECLARE @RecipeName VARCHAR;
+                             SELECT @LikesCount = COUNT(*)
+                             FROM Likes
+                             WHERE RecipeId = @recipeId;
 
-                              SELECT @RecipeChef = ChefId, @RecipeName = Title
-                              FROM Recipes
-                              WHERE RecipeId = @recipeId;
-
-                              INSERT INTO Notifications (UserId, Content, ReceivedAt) VALUES (@chefId, 'Someone just added '+@RecipeName+' to their favorites!','${date}');
-
-                              DECLARE @NotificationCount INT;
-
-                              SELECT @NotificationCount = COUNT(*)
-                              FROM Notifications
-                              WHERE UserId = @followee;
-                              IF(@NotificationCount >= 20)
-                              BEGIN 
-                                DECLARE @EarliestNotification INT;
-                                DECLARE @EarliestDate DATE;
-   
-                                SELECT @EarliestDate = MIN(ReceivedAt)
-                                FROM Notifications;
-                                
-                                SELECT @EarliestNotification = NotificationId
-                                FROM Notifications
-                                WHERE ReceivedAt = @EarliestDate;
-   
-                                DELETE FROM Notifications
-                                WHERE NotificationId = @EarliestNotification
-                              END
-                             END
+                             SELECT r.*, u.Username, @LikesCount AS Likes
+                             FROM Recipes r
+                               JOIN Users u 
+                               ON u.UserId = r.ChefId
+                             WHERE RecipeId = @recipeId;
+                             
+                             SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
+                             FROM Comments c
+                                JOIN Users u
+                                ON u.UserId = c.UserId
+                             WHERE RecipeId = @recipeId
                           END TRY
                           BEGIN CATCH
                             THROW;
