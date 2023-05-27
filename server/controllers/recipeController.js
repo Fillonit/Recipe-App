@@ -139,7 +139,7 @@ const addRecipe = asyncHandler(async (req, res) => {
         return;
     }
     const title = req.body.title, description = req.body.description;
-    const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;;
+    const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;
     const cookTime = req.body.cookTime, servings = req.body.servings;
     const steps = req.body.steps.split(","), prepTime = req.body.preparationTime;
     const tags = req.body.tags.split(",");
@@ -167,6 +167,7 @@ const addRecipe = asyncHandler(async (req, res) => {
             return;
         }
         const request = new sql.Request();
+        console.log(req.body);
         request.input('title', sql.VarChar, title);
         request.input('description', sql.VarChar, description);
         request.input('cookTime', sql.Int, cookTime);
@@ -529,7 +530,7 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid"});
+            res.status(401).json({ message: "Token is invalid" });
             return;
         }
         isValid = true;
