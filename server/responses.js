@@ -8,9 +8,6 @@ let responses = {
     tokenNoPermission: (res) => {
         res.status(403).json({ message: "You do not have permission to access this resource." });
     },
-    noResource: (res) => {
-        res.status(500).json({ message: "Could not find the resource." });
-    },
     inputsInvalid: (res) => {
         res.status(500).json({ message: "Inputs are invalid." });
     },
@@ -18,19 +15,19 @@ let responses = {
         res.status(500).json({ message: "Inputs are not provided." });
     },
     unexpectedDataType: (res) => {
-        res.status(500).json({ message: "Unexpected data type." });
+        res.status(422).json({ message: "Unexpected data type." });
     },
     invalidDataType: (res) => {
-        res.status(500).json({ message: "Invalid data type." });
+        res.status(422).json({ message: "Invalid data type." });
     },
     resourceNotFound: (res) => {
-        res.status(500).json({ message: "Resource not found." });
+        res.status(404).json({ message: "Resource not found." });
     },
     resourceAdded: (res) => {
         res.status(201).json({ message: "Resource added successfully." });
     },
     resourceUpdated: (res) => {
-        res.status(200).json({ message: "Resource updated successfully." });
+        res.status(204).json({ message: "Resource updated successfully." });
     },
     resourceFetched: (res, response) => {
         res.status(200).json({ message: "Resource fetched successfully.", response: response });
