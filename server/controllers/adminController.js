@@ -3,6 +3,7 @@ const sql = require("mssql/msnodesqlv8");
 const jwt = require('jsonwebtoken');
 const { errorHandler } = require("../middleware/errorMiddleware.js");
 const dotenv = require('dotenv').config();
+const responses = require('../responses');
 
 const {
     MSSQL_DATABASE_NAME,
@@ -293,6 +294,89 @@ const deleteUser = asyncHandler(async (req, res) => {
                 return;
             }
             res.status(204).json({ message: "User deleted successfully." });
+        })
+    });
+});
+
+const editUser = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            responses.tokenInvalid(res);
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            responses.tokenExpired(res);
+            return;
+        }
+        isValid = true;
+    })
+    if (!isValid) return;
+
+    const id = req.params.id;
+    if (isNaN(Number(id))) {
+        res.status(401).json({ message: "Expected integer for UserId, but instead got: " + (typeof id) });
+        return;
+    }
+    const { username, email, password, role } = req.body;
+    if (username === undefined || email === undefined || password === undefined || role === undefined) {
+        responses.inputsNotProvided(res);
+        return;
+    }
+    if (typeof username !== 'string' || typeof email !== 'string' || typeof password !== 'string' || typeof role !== 'string') {
+        res.status(400).json({ message: "Expected string for all fields." });
+        return;
+    }
+    if (username.length < 3 || username.length > 20) {
+        res.status(400).json({ message: "Username must be between 3 and 20 characters." });
+        return;
+    }
+    if (email.length < 3 || email.length > 50) {
+        res.status(400).json({ message: "Email must be between 3 and 50 characters." });
+        return;
+    }
+    if (password.length < 3 || password.length > 50) {
+        res.status(400).json({ message: "Password must be between 3 and 50 characters." });
+        return;
+    }
+    if (role !== 'admin' && role !== 'user') {
+        responses.tokenNoPermission(res);
+        return;
+    }
+    sql.connect(config, async (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error occurred on our part." });
+            console.log(err);
+            return;
+        }
+        const request = new sql.Request();
+        request.input('userId', sql.Int, Number(id));
+        request.input('username', sql.VarChar, username);
+        request.input('email', sql.VarChar, email);
+        request.input('password', sql.VarChar, password);
+        request.input('role', sql.VarChar, role);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                            UPDATE Users SET Username = @username, Email = @email,
+                            Password = @password, Role = @role WHERE UserId = @userId;
+                        END TRY
+                        BEGIN CATCH
+                            THROW;
+                            ROLLBACK;
+                        END CATCH;
+                          COMMIT;`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(404).json({ message: "User not found." });
+                return;
+            }
+            res.status(204).json({ message: "User updated successfully." });
         })
     });
 });

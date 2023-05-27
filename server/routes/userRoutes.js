@@ -10,12 +10,10 @@ const {
     editUser,
     deleteUserr,
     logUserIn,
-    updateUser,
-    testError
+    updateUser
 } = require('../controllers/userController');
 
 router.route('/').get(getUsers).post(register);
 router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);
 router.route('/login').post(logUserIn);
-router.route('/test').get(testError);
 module.exports = router;
