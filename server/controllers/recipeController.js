@@ -108,7 +108,6 @@ const deleteRecipe = asyncHandler(async (req, res) => {
         })
     })
 });
-
 const addRecipe = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     let chefId, isValid = false;
@@ -291,7 +290,6 @@ const getRecipes = asyncHandler(async (req, res, next) => {
         });
     });
 });
-
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { recipeId } = req.params;
     const token = req.headers.authorization.split(" ")[1];
@@ -542,7 +540,6 @@ const updateRecipe = asyncHandler(async (req, res) => {
         })
     })
 });
-
 const getRecipesByChef = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let userId = null, isValid = false;
@@ -591,5 +588,6 @@ module.exports = {
     getRecipes,
     getFavorites,
     filterRecipes,
-    updateRecipe    
+    updateRecipe,
+    getRecipesByChef
 }

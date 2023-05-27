@@ -19,14 +19,21 @@ const {
     addRecipe,
     getRecipes,
     getRecipe,
+    getFavorites,
+    filterRecipes,
+    updateRecipe,
+    getRecipesByChef
     // editRecipe
 } = require('../controllers/recipeController');
 
+router.route('/get').get(getRecipes);
+router.route('/get/:id').get(getRecipe);
 router.route('/add').post(upload.single('image'), addRecipe);
 router.route('/delete/:id').delete(deleteRecipe);
-// router.route('/edit/:id').post(editRecipe);
-router.route('/get/:id').get(getRecipe);
-router.route('/get').get(getRecipes);
+router.route('/edit/:id').post(updateRecipe);
+router.route('/get/favorites').get(getFavorites);
+router.route('/getByChef/:id').get(getRecipesByChef);
+router.route('/filter').get(filterRecipes);
 
 
 module.exports = router;
