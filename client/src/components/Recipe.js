@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 export default function Recipe() {
+    const { id } = useParams();
     const [data, setData] = useState({});
     async function setComponents() {
         try {
-            const response = await fetch(`http://localhost:5000/`);
+            const response = await fetch(`http://localhost:5000/api/recipe/get/${id}`, {
+                method: "GET"
+            });
+            if (response.status !== 200) return;
+            const json = await response.json();
+            const obj = {};
+            for(const prop in json.response[0])
         } catch (error) {
             console.log(error);
         }
