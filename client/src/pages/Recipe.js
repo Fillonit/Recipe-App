@@ -31,7 +31,7 @@ const Recipe = () => {
     setComponents();
   }, []);
   console.log(data.ImageUrl)
-  if (Object.keys(data).length != 0)
+  if (Object.keys(data).length !== 0)
     return (
       <div className="flex flex-col items-center justify-center h-full bg-gray-100 pt-[50rem]">
         <div className="w-full max-w-6xl p-8 bg-white rounded-lg shadow-md">
