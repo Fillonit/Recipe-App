@@ -1,5 +1,5 @@
 import React from 'react';
-import RecipeList from './RecipeList';
+import RecipeList from './Recipe/RecipeList';
 // import Navbar from './Navbar';
 import Hero from './Hero';
 // import ProfilePage from './ProfilePage';

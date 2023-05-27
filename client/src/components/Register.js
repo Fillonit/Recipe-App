@@ -60,7 +60,7 @@ export default function Register() {
   }
 
   return (
-    <div className={"mt-32 flex justify-center items-center"}>
+    <div className={"mt-32 flex justify-center items-center h-screen"}>
       <div className={"flex flex-col"}>
         <div className={"flex flex-col items-center"}>
           <h1 className={"text-4xl font-bold"}>Register</h1>

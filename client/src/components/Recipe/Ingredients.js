@@ -1,6 +1,6 @@
 import Ingredient from "./Ingredient";
 import Steps from "./Steps";
-import "../styles/recipeTags.css";
+import "../../styles/recipeTags.css";
 export default function Ingredients({ steps, ingredients, recipeIngredients, units }) {
     const ingredientCount = Object.keys(recipeIngredients).length;
     if (ingredientCount !== 0 || steps.length !== 0)

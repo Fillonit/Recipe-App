@@ -13,7 +13,7 @@ import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
 import Contact from './components/Contact';
 import LogIn from './components/Register';
-import PublishRecipe from './components/PublishRecipe';
+import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
 
 // const recipes = [
