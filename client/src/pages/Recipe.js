@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from "react-router-dom";
-import { resolve } from 'styled-jsx/css';
-import { setRevalidateHeaders } from 'next/dist/server/send-payload';
+// import { resolve } from 'styled-jsx/css';
 
 const Recipe = () => {
   const [selectedStep, setSelectedStep] = useState(1);
@@ -12,18 +11,18 @@ const Recipe = () => {
   async function likeComment(liked, id, index) {
     try {
       const response = await fetch(`http://localhost:5000/api/comments/like/${id}`, {
-        method: liked == 1 ? "DELETE" : "POST",
+        method: liked === 1 ? "DELETE" : "POST",
         headers: {
           'R-A-Token': localStorage.getItem('token')
         }
       });
-      if (response.status != (liked == 1 ? 204 : 201)) return;
+      if (response.status !== (liked === 1 ? 204 : 201)) return;
       setData((prev) => {
         const newComments = prev.comments.slice();
         newComments[index] = {
           ...newComments[index],
-          AlreadyLiked: liked == 1 ? 0 : 1,
-          Likes: liked == 1 ? newComments[index].Likes - 1 : newComments[index].Likes + 1
+          AlreadyLiked: liked === 1 ? 0 : 1,
+          Likes: liked === 1 ? newComments[index].Likes - 1 : newComments[index].Likes + 1
         }
         return { ...prev, comments: newComments };
       })
@@ -44,7 +43,7 @@ const Recipe = () => {
           recipeId: id
         })
       });
-      if (response.status != 201) return;
+      if (response.status !== 201) return;
       const json = await response.json();
       setComments((prev) => {
         return [...prev, json.response[0].Content];
@@ -124,15 +123,15 @@ const Recipe = () => {
   async function setLike(liked) {
     try {
       const response = await fetch(`http://localhost:5000/api/recipe/like/${id}`, {
-        method: liked == true ? "DELETE" : "POST",
+        method: liked === true ? "DELETE" : "POST",
         headers: {
           'R-A-Token': localStorage.getItem('token')
         }
       });
       console.log(liked + ", " + response.status);
-      if (response.status != (liked == true ? 204 : 201)) return;
+      if (response.status !== (liked === true ? 204 : 201)) return;
       setData((prev) => {
-        return { ...prev, AlreadyLiked: !liked, Likes: liked == true ? prev.Likes - 1 : prev.Likes + 1 };
+        return { ...prev, AlreadyLiked: !liked, Likes: liked === true ? prev.Likes - 1 : prev.Likes + 1 };
       })
     } catch (error) {
       console.log(error);
@@ -170,7 +169,7 @@ const Recipe = () => {
     setComponents();
   }, []);
 
-  if (Object.keys(data).length != 0)
+  if (Object.keys(data).length !== 0)
     return (
       <div className="flex flex-col items-center justify-center h-full bg-gray-100 pt-[50rem]">
         <div className="w-full max-w-6xl p-8 bg-white rounded-lg shadow-md">
@@ -180,6 +179,7 @@ const Recipe = () => {
           <img
             className="w-full rounded-lg mb-4"
             src={data.ImageUrl}
+            alt={'recipe'}
           />
           <h2 className="text-2xl font-bold mb-2 text-center text-indigo-600">
             Ingredients

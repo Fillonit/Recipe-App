@@ -688,6 +688,137 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
     })
 });
 
+const likeRecipe = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired." });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+    if (id === undefined) {
+        res.status(401).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (isNaN(Number(id))) {
+        res.status(401).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (id < 0) {
+        res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('recipeId', sql.Int, id);
+        request.input('userId', sql.Int, userId);
+        const QUERY = `BEGIN TRANSACTION;
+                          BEGIN TRY
+                             DECLARE @Count INT;
+
+                             SELECT @Count = COUNT(*)
+                             FROM Likes 
+                             WHERE RecipeId = @recipeId AND UserId = @userId
+                             IF(@Count = 0)
+                             BEGIN
+                              INSERT INTO Likes(UserId, RecipeId, CreatedAt) VALUES(@userId, @recipeId, GETDATE());
+                             END
+                          END TRY
+                          BEGIN CATCH
+                            THROW;
+                            ROLLBACK;
+                          END CATCH;
+                        COMMIT;`
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: "An error happened on our part." })
+                return;
+            }
+            res.status(201).json({ message: "Recipe fetched successfully." });
+            return;
+        })
+    })
+});
+const unlikeRecipe = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired." });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+    if (id === undefined) {
+        res.status(401).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (isNaN(Number(id))) {
+        res.status(401).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (id < 0) {
+        res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('recipeId', sql.Int, id);
+        request.input('userId', sql.Int, userId);
+        const QUERY = `BEGIN TRANSACTION;
+                          BEGIN TRY
+                             DECLARE @Count INT;
+
+                             SELECT @Count = COUNT(*)
+                             FROM Likes 
+                             WHERE RecipeId = @recipeId AND UserId = @userId
+                             IF(@Count = 1)
+                             BEGIN
+                              DELETE FROM Likes WHERE UserId = @userId AND RecipeId = @recipeId;
+                             END
+                          END TRY
+                          BEGIN CATCH
+                            THROW;
+                            ROLLBACK;
+                          END CATCH;
+                        COMMIT;`
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: "An error happened on our part." })
+                return;
+            }
+            res.status(204).json({ message: "Recipe deleted successfully." });
+            return;
+        })
+    })
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe,

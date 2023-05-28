@@ -12,9 +12,11 @@ import Dashboard from './pages/Dashboard';
 import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
 import Contact from './components/Contact';
-import LogIn from './components/Register';
+import Login from './components/Login';
 import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
+import Chef from './pages/Chef';
+
 
 function App() {
   return (
@@ -30,12 +32,17 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path='/contact' element={<Contact />} />
-        <Route path='/login' element={<LogIn />} />
+        <Route path='/Login' element={<Login />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
+        <Route path='/Chef' element={<Chef />} />
       </Routes>
-      <Footer />
+      {
+        //check if route is not dashboard
+        !window.location.pathname.includes('/dashboard') &&
+        <Footer />
+      }
     </Router>
   );
 }

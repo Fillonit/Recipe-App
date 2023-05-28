@@ -346,7 +346,7 @@ const editUser = asyncHandler(async (req, res) => {
     }
     sql.connect(config, async (err) => {
         if (err) {
-            res.status(500).json({ message: "An error occurred on our part." });
+            responses.serverError(res);
             console.log(err);
             return;
         }

@@ -25,7 +25,7 @@ const config = {
 
 const tokenKey = process.env.TOKEN_KEY;
 
-const salt = process.env.SALT, iterations = 1000, keylen = 64, digest = "sha512";
+const salt = SALT, iterations = 1000, keylen = 64, digest = "sha512";
 
 // @desc: Get user from the database
 // @route: GET /api/users/:id
@@ -98,8 +98,8 @@ const setUser = asyncHandler(async (req, res) => {
 });
 const logUserIn = asyncHandler(async (req, res) => {
     if (!req.body.username || !req.body.password) {
-        res.status(400);
-        throw new Error('No text');
+        res.status(400).json({err: "No text"});
+        return;
     }
     sql.connect(config, (err) => {
         if (err) {
