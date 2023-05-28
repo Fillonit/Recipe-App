@@ -22,7 +22,9 @@ const {
     getFavorites,
     filterRecipes,
     updateRecipe,
-    getRecipesByChef
+    getRecipesByChef,
+    likeRecipe,
+    unlikeRecipe
     // editRecipe
 } = require('../controllers/recipeController');
 
@@ -34,6 +36,8 @@ router.route('/edit/:id').post(updateRecipe);
 router.route('/get/favorites').get(getFavorites);
 router.route('/getByChef/:id').get(getRecipesByChef);
 router.route('/filter').get(filterRecipes);
+router.route('/like/:id').post(likeRecipe);
+router.route('/like/:id').delete(unlikeRecipe);
 
 
 module.exports = router;

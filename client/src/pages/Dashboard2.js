@@ -105,7 +105,7 @@ const Dashboard = () => {
   }
   useEffect(() => {
     setComponents();
-  }, [])
+  }, []);
   const userCount = stats.user === undefined ? "Loading..." : stats.user.count;
   const userIncrease = stats.user === undefined ? "Loading..." : stats.user.increase;
   const recipeCount = stats.recipe === undefined ? "Loading..." : stats.recipe.count;

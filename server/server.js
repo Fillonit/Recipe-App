@@ -17,6 +17,7 @@ const tagRouter = require('./routes/tagRoutes');
 const ingredientRouter = require('./routes/ingredientRoutes');
 const contactRouter = require('./routes/contactRoutes');
 const adminRouter = require('./routes/adminRoutes');
+const commentRouter = require('./routes/commentRoutes');
 
 const app = express();
 const uploadDirectory = path.join(__dirname, 'uploads');
@@ -24,7 +25,7 @@ const uploadDirectory = path.join(__dirname, 'uploads');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({
-    extended: false
+    extended: true
 }));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -37,9 +38,9 @@ app.use('/api/tags', tagRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/contacts', contactRouter);
+app.use('/api/comments', commentRouter);
 
 app.use('/images', express.static(uploadDirectory));
-
 app.use(errorHandler);
 app.use(requestLoggerMiddleware);
 

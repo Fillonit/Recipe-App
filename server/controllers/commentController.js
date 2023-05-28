@@ -12,11 +12,11 @@ const config = {
         trustedConnection: true
     }
 };
-
+const tokenKey = process.env.TOKEN_KEY
 
 const addComment = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId = null;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -26,26 +26,35 @@ const addComment = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
+        isValid = true;
         userId = decoded.userId;
     });
+    if (!isValid) return;
+    console.log(req.body)
+    const comment = req.body.comment, recipeId = req.body.recipeId;
+    console.log(comment);
+    if (comment === undefined) {
+        res.status(401).json({ message: "Comment content is not provided." });
+        return;
+    }
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            res.status(500).json({ message: "An error happened on our part." })
             return;
         }
-        const json = JSON.parse(req.body);
-        const content = json.content, recipeId = json.recipeId;
-        if (typeof content != 'string') {
-            res.status(400).json({ message: "The content is not valid" });
+        if (comment.length > 2000) {
+            res.status(401).json({ message: "Comment is too long." });
             return;
         }
-        if (content.length > 2000) {
-            res.status(400).json({ message: "Comment is too long." });
-        }
-
-        const commentQuery = `INSERT INTO Comments (UserId, Content, RecipeId)` +
-            `VALUES (${userId},'${content}',${recipeId})`;
         const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('comment', sql.VarChar, comment);
+        request.input('recipeId', sql.Int, recipeId);
+        const commentQuery = `INSERT INTO Comments (UserId, Content, RecipeId, CreatedAt) VALUES (@userId, @comment, @recipeId, GETDATE());
+                              DECLARE @CommentId INT;
+                              SELECT @CommentId = MAX(CommentId) FROM Comments;
+
+                              SELECT * FROM Comments WHERE CommentId = @CommentId`;
 
         request.query(commentQuery, (err, result) => {
             if (err) {
@@ -56,8 +65,8 @@ const addComment = asyncHandler(async (req, res) => {
                 res.status(500).json({ message: "Could not insert the resource." });
                 return;
             }
+            res.status(201).json({ message: "Successfully added resource.", response: result.recordset });
         });
-        res.status(201).json({ message: "Successfully added resource." });
     });
 });
 const deleteComment = asyncHandler(async (req, res) => {
@@ -77,7 +86,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            handler(error, req, res, "");
             return;
         }
         const commentId = req.params.id;
@@ -133,22 +142,24 @@ const deleteComment = asyncHandler(async (req, res) => {
     });
 });
 const likeComment = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId = null, role = null;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Token is invalid" });
+            res.status(401).json({ message: "Token is invalid." });
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid" });
+            res.status(401).json({ message: "Token is expired." });
             return;
         }
         userId = decoded.userId;
+        isValid = true;
     });
+    if (!isValid) return;
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            res.status(500).json({ message: "An error occurred on our part." })
             return;
         }
 
@@ -157,50 +168,61 @@ const likeComment = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM CommentLikes WHERE CommentId = ${commentId} AND UserId = ${userId}`;
         const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('commentId', sql.Int, commentId);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @Count INT;
 
-        request.query(existsQuery, (err, result) => {
+                         SELECT @Count = COUNT(*) 
+                         FROM CommentLikes 
+                         WHERE UserId = @userId AND CommentId = @commentId;
+                         
+                         IF(@Count = 0)
+                         BEGIN
+                          INSERT INTO CommentLikes(UserId, CommentId, CreatedAt) VALUES(@userId, @commentId, GETDATE());
+                          UPDATE Comments SET Likes = Likes + 1 WHERE CommentId = @commentId;
+                         END
+                        END TRY
+                        BEGIN CATCH
+                         THROW;
+                         ROLLBACK;
+                        END CATCH;
+                       COMMIT;`
+        request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length !== 0) {
-                res.status(409).json({ message: "Conflict, user already liked the given comment." });
-                return;
-            }
-        });
-        const likeQuery = `INSERT INTO CommentLikes (CommentId, UserId) VALUES (${commentId}, ${userId})`;
-        request.query(likeQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error happened on our part." });
+                console.log(err);
                 return;
             }
             if (result.rowsAffected === 0) {
                 res.status(404).json({ message: "Could not find comment." });
                 return;
             }
+            res.status(201).json({ message: "Successfully added resource." });
         });
-        res.status(201).json({ message: "Successfully added resource." });
     });
 });
 const unlikeComment = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId = null, role = null;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Token is invalid" });
+            res.status(401).json({ message: "Token is invalid." });
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is invalid" });
+            res.status(401).json({ message: "Token is expired." });
             return;
         }
         userId = decoded.userId;
+        isValid = true;
     });
+    if (!isValid) return;
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            res.status(500).json({ message: "An error occurred on our part." })
             return;
         }
 
@@ -209,27 +231,40 @@ const unlikeComment = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM CommentLikes WHERE CommentId = ${commentId} AND UserId = ${userId}`;
         const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('commentId', sql.Int, commentId);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @Count INT;
 
-        request.query(existsQuery, (err, result) => {
+                         SELECT @Count = COUNT(*) 
+                         FROM CommentLikes 
+                         WHERE UserId = @userId AND CommentId = @commentId;
+                         
+                         IF(@Count = 0)
+                         BEGIN
+                          DELETE FROM CommentLikes WHERE CommentId = @commentId AND UserId = @userId;
+                          UPDATE Comments SET Likes = Likes + 1 WHERE CommentId = @commentId;
+                         END
+                        END TRY
+                        BEGIN CATCH
+                         THROW;
+                         ROLLBACK;
+                        END CATCH;
+                       COMMIT;`
+        request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error happened on our part." });
+                console.log(err);
                 return;
             }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "Could not find the liked resource." });
+            if (result.rowsAffected === 0) {
+                res.status(404).json({ message: "Could not find comment." });
                 return;
             }
+            res.status(204).json({ message: "Successfully added resource." });
         });
-        const likeQuery = `DELETE FROM CommentLikes WHERE CommentId = (${commentId} AND UserId = ${userId})`;
-        request.query(likeQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-        });
-        res.status(204).json({ message: "Successfully deleted resource." });
     });
 });
 const editComment = asyncHandler(async (req, res) => {
@@ -249,7 +284,7 @@ const editComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            handler(error, req, res, "");
             return;
         }
 
@@ -302,7 +337,7 @@ const getComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            handler(error, req, res, "");
             return;
         }
 
@@ -334,7 +369,7 @@ const getComment = asyncHandler(async (req, res) => {
         res.status(200).json({ message: "Successfully retrieved resource." });
     });
 });
- const getComments = asyncHandler(async (req, res) => {
+const getComments = asyncHandler(async (req, res) => {
     const token = req.body.auth;
     let userId = null, role = null;
     jwt.verify(token, tokenKey, (err, decoded) => {
@@ -351,7 +386,7 @@ const getComment = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            handler(error, req, res, "");
             return;
         }
 
@@ -362,7 +397,7 @@ const getComment = asyncHandler(async (req, res) => {
         }
         const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
         const request = new sql.Request();
-        
+
         request.query(existsQuery, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
@@ -400,7 +435,7 @@ const getCommentsForRecipe = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); 
+            handler(error, req, res, "");
             return;
         }
 

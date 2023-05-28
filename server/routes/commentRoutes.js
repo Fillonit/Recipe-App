@@ -11,8 +11,8 @@ const {
     editComment,
     getComment
 } = require('../controllers/commentController.js');
-
-router.route('/:id').post(addComment).delete(deleteComment);
+router.route('/').post(addComment);
+router.route('/:id').delete(deleteComment);
 router.route('/like/:id').post(likeComment).delete(unlikeComment);
 router.route('/edit/:id').post(editComment);
 router.route('/get/:id').get(getComment);
