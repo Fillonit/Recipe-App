@@ -33,7 +33,7 @@ const Profile = () => {
   }, [])
   if (data !== undefined)
     return (
-      <div className="mt-60">
+      <div className="mt-60 h-screen">
         <div className="relative max-w-md mx-auto md:max-w-2xl min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-xl mt-16 border-indigo-500 border-2">
           <div className="px-6">
             <div className="flex flex-wrap justify-center">
