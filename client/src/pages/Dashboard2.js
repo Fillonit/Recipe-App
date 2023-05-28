@@ -260,9 +260,9 @@ const Dashboard = () => {
           <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
         </div>
         <div className="mt-12 mx-6">
-          <h2 className="text-4xl font-bold mb-12">User List</h2>
+          <h2 className="text-4xl font-bold mb-12 text-gray-800">User List</h2>
           <table className="w-full bg-white rounded-lg shadow-md">
-            <thead className="bg-gray-200 text-gray-800">
+            <thead className="bg-gray-800 text-white">
               <tr>
                 <th className="py-4 px-6 text-left">ID</th>
                 <th className="py-4 px-6 text-left">Name</th>
@@ -272,7 +272,7 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.UserId} className="border-b hover:bg-gray-100">
+                <tr key={user.UserId} className="border-b hover:bg-gray-900">
                   <td className="py-4 px-6">{user.UserId}</td>
                   <td className="py-4 px-6">{user.Username}</td>
                   <td className="py-4 px-6">{user.Email == null ? "User doesnt have email." : user.Email}</td>
