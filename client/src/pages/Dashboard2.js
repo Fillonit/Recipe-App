@@ -248,7 +248,7 @@ const Dashboard = () => {
             placeholder="Page"
             ref={page}
             className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
-            // defaultValue={1}
+            defaultValue={1}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
               e.target.value = value;
