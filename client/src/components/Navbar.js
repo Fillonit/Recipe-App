@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Logo from "../images/logo.png"
+import Icon from "../images/icon.png"
 import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
 const Navbar = ({ title, image, description }) => {
@@ -26,7 +28,10 @@ const Navbar = ({ title, image, description }) => {
           {isNavOpen ? (
             <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2 -mt-1">Recipe App</span>
           ) : (
-            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Recipe App</span>
+            <>
+            <img className="h-8 mb-1" src={Icon} alt="Icon" />
+            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
+            </>
           )}
         </a>
         <div className="block lg:hidden">
