@@ -239,15 +239,15 @@ const Dashboard = () => {
         </div>
         <div className="mt-12 mx-4 flex justify-start items-center">
         <div id={'Search1'}>
-        <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 rounded-md mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
-        <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'}/></button>
+        <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
+        <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'}/></button>
         </div>
         <div id={'Search1'}>
         <input
             type="text"
             placeholder="Page"
             ref={page}
-            className="p-2 rounded-md m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
+            className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
             // defaultValue={1}
             onChange={(e) => {
               const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
@@ -257,7 +257,7 @@ const Dashboard = () => {
           </div>
 
 
-          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
+          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
         </div>
         <div className="mt-12 mx-6">
           <h2 className="text-4xl font-bold mb-12">User List</h2>
