@@ -15,6 +15,8 @@ import Contact from './components/Contact';
 import Login from './components/Login';
 import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
+import Chef from './pages/Chef';
+
 
 function App() {
   return (
@@ -34,6 +36,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
+        <Route path='/Chef' element={<Chef />} />
       </Routes>
       {
         //check if route is not dashboard
