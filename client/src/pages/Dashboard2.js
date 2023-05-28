@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faUsers, faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faUsers, faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
 // import './Dashboard.css'
 
@@ -148,7 +148,7 @@ const Dashboard = () => {
             </li>
           </ul>
           <div className="absolute bottom-0 py-4 px-8">
-            <p className="text-xs text-gray-400">Â© 2023 Magnolia. All rights reserved.</p>
+            <p className="text-xs text-gray-400">© 2023 Magnolia. All rights reserved.</p>
           </div>
         </div>
       </div>
@@ -237,7 +237,28 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <input type='text' placeholder='Search user' ref={currentSearchString} /><button onClick={searchUsers}>SEARCH</button>
+        <div className="mt-12 mx-4 flex justify-start items-center">
+        <div id={'Search1'}>
+        <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 rounded-md mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
+        <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'}/></button>
+        </div>
+        <div id={'Search1'}>
+        <input
+            type="text"
+            placeholder="Page"
+            ref={page}
+            className="p-2 rounded-md m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
+            // defaultValue={1}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+              e.target.value = value;
+            }}
+          />
+          </div>
+
+
+          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
+        </div>
         <div className="mt-12 mx-6">
           <h2 className="text-4xl font-bold mb-12">User List</h2>
           <table className="w-full bg-white rounded-lg shadow-md">
@@ -269,8 +290,20 @@ const Dashboard = () => {
               ))}
             </tbody>
           </table>
-          <input type='number' placeholder='Page' ref={page} />
-          <button onClick={() => { changePage(page.current.value) }}>SEARCH</button>
+          {/* <div className="mt-12 mx-2 flex justify-start items-center">
+          <input
+            type="text"
+            placeholder="Page"
+            ref={page}
+            className="p-2 rounded-md mr-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
+            defaultValue={1}
+            onChange={(e) => {
+              const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+              e.target.value = value;
+            }}
+          />
+          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
+          </div> */}
         </div>
       </div>
     </div>

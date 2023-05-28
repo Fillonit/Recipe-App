@@ -35,7 +35,11 @@ function App() {
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
       </Routes>
-      <Footer />
+      {
+        //check if route is not dashboard
+        !window.location.pathname.includes('/dashboard') &&
+        <Footer />
+      }
     </Router>
   );
 }
