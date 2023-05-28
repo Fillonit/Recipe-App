@@ -54,7 +54,13 @@ const addComment = asyncHandler(async (req, res) => {
                               DECLARE @CommentId INT;
                               SELECT @CommentId = MAX(CommentId) FROM Comments;
 
-                              SELECT * FROM Comments WHERE CommentId = @CommentId`;
+                              SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited,
+                               (SELECT COUNT(*) FROM Comments WHERE CommentId = c.CommentId AND c.UserId = @userId) AS IsOwnComment,
+                               (SELECT COUNT(*) FROM CommentLikes WHERE UserId = @userId AND CommentId = c.CommentId) AS AlreadyLiked 
+                              FROM Comments c
+                                JOIN Users u
+                                ON u.UserId = c.UserId
+                              WHERE CommentId = @commentId;`;
 
         request.query(commentQuery, (err, result) => {
             if (err) {
@@ -70,8 +76,8 @@ const addComment = asyncHandler(async (req, res) => {
     });
 });
 const deleteComment = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId = null, role = null;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false, role = null;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -81,9 +87,11 @@ const deleteComment = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        userId = decoded.userId;
         role = decoded.role;
+        userId = decoded.userId;
+        isValid = true;
     });
+    if (!isValid) return;
     sql.connect(config, (error) => {
         if (error) {
             handler(error, req, res, "");
@@ -94,41 +102,29 @@ const deleteComment = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const queries = [`BEGIN TRANSACTION`];
-        queries.push(`DELETE FROM Comments WHERE CommentId = ${commentId}`);
-        queries.push(`DELETE FROM CommentLikes WHERE CommentId = ${commentId}`);
-        queries.push(`COMMIT`);
-        const commentQuery = queries.join("; ") + ";";
         const request = new sql.Request();
-        if (role == 'admin') {
-            request.query(commentQuery, (err, result) => {
-                if (err) {
-                    handler(err, req, res, "");
-                    return;
-                }
-                if (result.rowsAffected === 0) {
-                    res.status(404).json({ message: "Could not find resource." });
-                    return;
-                }
-                res.status(204).json({ message: "Successfully deleted resource." });
-            })
-        }
-        const userQuery = `SELECT UserId FROM Comments WHERE CommentId = ${commentId}`;
-        request.query(userQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "Could not find resource." });
-                return;
-            }
-            if (result.recordset.UserId != userId) {
-                res.status(403).json({ message: "You don't have permission to delete that comment." });
-                return;
-            }
-        });
-        request.query(commentQuery, (err, result) => {
+        request.input('userId', sql.Int, userId);
+        request.input('commentId', sql.Int, commentId);
+        request.input('role', sql.VarChar, role);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @Count INT;
+                         
+                         SELECT @Count = COUNT(*)
+                         FROM Comments 
+                         WHERE @role = 'admin' OR(CommentId = @commentId AND UserId = @userId);
+
+        IF(@Count > 0)
+        BEGIN 
+                           DELETE FROM Comments WHERE CommentId = @commentId;
+        END
+                        END TRY
+                        BEGIN CATCH
+        THROW;
+        ROLLBACK;
+                        END CATCH;
+        COMMIT; `;
+        request.query(QUERY, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
                 return;
@@ -178,18 +174,18 @@ const likeComment = asyncHandler(async (req, res) => {
                          SELECT @Count = COUNT(*) 
                          FROM CommentLikes 
                          WHERE UserId = @userId AND CommentId = @commentId;
-                         
-                         IF(@Count = 0)
-                         BEGIN
+
+        IF(@Count = 0)
+        BEGIN
                           INSERT INTO CommentLikes(UserId, CommentId, CreatedAt) VALUES(@userId, @commentId, GETDATE());
                           UPDATE Comments SET Likes = Likes + 1 WHERE CommentId = @commentId;
-                         END
+        END
                         END TRY
                         BEGIN CATCH
-                         THROW;
-                         ROLLBACK;
+        THROW;
+        ROLLBACK;
                         END CATCH;
-                       COMMIT;`
+        COMMIT; `
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error happened on our part." });
@@ -241,18 +237,18 @@ const unlikeComment = asyncHandler(async (req, res) => {
                          SELECT @Count = COUNT(*) 
                          FROM CommentLikes 
                          WHERE UserId = @userId AND CommentId = @commentId;
-                         
-                         IF(@Count = 0)
-                         BEGIN
+
+        IF(@Count = 0)
+        BEGIN
                           DELETE FROM CommentLikes WHERE CommentId = @commentId AND UserId = @userId;
                           UPDATE Comments SET Likes = Likes + 1 WHERE CommentId = @commentId;
-                         END
+        END
                         END TRY
                         BEGIN CATCH
-                         THROW;
-                         ROLLBACK;
+        THROW;
+        ROLLBACK;
                         END CATCH;
-                       COMMIT;`
+        COMMIT; `
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error happened on our part." });
@@ -268,8 +264,8 @@ const unlikeComment = asyncHandler(async (req, res) => {
     });
 });
 const editComment = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId = null, role = null;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false, role = null;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -279,45 +275,63 @@ const editComment = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        userId = decoded.userId;
         role = decoded.role;
+        isValid = true;
+        userId = decoded.userId;
     });
+    if (!isValid) return;
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, "");
+            res.status(500).json({ message: "An error occurred on our part." });
             return;
         }
 
         const commentId = req.params.id;
         if (isNaN(Number(commentId))) {
-            res.status(400).json({ message: "Expected integer but instead got string for commentId." });
+            res.status(401).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        console.log(req.body);
+        const content = req.body.content;
         const request = new sql.Request();
+        request.input('commentId', sql.Int, commentId);
+        request.input('userId', sql.Int, userId);
+        request.input('content', sql.VarChar, content);
+        request.input('role', sql.VarChar, role);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @Count INT;
+    
+                         SELECT @Count = COUNT(*)
+                         FROM Comments 
+                         WHERE CommentId = @commentId AND UserId = @userId;
 
-        request.query(existsQuery, (err, result) => {
+                         IF(@Count = 1)
+                         BEGIN 
+                          UPDATE Comments
+                          SET Content = @content, UpdatedAt = GETDATE(), Edited = 1
+                          WHERE CommentId = @commentId;
+                         END
+                         ELSE IF(@role = 'admin')
+                         BEGIN
+                          UPDATE Comments
+                          SET Content = @content, AdminUpdatedAt = GETDATE()
+                          WHERE CommentId = @commentId;
+                         END
+                        END TRY
+                        BEGIN CATCH
+                         THROW;
+                         ROLLBACK;
+                        END CATCH;
+                       COMMIT; `
+        request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "Could not find resource." });
-                return;
-            }
-            if (result.recordset.UserId != userId) {
-                res.status(403).json({ message: "You don't have permission to edit that comment." });
-                return;
-            }
+            res.status(200).json({ message: "Successfully updated resource.", response: content });
         });
-        const editQuery = `UPDATE Comments SET Comment = '${req.body.comment}' WHERE CommentId = ${commentId}`;
-        request.query(editQuery, (err, result) => {
-            if (err) {
-                handler(error, req, res, "");
-                return;
-            }
-        });
-        res.status(204).json({ message: "Successfully edited resource." });
     });
 });
 const getComment = asyncHandler(async (req, res) => {
@@ -346,7 +360,7 @@ const getComment = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId} `;
         const request = new sql.Request();
 
         request.query(existsQuery, (err, result) => {
@@ -359,7 +373,7 @@ const getComment = asyncHandler(async (req, res) => {
                 return;
             }
         });
-        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId}`;
+        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId} `;
         request.query(getQuery, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
@@ -395,7 +409,7 @@ const getComments = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for commentId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId}`;
+        const existsQuery = `SELECT COUNT(*) FROM Comments WHERE CommentId = ${commentId} `;
         const request = new sql.Request();
 
         request.query(existsQuery, (err, result) => {
@@ -408,7 +422,7 @@ const getComments = asyncHandler(async (req, res) => {
                 return;
             }
         });
-        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId}`;
+        const getQuery = `SELECT * FROM Comments WHERE CommentId = ${commentId} `;
         request.query(getQuery, (err, result) => {
             if (err) {
                 handler(error, req, res, "");
@@ -443,7 +457,7 @@ const getCommentsForRecipe = asyncHandler(async (req, res) => {
             res.status(400).json({ message: "Expected integer but instead got string for recipeId." });
             return;
         }
-        const existsQuery = `SELECT COUNT(*) FROM Recipes WHERE RecipeId = ${recipeId}`;
+        const existsQuery = `SELECT COUNT(*) FROM Recipes WHERE RecipeId = ${recipeId} `;
         const request = new sql.Request();
 
         request.query(existsQuery, (err, result) => {
@@ -456,7 +470,7 @@ const getCommentsForRecipe = asyncHandler(async (req, res) => {
                 return;
             }
         });
-        const getQuery = `SELECT * FROM Comments WHERE RecipeId = ${recipeId}`;
+        const getQuery = `SELECT * FROM Comments WHERE RecipeId = ${recipeId} `;
         request.query(getQuery, (err, result) => {
             if (err) {
                 handler(error, req, res, "");

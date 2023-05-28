@@ -7,6 +7,7 @@ const Recipe = () => {
   const { id } = useParams();
   const [data, setData] = useState({});
   const comment = useRef();
+  const [comments, setComments] = useState([]);
   async function likeComment(liked, id, index) {
     try {
       const response = await fetch(`http://localhost:5000/api/comments/like/${id}`, {
@@ -44,7 +45,9 @@ const Recipe = () => {
       });
       if (response.status !== 201) return;
       const json = await response.json();
-
+      setComments((prev) => {
+        return [...prev, json.response[0].Content];
+      })
       setData((prev) => {
         return { ...prev, comments: [...prev.comments, json.response[0]] };
       })
@@ -66,16 +69,57 @@ const Recipe = () => {
       const obj = {};
       for (const prop in json.response[0][0])
         obj[prop] = json.response[0][0][prop];
-      obj["comments"] = json.response[1].slice();
+      const comments = [...json.response[1]];
+      for (let i = 0; i < comments.length; i++)
+        if (comments[i].IsOwnComment == 1) comments[i]['editingMode'] = false;
+      obj["comments"] = [...comments];
       obj["ingredients"] = json.response[2].slice();
       obj['steps'] = json.response[3].slice();
       console.log(obj)
+      for (let i = 0; i < comments.length; i++)
+        comments[i] = comments[i].Content
+      setComments([...comments]);
       setData(obj);
     } catch (error) {
       console.log(error);
     }
   }
-
+  function handleCommentChange(e, index) {
+    setComments((prev) => {
+      const comments = [...prev];
+      comments[index] = e.target.value;
+      return comments
+    })
+  }
+  async function editComment(commentId, ref, index) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+        method: "PUT",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: comments[index]
+        })
+      });
+      if (response.status !== 200) return;
+      const json = await response.json();
+      setComments((prev) => {
+        const comments = [...prev];
+        comments[index] = json.response;
+        return comments;
+      })
+      setData((prev) => {
+        const comments = [...prev.comments];
+        comments[index] = { ...comments[index], Content: json.response, editingMode: false, Edited: true };
+        return { ...prev, comments: comments };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  console.log(comments);
   async function setLike(liked) {
     try {
       const response = await fetch(`http://localhost:5000/api/recipe/like/${id}`, {
@@ -92,6 +136,34 @@ const Recipe = () => {
     } catch (error) {
       console.log(error);
     }
+  }
+  async function deleteComment(commentId, index) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          'r-a-token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 204) return;
+      setComments((prev) => {
+        const comments = [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)];
+        return comments;
+      })
+      setData((prev) => {
+        const comments = [...prev.comments.slice(0, index), ...prev.comments.slice(index + 1, prev.comments.length)];
+        return { ...prev, comments: comments };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  function setEditingMode(index) {
+    setData((prev) => {
+      const comments = [...prev.comments];
+      comments[index] = { ...comments[index], editingMode: true };
+      return { ...prev, comments: [...comments] };
+    })
   }
   useEffect(() => {
     setComponents();
@@ -169,9 +241,12 @@ const Recipe = () => {
           <input ref={comment} type='text' /><button onClick={publishComment}>COMMENT</button>
           <ol>
             {data.comments.map((item, index) => {
-              return <> <li>{item.Username}: {item.Content}, {item.CreatedAt}, Likes: {item.Likes}</li><button onClick={() => {
+              return <> <li>{item.Username}: {item.editingMode ? <input value={comments[index]} ref={item.ref} onChange={(e) => { handleCommentChange(e, index) }} type='text' /> : item.Content}, {new Date(item.CreatedAt).toLocaleString()}, Likes: {item.Likes}</li><button onClick={() => {
                 likeComment(item.AlreadyLiked, item.CommentId, index);
-              }}>{item.AlreadyLiked == 1 ? 'UNLIKE' : "LIKE"}</button></>
+              }}>{item.AlreadyLiked == 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
+                if (item.editingMode == true) editComment(item.CommentId, item.ref, index);
+                else setEditingMode(index);
+              }}>{item.editingMode ? 'CONFIRM EDIT' : "EDIT"}</button></>}</>
             })}
           </ol>
         </div>

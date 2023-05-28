@@ -341,7 +341,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
 //                                JOIN Users u 
 //                                ON u.UserId = r.ChefId
 //                              WHERE RecipeId = @recipeId;
-                             
+
 //                              SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
 //                              FROM Comments c
 //                                 JOIN Users u
@@ -367,7 +367,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const token = req.headers['r-a-token'];
-    let userId = null, isValid = false;
+    let userId = null, isValid = false, role = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             responses.tokenNoPermission(res);
@@ -377,8 +377,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
             responses.tokenExpired(res);
             return;
         }
-        chefId = decoded.userId;
-        isValid = true;
+        role = decoded.role;
         userId = decoded.userId;
         isValid = true;
     });
@@ -407,7 +406,8 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         }
         const request = new sql.Request();
         request.input('recipeId', sql.Int, id);
-        request.input('chefId', sql.Int, userId);
+        request.input('userId', sql.Int, userId);
+        request.input('role', sql.VarChar, role)
         const QUERY = `BEGIN TRANSACTION;
                           BEGIN TRY
                              DECLARE @LikesCount INT;
@@ -417,7 +417,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                              DECLARE @Fats INT;
                              DECLARE @AlreadyLiked BIT;
 
-                             SET @AlreadyLiked = CASE WHEN (SELECT COUNT(*) FROM Likes WHERE RecipeId = @recipeId AND UserId = @chefId) = 1 THEN 1 ELSE 0 END;
+                             SET @AlreadyLiked = CASE WHEN (SELECT COUNT(*) FROM Likes WHERE RecipeId = @recipeId AND UserId = @userId) = 1 THEN 1 ELSE 0 END;
 
                              SELECT @Proteins = SUM(ri.Amount*i.ProteinsInGramsPerBase*u.ValueInStandardUnit),
                                     @Calories = SUM(ri.Amount*i.CaloriesPerBase*u.ValueInStandardUnit),
@@ -443,8 +443,9 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                                  ON c.CuisineId = r.CuisineId
                              WHERE RecipeId = @recipeId;
                              
-                             SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId,
-                              (SELECT COUNT(*) FROM CommentLikes WHERE UserId = @chefId AND CommentId = c.CommentId) AS AlreadyLiked 
+                             SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited,
+                              (SELECT COUNT(*) FROM Comments WHERE (CommentId = c.CommentId AND c.UserId = @userId) OR (@role = 'admin' AND CommentId = c.CommentId)) AS CanEdit,
+                              (SELECT COUNT(*) FROM CommentLikes WHERE UserId = @userId AND CommentId = c.CommentId) AS AlreadyLiked 
                              FROM Comments c
                                 JOIN Users u
                                 ON u.UserId = c.UserId
@@ -827,6 +828,4 @@ module.exports = {
     filterRecipes,
     updateRecipe,
     getRecipesByChef,
-    likeRecipe,
-    unlikeRecipe
 }
