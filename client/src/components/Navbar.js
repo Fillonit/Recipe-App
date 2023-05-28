@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Logo from "../images/logo.png"
+// import Logo from "../images/logo.png"
 import Icon from "../images/icon.png"
 import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
@@ -26,7 +26,10 @@ const Navbar = ({ title, image, description }) => {
      xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
-            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2 -mt-1">Recipe App</span>
+            <>
+            <img className="h-9" src={Icon} alt="Icon" />
+            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
+            </>
           ) : (
             <>
             <img className="h-9" src={Icon} alt="Icon" />
