@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const sql = require("mssql/msnodesqlv8");
 const jwt = require('jsonwebtoken');
 const handler = require("../middleware/errorMiddleware.js");
+const responses = require('../responses');
 
 
 const config = {
@@ -291,38 +292,117 @@ const getRecipes = asyncHandler(async (req, res, next) => {
         });
     });
 });
+// const getRecipe = asyncHandler(async (req, res, next) => {
+//     const { recipeId } = req.params;
+//     const token = req.headers['r-a-token'];
+//     let chefId = null, isValid = false;
+//     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+//         if (err) {
+//             res.status(401).json({ message: "Not authorized to view recipes." });
+//             return;
+//         }
+//         if (Date.now() / 1000 > decoded.exp) {
+//             res.status(401).json({ message: "Token is expired." });
+//             return;
+//         }
+//         chefId = decoded.userId;
+//     });
+//     if (!isValid) return;
+//     if (recipeId === undefined) {
+//         res.status(400).json({ message: "Not all required information was provided." });
+//         return;
+//     }
+//     if (typeof recipeId != 'number') {
+//         res.status(400).json({ message: "Information is not in the expected format." });
+//         return;
+//     }
+//     if (recipeId < 0) {
+//         res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
+//         return;
+//     }
+//     sql.connect(config, (err) => {
+//         if (err) {
+//             handler(err, req, res, "");
+//             return;
+//         }
+//         const request = new sql.Request();
+//         request.input('recipeId', sql.Int, recipeId);
+//         request.input('userId', sql.Int, userId);
+//         const QUERY = `BEGIN TRANSACTION;
+//                           BEGIN TRY
+//                              DECLARE @LikesCount INT;
+
+//                              SELECT @LikesCount = COUNT(*)
+//                              FROM Likes
+//                              WHERE RecipeId = @recipeId;
+
+//                              SELECT r.*, u.Username, @LikesCount AS Likes
+//                              FROM Recipes r
+//                                JOIN Users u 
+//                                ON u.UserId = r.ChefId
+//                              WHERE RecipeId = @recipeId;
+                             
+//                              SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
+//                              FROM Comments c
+//                                 JOIN Users u
+//                                 ON u.UserId = c.UserId
+//                              WHERE RecipeId = @recipeId
+//                           END TRY
+//                           BEGIN CATCH
+//                             THROW;
+//                             ROLLBACK;
+//                           END CATCH;
+//                         COMMIT;`
+//         request.query(QUERY, (err, result) => {
+//             if (err) {
+//                 handler(err, req, res, "");
+//                 return;
+//             }
+//             res.status(201).json({ message: "Recipe added successfully." });
+//             return;
+//         })
+//     })
+// });
+
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const token = req.headers['r-a-token'];
     let userId = null, isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Not authorized to view recipes." });
+            responses.tokenNoPermission(res);
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is expired." });
+            responses.tokenExpired(res);
             return;
         }
+        chefId = decoded.userId;
+        isValid = true;
         userId = decoded.userId;
         isValid = true;
     });
     if (!isValid) return;
     if (id === undefined) {
-        res.status(401).json({ message: "Not all required information was provided." });
+        // res.status(401).json({ message: "Not all required information was provided." });
+        responses.inputsNotProvided(res);
         return;
     }
     if (isNaN(Number(id))) {
-        res.status(401).json({ message: "Information is not in the expected format." });
+        // res.status(401).json({ message: "Information is not in the expected format." });
+        responses.invalidDataType(res);
         return;
     }
     if (id < 0) {
-        res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        // res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        responses.inputsInvalid(res);
         return;
     }
     sql.connect(config, (err) => {
         if (err) {
             res.status(500).json({ message: "A mistake happened on our part." });
+            // res.status(500).json({ message: "A mistake happened on our part." });
+            responses.serverError(res);
             return;
         }
         const request = new sql.Request();
@@ -397,10 +477,12 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         request.query(QUERY, (err, result) => {
             if (err) {
                 console.log(err);
-                res.status(500).json({ message: "An error happened on our part." })
+                // res.status(500).json({ message: "An error happened on our part." })
+                responses.serverError(res);
                 return;
             }
-            res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            responses.resourceFetched(res, result.recordsets);
             return;
         })
     })

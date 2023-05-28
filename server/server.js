@@ -9,6 +9,8 @@ const {
     requestLoggerMiddleware
 } = require('./middleware/errorMiddleware');
 
+const responses = require('./responses');
+
 const userRouter = require('./routes/userRoutes');
 const recipeRouter = require('./routes/recipeRoutes');
 const cuisineRouter = require('./routes/cuisineRoutes');
@@ -29,6 +31,7 @@ app.use(express.urlencoded({
 }));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(requestLoggerMiddleware);
 
 app.use('/api/user', userRouter);
 app.use('/api/recipe', recipeRouter);
@@ -41,8 +44,13 @@ app.use('/api/contacts', contactRouter);
 app.use('/api/comments', commentRouter);
 
 app.use('/images', express.static(uploadDirectory));
+
+app.get('/testResponse', (req, res) => {
+    let path = req.url;
+    responses.resourceAdded(res, `${path ?? 'Test'}`);
+});
+
 app.use(errorHandler);
-app.use(requestLoggerMiddleware);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

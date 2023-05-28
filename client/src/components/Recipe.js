@@ -25,7 +25,8 @@ export default function Recipe() {
     });
     const ingredients = [];
     const comments = [];
-    if (Object.keys(data) != 0)
+    let rating;
+    if (Object.keys(data) !== 0)
         return (
             <div className="max-w-xl mx-auto p-4 bg-white rounded-lg shadow">
                 <img src="" alt="" className="w-full h-auto rounded-lg mb-4" />
@@ -46,7 +47,7 @@ export default function Recipe() {
                         </li>
                     ))}
                 </ul>
-                <p>Rating: {rating}</p>
+                <p>Rating: {rating ?? 0}</p>
             </div>
         );
     else return (<></>);

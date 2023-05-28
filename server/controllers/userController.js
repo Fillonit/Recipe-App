@@ -651,7 +651,6 @@ const editUsers = asyncHandler(async (req, res) => {
     });
 });
 
-const testError = asyncHandler(async (req, res) => { });
 module.exports = {
     getUsers,
     register,
@@ -660,6 +659,5 @@ module.exports = {
     editUser,
     deleteUserr,
     logUserIn,
-    updateUser,
-    testError
+    updateUser
 };
