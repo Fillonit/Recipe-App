@@ -995,5 +995,7 @@ module.exports = {
     getRecipesByChef,
     getPopularRecipes,
     getRecentRecipes,
-    getMostLikedRecipes
+    getMostLikedRecipes,
+    likeRecipe,
+    unlikeRecipe
 }
