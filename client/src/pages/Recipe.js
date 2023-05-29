@@ -71,7 +71,7 @@ const Recipe = () => {
         obj[prop] = json.response[0][0][prop];
       const comments = [...json.response[1]];
       for (let i = 0; i < comments.length; i++)
-        if (comments[i].IsOwnComment == 1) comments[i]['editingMode'] = false;
+        if (comments[i].IsOwnComment === 1) comments[i]['editingMode'] = false;
       obj["comments"] = [...comments];
       obj["ingredients"] = json.response[2].slice();
       obj['steps'] = json.response[3].slice();
@@ -167,6 +167,7 @@ const Recipe = () => {
   }
   useEffect(() => {
     setComponents();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (Object.keys(data).length !== 0)
@@ -237,14 +238,14 @@ const Recipe = () => {
           <h1>LIKES: {data.Likes}</h1>
           <button onClick={() => {
             setLike(data.AlreadyLiked);
-          }}>{data.AlreadyLiked == true ? 'UNLIKE' : 'LIKE'}</button><br />
+          }}>{data.AlreadyLiked === true ? 'UNLIKE' : 'LIKE'}</button><br />
           <input ref={comment} type='text' /><button onClick={publishComment}>COMMENT</button>
           <ol>
             {data.comments.map((item, index) => {
               return <> <li>{item.Username}: {item.editingMode ? <input value={comments[index]} ref={item.ref} onChange={(e) => { handleCommentChange(e, index) }} type='text' /> : item.Content}, {new Date(item.CreatedAt).toLocaleString()}, Likes: {item.Likes}</li><button onClick={() => {
                 likeComment(item.AlreadyLiked, item.CommentId, index);
-              }}>{item.AlreadyLiked == 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
-                if (item.editingMode == true) editComment(item.CommentId, item.ref, index);
+              }}>{item.AlreadyLiked === 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
+                if (item.editingMode === true) editComment(item.CommentId, item.ref, index);
                 else setEditingMode(index);
               }}>{item.editingMode ? 'CONFIRM EDIT' : "EDIT"}</button></>}</>
             })}
