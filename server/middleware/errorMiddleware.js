@@ -24,9 +24,9 @@ const requestLoggerMiddleware = (req, res, next) => {
 
     const tableLine = '-'.repeat(tableRow.length - 36);
 
-    console.log(tableLine);
+    // console.log(tableLine);
     console.log(tableRow);
-    console.log(tableLine);
+    // console.log(tableLine);
 
     next();
 };

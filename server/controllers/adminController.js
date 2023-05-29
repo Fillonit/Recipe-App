@@ -14,9 +14,9 @@ const {
 } = process.env;
 
 const config = {
-    database: 'Recipes',
-    server: 'DESKTOP-8HBAVK7',
-    driver: 'msnodesqlv8',
+    database: MSSQL_DATABASE_NAME,
+    server: MSSQL_SERVER_NAME,
+    driver: MSSQL_DRIVER,
     options: {
         trustedConnection: true
     }
