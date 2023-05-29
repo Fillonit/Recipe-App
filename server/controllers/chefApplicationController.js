@@ -57,7 +57,7 @@ const addApplication = asyncHandler(async (req, res) => {
         request.input('experience', sql.Int, experience);
         request.input('worksAt', sql.VarChar, worksAt);
         request.input('description', sql.VarChar, description);
-        request.input('imageUrl', sql.VarChar, `http://localhost:5000/image/${req.file.filename}`);
+        request.input('imageUrl', sql.VarChar, `http://localhost:5000/images/chefApplications/${req.file.filename}`);
 
         const QUERY = `BEGIN TRANSACTION
                         BEGIN TRY
