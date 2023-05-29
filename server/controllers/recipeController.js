@@ -819,6 +819,115 @@ const unlikeRecipe = asyncHandler(async (req, res, next) => {
     })
 });
 
+const getPopularRecipes = asyncHandler(async (req, res, next) => {
+    const { page, pageSize } = req.query;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired." }); 
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+    if (page === undefined || pageSize === undefined) {
+        res.status(401).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (isNaN(Number(page)) || isNaN(Number(pageSize))) {
+        res.status(401).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (page < 0 || pageSize <= 0) {
+        res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('page', sql.Int, page);
+        request.input('pageSize', sql.Int, pageSize);
+        const QUERY = `SELECT *
+                          FROM Recipes
+                            ORDER BY Views DESC
+                            OFFSET @page * @pageSize ROWS FETCH NEXT @pageSize ROWS ONLY;`
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: "An error happened on our part." })
+                return;
+            }
+            res.status(200).json({ message: "Recipes fetched successfully.", response: result.recordset });
+            return;
+        })
+    })
+});
+
+const getRecentRecipes = asyncHandler(async (req, res, next) => {
+    const { page, pageSize } = req.query;
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Not authorized to view recipes." });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired." });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+
+    if (page === undefined || pageSize === undefined) {
+        res.status(401).json({ message: "Not all required information was provided." });
+        return;
+    }
+    if (isNaN(Number(page)) || isNaN(Number(pageSize))) {
+        res.status(401).json({ message: "Information is not in the expected format." });
+        return;
+    }
+    if (page < 0 || pageSize <= 0) {
+        res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('page', sql.Int, page);
+        request.input('pageSize', sql.Int, pageSize);
+        const QUERY = `SELECT *
+                            FROM Recipes
+                            ORDER BY CreatedAt DESC
+                            OFFSET @page * @pageSize ROWS FETCH NEXT @pageSize ROWS ONLY;`
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json({ message: "An error happened on our part." })
+                return;
+            }
+            res.status(200).json({ message: "Recipes fetched successfully.", response: result.recordset });
+            return;
+        })
+    })
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe,
@@ -828,4 +937,6 @@ module.exports = {
     filterRecipes,
     updateRecipe,
     getRecipesByChef,
+    getPopularRecipes,
+    getRecentRecipes
 }
