@@ -22,7 +22,7 @@ const config = {
     }
 };
 
-const addAplication = asyncHandler(async (req, res) => {
+const addApplication = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     let isValid = false, userId = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
@@ -87,7 +87,7 @@ const addAplication = asyncHandler(async (req, res) => {
         });
     })
 });
-const getAplication = asyncHandler(async (req, res) => {
+const getApplication = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     let isValid = false, userId = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
@@ -127,6 +127,6 @@ const getAplication = asyncHandler(async (req, res) => {
     })
 });
 module.exports = {
-    getAplication,
-    addAplication
+    getApplication,
+    addApplication
 }

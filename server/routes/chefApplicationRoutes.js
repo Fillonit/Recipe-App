@@ -33,10 +33,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const {
-    getAplication,
-    addAplication
+    getApplication,
+    addApplication
 } = require('../controllers/chefApplicationController');
 
-router.route('/').get(getAplication).post(upload.single('image'), addAplication);
+router.route('/').get(getApplication).post(upload.single('image'), addApplication);
 
 module.exports = router;
