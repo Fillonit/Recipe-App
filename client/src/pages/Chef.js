@@ -27,14 +27,14 @@ const Chef = () => {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <div className="w-2/3 border border-gray-300 rounded p-8 bg-indigo-100">
+      <div className="w-2/3 border border-gray-300 rounded p-8 bg-indigo-400">
         <form onSubmit={handleSubmit}>
-          <h1 className="w-2/3 text-indigo-400 mb-4">Chef Application</h1>
+          <h1 className="text-indigo-100 mb-4 text-center text-4xl">Chef Application</h1>
           <textarea ref={description} className="w-full p-4 border border-gray-300 rounded mb-4" placeholder="Describe yourself here..." name="description"></textarea>
-          <input ref={experience} className="w-full p-4 border border-gray-300 rounded mb-4" type="number" placeholder="Experience" name="number" />
+          <input ref={experience} className="w-full p-4 border border-gray-300 rounded mb-4" type="number" placeholder="Experience" name="number" style={{ '-moz-appearance': 'textfield', 'appearance': 'textfield' }}/>
           <input ref={worksAt} className="w-full p-4 border border-gray-300 rounded mb-4" type="text" placeholder="The place you work at here..." name="text" />
           <input ref={image} className="w-full p-4 border bg-white border-gray-300 rounded mb-4" type="file" accept='image/*' placeholder="File" name="file" />
-          <button className="w-full p-4 bg-indigo-500 text-white rounded hover:bg-indigo-600" type="submit">Submit</button>
+          <button className="w-full p-4 bg-indigo-500 text-white text-xl rounded hover:bg-indigo-600" type="submit">Submit</button>
         </form>
       </div>
     </div>
