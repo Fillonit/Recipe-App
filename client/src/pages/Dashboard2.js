@@ -245,7 +245,7 @@ const Dashboard = () => {
         </div>
         <div id={'Search1'}>
         <input
-            type="text"
+            type="number"
             placeholder="Page"
             ref={page}
             className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
@@ -254,6 +254,7 @@ const Dashboard = () => {
               const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
               e.target.value = value;
             }}
+            style={{ '-moz-appearance': 'textfield', 'appearance': 'textfield' }}
           />
           </div>
 
@@ -261,7 +262,7 @@ const Dashboard = () => {
           <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'} /></button>
         </div>
         <div className="mt-3 mx-6">
-          <h2 className="text-4xl font-bold mb-12 text-gray-800 mb-12">User List</h2>
+          <h2 className="text-4xl font-bold mb-12 text-gray-800">User List</h2>
           <table className="w-full bg-white rounded-lg shadow-md">
             <thead className="bg-gray-800 text-white">
               <tr>
