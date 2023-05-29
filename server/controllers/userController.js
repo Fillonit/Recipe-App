@@ -289,7 +289,6 @@ const deleteUserr = asyncHandler(async (req, res) => {
 });
 
 const register = asyncHandler(async (req, res) => {
-    console.log("registered");
     if (req.body === undefined || req.body === null || req.body === "" || req.body === {} || req.body === []) {
         res.status(401).json({ message: "Body property not included in the request." });
         console.log("req.body undefined");
@@ -300,11 +299,10 @@ const register = asyncHandler(async (req, res) => {
         username,
         password,
         description,
-        profilePicture,
-        name,
+        fullName,
         email
     } = req.body;
-
+    const imageName = req.file == undefined ? "https://wallpapers.com/images/hd/blank-default-pfp-wue0zko1dfxs9z2c.jpg" : req.file.filename;
     if (typeof username != 'string' || typeof password != 'string') {
         console.log("req.body undefined");
         res.status(401).json({ message: "Expected both password and usernmae to be string, instead got: " + (typeof username) + ", and " + (typeof password) });
@@ -326,15 +324,28 @@ const register = asyncHandler(async (req, res) => {
         const request = new sql.Request();
         request.input('username', sql.VarChar, username);
         request.input('password', sql.VarChar, hashedPassword);
+        request.input('email', sql.VarChar, email);
+        request.input('description', sql.VarChar, description);
+        request.input('fullName', sql.VarChar, fullName);
+        request.input('imageUrl', sql.VarChar, `http://localhost:5000/images/${imageName}`)
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         INSERT INTO Users(Username, Password, Role, CreatedAt, Description, Name, Email, ProfilePicture)
+                          VALUES(@username, @password, 'user', GETDATE(), @description, @fullName, @email, @imageUrl);
+                         DECLARE @UserId INT;
 
-        const QUERY = `INSERT INTO Users(Username, Password, Role, CreatedAt) VALUES(@username, @password, 'user', GETDATE());
-                       DECLARE @UserId INT;
+                         SELECT @UserId = UserId
+                         FROM Users
+                         WHERE Username = @username
 
-                       SELECT @UserId = UserId
-                       FROM Users
-                       WHERE Username = @username
-
-                       INSERT INTO Following(UserId) VALUES(@UserId);`;
+                         INSERT INTO Following(UserId) VALUES(@UserId);
+                         INSERT INTO Normal_User(UserId) VALUES(@UserId);
+                        END TRY
+                        BEGIN CATCH
+                         THROW;
+                         ROLLBACK;
+                        END CATCH;
+                       COMMIT;`;
 
         request.query(QUERY, (err, result) => {
             if (err) {

@@ -12,10 +12,10 @@ import Dashboard from './pages/Dashboard';
 import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
 import Contact from './components/Contact';
-import Login from './components/Login';
 import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
 import Chef from './pages/Chef';
+import LogInPage from './components/LogInPage';
 
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path='/contact' element={<Contact />} />
-        <Route path='/Login' element={<Login />} />
+        <Route path='/Login' element={<LogInPage />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
