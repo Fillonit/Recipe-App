@@ -26,7 +26,7 @@ const Dashboard = () => {
     changePage(lastPage);
   }
   async function changePage(page) {
-    const usersResponse = await fetch(`http://localhost:5000/api/user`, {
+    const usersResponse = await fetch(`http://localhost:5000/api/user/all`, {
       method: "GET",
       headers: {
         'R-A-Token': localStorage.getItem('token'),
@@ -42,7 +42,7 @@ const Dashboard = () => {
   }
   async function setComponents() {
     try {
-      const usersResponse = await fetch(`http://localhost:5000/api/user`, {
+      const usersResponse = await fetch(`http://localhost:5000/api/user/all`, {
         method: "GET",
         headers: {
           'R-A-Token': localStorage.getItem('token'),
@@ -74,6 +74,7 @@ const Dashboard = () => {
       const recipeIncreaseJson = await recipeIncreaseResponse.json();
       const trafficIncreaseJson = await trafficIncreaseResponse.json();
       const objToAssign = {};
+      console.log(usersJson);
       if (userIncreaseResponse.status === 200) objToAssign['user'] = { increase: userIncreaseJson.response[0].Percentage, count: userIncreaseJson.response[0].Count };
       if (recipeIncreaseResponse.status === 200) objToAssign['recipe'] = { increase: recipeIncreaseJson.response[0].Percentage, count: recipeIncreaseJson.response[0].Count };
       if (trafficIncreaseResponse.status === 200) objToAssign['traffic'] = { increase: trafficIncreaseJson.response[0].Percentage, count: trafficIncreaseJson.response[0].Count };
@@ -85,7 +86,7 @@ const Dashboard = () => {
   }
   async function searchUsers() {
     try {
-      const response = await fetch('http://localhost:5000/api/user', {
+      const response = await fetch('http://localhost:5000/api/user/all', {
         method: "GET",
         headers: {
           'R-A-Token': localStorage.getItem('token'),
@@ -238,29 +239,29 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="mt-12 mx-4 flex justify-start items-center">
-        <div id={'Search1'}>
-        <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
-        <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'}/></button>
-        </div>
-        <div id={'Search1'}>
-        <input
-            type="text"
-            placeholder="Page"
-            ref={page}
-            className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
-            // defaultValue={1}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-              e.target.value = value;
-            }}
-          />
+          <div id={'Search1'}>
+            <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
+            <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'} /></button>
+          </div>
+          <div id={'Search1'}>
+            <input
+              type="text"
+              placeholder="Page"
+              ref={page}
+              className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
+              // defaultValue={1}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+                e.target.value = value;
+              }}
+            />
           </div>
 
 
-          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
+          <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'} /></button>
         </div>
-        <div className="mt-12 mx-6">
-          <h2 className="text-4xl font-bold mb-12 text-gray-800">User List</h2>
+        <div className="mt-3 mx-6">
+          <h2 className="text-4xl font-bold mb-12 text-gray-800 mb-12">User List</h2>
           <table className="w-full bg-white rounded-lg shadow-md">
             <thead className="bg-gray-800 text-white">
               <tr>
@@ -273,10 +274,10 @@ const Dashboard = () => {
             <tbody>
               {users.map((user) => (
                 <tr key={user.UserId} className="border-b hover:bg-gray-900">
-                  <td className="py-4 px-6">{user.UserId}</td>
-                  <td className="py-4 px-6">{user.Username}</td>
-                  <td className="py-4 px-6">{user.Email == null ? "User doesnt have email." : user.Email}</td>
-                  <td className="py-4 px-6 text-center">
+                  <td className="py-4 px-6 group-hover:bg-slate-100">{user.UserId}</td>
+                  <td className="py-4 px-6 group-hover:bg-slate-100" >{user.Username}</td>
+                  <td className="py-4 px-6 group-hover:bg-slate-100" >{user.Email == null ? "User doesnt have email." : user.Email}</td>
+                  <td className="py-4 px-6  group-hover:bg-slate-100 text-center">
                     <button className="mr-2 text-blue-500 hover:text-blue-700">
                       <FontAwesomeIcon icon={faEdit} />
                     </button>

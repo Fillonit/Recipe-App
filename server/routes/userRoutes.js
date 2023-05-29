@@ -14,6 +14,7 @@ const {
 } = require('../controllers/userController');
 
 router.route('/').get(getUser).post(register);
+router.route('/all').get(getUsers);
 router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);
 router.route('/login').post(logUserIn);
 module.exports = router;

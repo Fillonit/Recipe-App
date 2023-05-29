@@ -13,7 +13,7 @@ const Profile = () => {
 
   async function setComponents() {
     try {
-      const response = await fetch(`http://localhost:5000/api/user`, {
+      const response = await fetch(`http://localhost:5000/api/user/`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

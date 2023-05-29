@@ -36,7 +36,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/dashboard2' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
-        <Route path='/Chef' element={<Chef />} />
+        <Route path='/chef' element={<Chef />} />
       </Routes>
       {
         //check if route is not dashboard

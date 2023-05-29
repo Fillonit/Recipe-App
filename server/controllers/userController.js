@@ -98,7 +98,7 @@ const setUser = asyncHandler(async (req, res) => {
 });
 const logUserIn = asyncHandler(async (req, res) => {
     if (!req.body.username || !req.body.password) {
-        res.status(400).json({err: "No text"});
+        res.status(400).json({ err: "No text" });
         return;
     }
     sql.connect(config, (err) => {
@@ -350,10 +350,9 @@ const register = asyncHandler(async (req, res) => {
         });
     })
 });
-
-const promoteToChef = asyncHandler(async (req, res) => {
-    const token = req.params.auth;
-    let role = null, isValid = false;
+const rejectPromotionToChef = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -363,14 +362,92 @@ const promoteToChef = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "You are not authorized to access this resource." });
+            return;
+        }
         isValid = true;
-        role = decoded.role;
+        userId = decoded.userId;
     });
     if (!isValid) return;
-    if (role !== 'admin') {
-        res.status(403).json({ message: "You are not authorized to access this resource." });
-        return;
-    }
+    const { userToReject } = req.body;
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred in our part." });
+            return;
+        }
+        const request = new sql.Request();
+        request.input('@userId', sql.Int, userId);
+
+        const QUERY = `BEGIN TRANSACTION;
+                        BEGIN TRY
+                         DECLARE @Count INT;
+                         
+                         SELECT @Count = COUNT(*)
+                         FROM ChefApplications 
+                         WHERE UserId = @userId
+
+                         IF(@Count = 0)
+                          BEGIN
+                           DELETE FROM ChefApplications WHERE UserId = @userId;
+                           
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@userId, 'Your chef application was unfortunately rejected...', GETDATE());
+                           DECLARE @NotificationCount INT;
+
+                           SELECT @NotificationCount = COUNT(*)
+                           FROM Notifications
+                           WHERE UserId = @userId;
+
+                           IF(@NotificationCount >= 20)
+                           BEGIN 
+                             DECLARE @EarliestNotification INT;
+                             DECLARE @EarliestDate DATE;
+
+                             SELECT @EarliestDate = MIN(ReceivedAt)
+                             FROM Notifications;
+                             
+                             SELECT @EarliestNotification = NotificationId
+                             FROM Notifications
+                             WHERE ReceivedAt = @EarliestDate;
+
+                             DELETE FROM Notifications
+                             WHERE NotificationId = @EarliestNotification
+                           END
+                          END
+                        END TRY`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error ocurred in our part." });
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
+                return;
+            }
+            res.status(204).json({ message: "Deleted resource successfully." });
+        })
+    });
+});
+const promoteToChef = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+    jwt.verify(token, tokenKey, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "You are not authorized to access this resource." });
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
     const { userToPromote, experience, worksAt } = req.body;
     if (isNaN(Number(userToPromote)) || Number(userToPromote) != Math.floor(Number(userToPromote))) {
         res.status(401).json({ message: "Expected integer for user id." });
@@ -385,33 +462,35 @@ const promoteToChef = asyncHandler(async (req, res) => {
         request.input('@userId', sql.Int, userToPromote);
         request.input('@experience', sql.Float, experience);
         request.input('@worksAt', sql.VarChar, worksAt);
-        const d = new Date();
-        const date = d.toISOString().slice(0, 10);
+
         const QUERY = `BEGIN TRANSACTION;
                         BEGIN TRY
                          DECLARE @Count INT;
                          
                          SELECT @Count = COUNT(*)
                          FROM Normal_User
-                         WHERE NormalUserId = @userId;
+                         WHERE UserId = @userId;
 
                          IF(@Count = 0)
                           BEGIN
                            INSERT INTO Chef(ChefId, Experience, WorksAt) VALUES (@userId, @experience, @worksAt);
-
+                     
                            DELETE FROM Normal_User
                            WHERE NormalUserId = @userId;
                            
+                           DELETE FROM ChefApplications
+                           WHERE UserId = @userId;
+
                            UPDATE Users
                            SET Role = 'Chef'
                            WHERE UserId = @userId;
 
-                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@userId,'Your chef application was successful, you are now a chef!', '${date}');
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@userId,'Your chef application was successful, you are now a chef!', GETDATE());
                            DECLARE @NotificationCount INT;
 
                            SELECT @NotificationCount = COUNT(*)
                            FROM Notifications
-                           WHERE UserId = @followee;
+                           WHERE UserId = @userId;
                            
                            IF(@NotificationCount >= 20)
                            BEGIN 
@@ -439,7 +518,7 @@ const promoteToChef = asyncHandler(async (req, res) => {
                 res.status(401).json({ message: "The data provided conflicts with our database" });
                 return;
             }
-            res.status(204).json({ message: "Updated resource successfully." });
+            res.status(200).json({ message: "Created resource successfully." });
         })
     });
 });
