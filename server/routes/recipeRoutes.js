@@ -17,15 +17,15 @@ const upload = multer({ storage: storage });
 const {
     deleteRecipe,
     addRecipe,
-    getRecipes,
     getRecipe,
+    getRecipes,
     getFavorites,
     filterRecipes,
     updateRecipe,
     getRecipesByChef,
-    // likeRecipe,
-    // unlikeRecipe
-    // editRecipe
+    getPopularRecipes,
+    getRecentRecipes,
+    getMostLikedRecipes
 } = require('../controllers/recipeController');
 
 router.route('/get').get(getRecipes);
@@ -36,6 +36,9 @@ router.route('/edit/:id').post(updateRecipe);
 router.route('/get/favorites').get(getFavorites);
 router.route('/getByChef/:id').get(getRecipesByChef);
 router.route('/filter').get(filterRecipes);
+router.route('/get/popular').get(getPopularRecipes);
+router.route('/get/recent').get(getRecentRecipes);
+router.route('/get/mostLiked').get(getMostLikedRecipes);
 // router.route('/like/:id').post(likeRecipe);
 // router.route('/like/:id').delete(unlikeRecipe);
 
