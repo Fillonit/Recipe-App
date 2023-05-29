@@ -55,6 +55,7 @@ const Recipe = () => {
       console.log(error);
     }
   }
+  console.log(data);
   async function setComponents() {
     try {
       const response = await fetch(`http://localhost:5000/api/recipe/get/${id}`, {
@@ -167,7 +168,7 @@ const Recipe = () => {
   }
   useEffect(() => {
     setComponents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (Object.keys(data).length !== 0)

@@ -53,18 +53,16 @@ const addComment = asyncHandler(async (req, res) => {
         const commentQuery = `INSERT INTO Comments (UserId, Content, RecipeId, CreatedAt) VALUES (@userId, @comment, @recipeId, GETDATE());
                               DECLARE @CommentId INT;
                               SELECT @CommentId = MAX(CommentId) FROM Comments;
-
-                              SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited,
-                               (SELECT COUNT(*) FROM Comments WHERE CommentId = c.CommentId AND c.UserId = @userId) AS IsOwnComment,
-                               (SELECT COUNT(*) FROM CommentLikes WHERE UserId = @userId AND CommentId = c.CommentId) AS AlreadyLiked 
-                              FROM Comments c
+                              
+                              SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited, 1 AS CanEdit, 0 AS AlreadyLiked 
+                             FROM Comments c
                                 JOIN Users u
                                 ON u.UserId = c.UserId
-                              WHERE CommentId = @commentId;`;
+                             WHERE CommentId = @commentId`;
 
         request.query(commentQuery, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." })
                 return;
             }
             if (result.rowsAffected === 0) {
