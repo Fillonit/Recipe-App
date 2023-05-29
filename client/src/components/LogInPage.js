@@ -5,7 +5,7 @@ export default function LogInPage() {
     const [logIn, setLogIn] = useState(false);
     return (
         <>
-            {logIn == true ? <Login setLogIn={setLogIn} /> : <Register setLogIn={setLogIn} />}
+            {logIn === true ? <Login setLogIn={setLogIn} /> : <Register setLogIn={setLogIn} />}
         </>
     );
 }
