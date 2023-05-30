@@ -64,20 +64,20 @@ export default function Register({ setLogIn }) {
                     <div className="w-1/2 p-3">
                         <div>
                             <label className="block mb-2 text-indigo-500">Description</label>
-                            <textarea ref={description} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="text" />
+                            <input ref={description} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type={"text"} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Full name</label>
-                            <input ref={fullName} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="text" />
+                            <input ref={fullName} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type={"text"} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Profile picture</label>
-                            <input ref={image} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="file" accept="image/*" name="image" />
+                            <input ref={image} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 " type="file" accept="image/*" name="image" />
                         </div>
                     </div>
                 </div>
                 <div className="flex justify-center">
-                    <button className="w-25 bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 mb-6 rounded" onClick={handleRegistration}>Register</button>
+                    <button className="w-1/5 min-w-fit bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 mb-6 rounded" onClick={handleRegistration}>Register</button>
                 </div>
                 <footer>
                     <button className="text-indigo-700 hover:text-indigo-900 text-sm float-right" onClick={() => { setLogIn(true) }}>Already have an account? Log in!</button>
