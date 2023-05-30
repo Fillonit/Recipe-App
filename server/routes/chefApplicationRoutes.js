@@ -34,9 +34,13 @@ const upload = multer({ storage: storage });
 
 const {
     getApplication,
-    addApplication
+    addApplication,
+    rejectPromotionToChef,
+    promoteToChef
 } = require('../controllers/chefApplicationController');
 
 router.route('/').get(getApplication).post(upload.single('image'), addApplication);
+router.route('/accept').post(promoteToChef);
+router.route('/reject/:id').delete(rejectPromotionToChef);
 
 module.exports = router;

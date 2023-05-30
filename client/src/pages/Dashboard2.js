@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faUsers, faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
-// import './Dashboard.css'
+import DashboardSidebar from '../components/DashboardSidebar';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({});
@@ -116,43 +116,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="w-1/6 bg-gray-900 text-white pt-3">
-        <div className="p-6 pl-6">
-          <h2 className="text-3xl font-bold mb-12 px-3">Magnolia</h2>
-          <ul className="space-y-4">
-            <li className="py-4 rounded-lg bg-gray-800">
-              <a
-                href="/"
-                className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
-              >
-                <FontAwesomeIcon icon={faHome} className="mr-4" />
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a
-                href="/users"
-                className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
-              >
-                <FontAwesomeIcon icon={faUsers} className="mr-4" />
-                Users
-              </a>
-            </li>
-            <li>
-              <a
-                href="/recipes"
-                className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
-              >
-                <FontAwesomeIcon icon={faUtensils} className="mr-4" />
-                Recipes
-              </a>
-            </li>
-          </ul>
-          <div className="absolute bottom-0 py-4 px-8">
-            <p className="text-xs text-gray-400">© 2023 Magnolia. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
+      <DashboardSidebar />
       <div className="w-5/6 p-8 bg-gray-100">
         <h2 className="text-4xl font-bold mb-8 mx-6">Statistics</h2>
         <div className="flex flex-wrap">
@@ -239,23 +203,23 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="mt-12 mx-4 flex justify-start items-center">
-        <div id={'Search1'}>
-        <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
-        <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'}/></button>
-        </div>
-        <div id={'Search1'}>
-        <input
-            type="number"
-            placeholder="Page"
-            ref={page}
-            className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
-            defaultValue={1}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-              e.target.value = value;
-            }}
-            style={{ '-moz-appearance': 'textfield', 'appearance': 'textfield' }}
-          />
+          <div id={'Search1'}>
+            <input type='text' placeholder='Username' ref={currentSearchString} className={'p-2 mx-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 font-bold'} />
+            <button onClick={searchUsers} className={'text-white bg-gray-800 p-2 border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faFilter} className={'px-2'} /></button>
+          </div>
+          <div id={'Search1'}>
+            <input
+              type="number"
+              placeholder="Page"
+              ref={page}
+              className="p-2 m-2 border-2 border-gray-500 focus:outline-none focus:border-indigo-500 w-16 font-bold text-center"
+              defaultValue={1}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+                e.target.value = value;
+              }}
+              style={{ '-moz-appearance': 'textfield', 'appearance': 'textfield' }}
+            />
           </div>
 
 
