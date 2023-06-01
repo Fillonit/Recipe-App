@@ -106,9 +106,9 @@ export default function UsersDashboard() {
     const adminPercentage = (radialData.admins / (radialData.chefs + radialData.users + radialData.admins)) * 100;
     const userPercentage = (radialData.users / (radialData.chefs + radialData.users + radialData.admins)) * 100;
     const angles = [
-        { angle: chefPercentage, label: `Chefs(${Math.round(chefPercentage)}%)` },
-        { angle: adminPercentage, label: `Admins(${Math.round(adminPercentage)}%)` },
-        { angle: userPercentage, label: `Users(${Math.round(userPercentage)}%)` },
+        { angle: chefPercentage, label: `${Math.round(chefPercentage)}%` },
+        { angle: adminPercentage, label: `${Math.round(adminPercentage)}%` },
+        { angle: userPercentage, label: `${Math.round(userPercentage)}%` },
     ];
 
     useEffect(() => {
@@ -119,25 +119,34 @@ export default function UsersDashboard() {
             <DashboardSidebar />
             <div className="mx-4 w-5/6 flex flex-col justify-start items-center">
                 {data.length !== 0 &&
-                    <div className="h-96 w-5/6 flex justify-evenly items-center mt-11 shadow-lg">
+                    <div className="bg-slate-800 rounded-2xl h-96 w-10/12 flex justify-evenly items-center mt-11 shadow-lg">
                         <XYPlot width={600} height={350} xType="ordinal">
-                            <XAxis />
-                            <YAxis />
+                            <XAxis style={{ text: { fill: 'white' } }} />
+                            <YAxis style={{ text: { fill: 'white' } }} />
                             <VerticalBarSeries data={data} />
                         </XYPlot>
-                        <RadialChart
-                            width={400}
-                            height={300}
-                            data={angles}
-                            colorRange={colorRange}
-                            labelsRadiusMultiplier={0.8}
-                            labelsStyle={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                fill: '#000000',
-                            }}
-                            showLabels
-                        />
+                        <div>
+                            <div className="w-full h-10 flex justify-evenly items-center">
+                                <div className="flex justify-evenly items-center w-full h-8">
+                                    <h2 className="text-base text-white">Chefs</h2>
+                                    <div style={{ backgroundColor: "#FF7F0E" }} className="w-16 h-full"></div>
+                                </div>
+                                <div className="flex justify-evenly items-center w-full h-8">
+                                    <h2 className="text-base text-white">Admins</h2>
+                                    <div style={{ backgroundColor: "#93C572" }} className="w-16 h-full"></div>
+                                </div>
+                                <div className="flex justify-evenly items-center w-full h-8">
+                                    <h2 className="text-base text-white">Users</h2>
+                                    <div style={{ backgroundColor: "#1F77B4" }} className="w-16 h-full"></div>
+                                </div>
+                            </div>
+                            <RadialChart
+                                width={400}
+                                height={300}
+                                data={angles}
+                                colorRange={colorRange}
+                            />
+                        </div>
                     </div>}
                 <div className="w-full  flex justify-evenly items-center h-20" >
                     <h2 className="text-4xl ml-24 font-bold text-gray-800">User List</h2>
