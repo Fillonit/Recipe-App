@@ -23,7 +23,7 @@ const {
     updateUser,
 } = require('../controllers/userController');
 
-router.route('/').get(getUsers).post(upload.single('image'), register);
+router.route('/').get(getUser).post(upload.single('image'), register);
 router.route('/all').get(getUsers);
 router.route('/login').post(logUserIn);
 router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);

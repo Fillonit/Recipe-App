@@ -7,6 +7,7 @@ import Hero from './Hero';
 // import Footer from './Footer';
 // import Wave from './Wave';
 // import Content from './Content';
+import Trending from './Trending';
 
 const recipes = [
   {
@@ -41,6 +42,7 @@ function App() {
           <RecipeList recipes={recipes} />
 
           {/* <ProfilePage /> */}
+          <Trending />
         </div>
       </div>
       {/* <Footer /> */}
