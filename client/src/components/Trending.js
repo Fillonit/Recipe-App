@@ -1,4 +1,7 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar, faClock } from '@fortawesome/free-solid-svg-icons';
+
 
 const recipes = [
   {
@@ -67,23 +70,12 @@ const RecipeCard = ({ recipe }) => {
         <div className="relative">
           <img src={recipe.image} alt={recipe.title} className="w-full h-40 object-cover transform transition duration-300 ease-in-out hover:scale-105" />
           <div className="absolute top-2 right-2 bg-gray-800 text-white px-2 pb-0.5 rounded">
-            <span className="text-xs font-medium">{recipe.category}</span>
+            {/* <span className="text-xs font-medium">{recipe.category}</span> */}
+            <span className="text-xs font-medium">15 min<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'}/></span>
           </div>
-          <div className="absolute top-2 left-2 bg-yellow-400 text-gray-900 px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded">
             <span className="text-xs flex items-center">
-              {starRating.toFixed(1)}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className="h-4 w-4 ml-1"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 14.472l4.065 2.005-.979-4.872L18 8.53l-5.39-.785L10 3l-2.61 4.746L4 8.53l3.914 3.075L6.935 16.477z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              {starRating.toFixed(1)}  <FontAwesomeIcon icon={faStar} className={'ml-1 text-xs'}/>
             </span>
           </div>
         </div>
@@ -92,7 +84,7 @@ const RecipeCard = ({ recipe }) => {
           <p className="text-gray-700 text-sm line-clamp-3">{recipe.description}</p>
           <div className="flex justify-between mt-4">
             <div className="text-gray-600 text-xs">Prep Time: {recipe.prepTime}</div>
-            <div className="text-gray-600 text-xs">Cook Time: {recipe.cookTime}</div>
+            <div className="text-gray-600 text-xs">{recipe.category}</div>
           </div>
         </div>
       </div>
