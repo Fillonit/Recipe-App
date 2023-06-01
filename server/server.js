@@ -23,6 +23,7 @@ const contactRouter = require('./routes/contactRoutes');
 const adminRouter = require('./routes/adminRoutes');
 const commentRouter = require('./routes/commentRoutes');
 const chefApplicationRouter = require('./routes/chefApplicationRoutes');
+const initRecipesRouter = require('./routes/initRecipesRoutes');
 
 const app = express();
 const uploadDirectory = path.join(__dirname, 'uploads');
@@ -46,6 +47,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/contacts', contactRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/chefApplications', chefApplicationRouter);
+app.use('/api/initRecipes', initRecipesRouter);
 
 app.use('/images', express.static(uploadDirectory));
 app.use('/images/chefApplications', (req, res, next) => {
