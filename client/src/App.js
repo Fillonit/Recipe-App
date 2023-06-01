@@ -16,6 +16,7 @@ import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
 import Chef from './pages/Chef';
 import LogInPage from './components/LogInPage';
+import Hero2 from './components/Hero2';
 import DashboardChefApplications from './components/DashboardChefApplications';
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
         <Route path='/publishRecipe' element={<PublishRecipe />} />
         <Route path='/chef' element={<Chef />} />
         <Route path='/dashboard2/chefApplications' element={<DashboardChefApplications />} />
+        <Route path='/hero2' element={<Hero2 />} />
       </Routes>
       {
         //check if route is not dashboard

@@ -2,6 +2,7 @@ import React from 'react';
 import RecipeList from './Recipe/RecipeList';
 // import Navbar from './Navbar';
 import Hero from './Hero';
+import Hero2 from './Hero2';
 // import ProfilePage from './ProfilePage';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // import Footer from './Footer';
@@ -34,12 +35,13 @@ function App() {
   return (
     <div className="-mt-2">
       {/* <Navbar /> */}
-      <Hero />
+      {/* <Hero />*/}
+      <Hero2/>
       {/* <Wave /> */}
       <div className="relative">
         <div className="container mx-auto my-8">
           <h1 className="text-6xl pb-4 border-b-2 font-bold mb-6 flex justify-center text-indigo-500 border-indigo-300">Recipes</h1>
-          <RecipeList recipes={recipes} />
+          {/* <RecipeList recipes={recipes} /> */}
 
           {/* <ProfilePage /> */}
           <Trending />
