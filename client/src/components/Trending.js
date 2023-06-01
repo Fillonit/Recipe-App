@@ -71,7 +71,7 @@ const RecipeCard = ({ recipe }) => {
           <img src={recipe.image} alt={recipe.title} className="w-full h-40 object-cover transform transition duration-300 ease-in-out hover:scale-105" />
           <div className="absolute top-2 right-2 bg-gray-800 text-white px-2 pb-0.5 rounded">
             {/* <span className="text-xs font-medium">{recipe.category}</span> */}
-            <span className="text-xs font-medium">15 min<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'}/></span>
+            <span className="text-xs font-medium">{recipe.cookTime}<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'}/></span>
           </div>
           <div className="absolute top-2 left-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded">
             <span className="text-xs flex items-center">
