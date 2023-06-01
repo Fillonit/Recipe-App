@@ -8,7 +8,7 @@ export default function DashboardSidebar() {
                 <ul className="space-y-4">
                     <li className="py-4 rounded-lg bg-gray-800">
                         <a
-                            href="/main"
+                            href="/dashboard"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
                         >
                             <FontAwesomeIcon icon={faHome} className="mr-4" />
@@ -17,7 +17,7 @@ export default function DashboardSidebar() {
                     </li>
                     <li>
                         <a
-                            href="/users"
+                            href="/dashboard/users"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
                         >
                             <FontAwesomeIcon icon={faUsers} className="mr-4" />
@@ -26,7 +26,7 @@ export default function DashboardSidebar() {
                     </li>
                     <li>
                         <a
-                            href="/recipes"
+                            href="/dashboard/recipes"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
                         >
                             <FontAwesomeIcon icon={faUtensils} className="mr-4" />
@@ -35,7 +35,7 @@ export default function DashboardSidebar() {
                     </li>
                     <li>
                         <a
-                            href="/dashboard2/chefApplications"
+                            href="/dashboard/chefApplications"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
                         >
                             <FontAwesomeIcon icon={faUtensils} className="mr-4" />

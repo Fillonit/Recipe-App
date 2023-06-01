@@ -7,12 +7,14 @@ const {
     usersIncrease,
     recipeIncrease,
     trafficIncrease,
-    deleteUser
+    deleteUser,
+    userChart
 } = require('../controllers/adminController.js');
 
 router.route('/stats/user').get(usersIncrease);
 router.route('/stats/recipe').get(recipeIncrease);
 router.route('/stats/traffic').get(trafficIncrease);
 router.route('/user/:id').delete(deleteUser);
+router.route('/userChart').get(userChart);
 
 module.exports = router;
