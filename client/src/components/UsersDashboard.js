@@ -119,16 +119,18 @@ export default function UsersDashboard() {
             <DashboardSidebar />
             <div className="mx-4 w-5/6 flex flex-col justify-start items-center">
                 {data.length !== 0 &&
-                    <div className="bg-slate-800 rounded-2xl h-96 w-10/12 flex justify-evenly items-center mt-11 shadow-lg">
+                    <div className="bg-slate-800 rounded-2xl h-96 w-11/12 flex justify-evenly items-center mt-11 shadow-lg">
                         <XYPlot width={600} height={350} xType="ordinal">
                             <XAxis style={{ text: { fill: 'white' } }} />
                             <YAxis style={{ text: { fill: 'white' } }} />
                             <VerticalBarSeries data={data} />
+                            <h2 style={{ transform: "translate(95%, -35px)" }}>Day(s) ago</h2>
+                            <h2 style={{ transform: "translate(-18px, -350px)" }}>User(s)</h2>
                         </XYPlot>
                         <div>
                             <div className="w-full h-10 flex justify-evenly items-center">
                                 <div className="flex justify-evenly items-center w-full h-8">
-                                    <h2 className="text-base text-white">Chefs</h2>
+                                    <h2 className="text-base text-white">Users</h2>
                                     <div style={{ backgroundColor: "#FF7F0E" }} className="w-16 h-full"></div>
                                 </div>
                                 <div className="flex justify-evenly items-center w-full h-8">
@@ -136,7 +138,7 @@ export default function UsersDashboard() {
                                     <div style={{ backgroundColor: "#93C572" }} className="w-16 h-full"></div>
                                 </div>
                                 <div className="flex justify-evenly items-center w-full h-8">
-                                    <h2 className="text-base text-white">Users</h2>
+                                    <h2 className="text-base text-white">Chefs</h2>
                                     <div style={{ backgroundColor: "#1F77B4" }} className="w-16 h-full"></div>
                                 </div>
                             </div>

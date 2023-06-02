@@ -243,15 +243,17 @@ const addRecipe = asyncHandler(async (req, res) => {
 const getRecipes = asyncHandler(async (req, res, next) => {
     const { page, pageSize, cuisineId, title, ingredients, sortBy, sortOrder } = req.query;
     const { userId } = req.params;
-    const token = req.headers.authorization.split(" ")[1];
-    let chefId = null;
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    console.log('hereee');
+    const token = req.headers['r-a-token'];
+    let chefId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Not authorized to view recipes." });
             return;
         }
-        chefId = token.userId;
+        chefId = decoded.userId;
     });
+    if (!isValid) return;
     if (page === undefined || pageSize === undefined || cuisineId === undefined || title === undefined || ingredients === undefined || sortBy === undefined || sortOrder === undefined) {
         res.status(400).json({ message: "Not all required information was provided." });
         return;
@@ -416,8 +418,22 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                              DECLARE @Carbs INT;
                              DECLARE @Fats INT;
                              DECLARE @AlreadyLiked BIT;
+                             DECLARE @ViewedToday BIT;
 
                              SET @AlreadyLiked = CASE WHEN (SELECT COUNT(*) FROM Likes WHERE RecipeId = @recipeId AND UserId = @userId) = 1 THEN 1 ELSE 0 END;
+                             SET @ViewedToday = CASE WHEN (SELECT COUNT(*) FROM RecipeViews WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE())) = 1 THEN 1 ELSE 0 END;
+                             IF(@ViewedToday)
+                             BEGIN 
+                               UPDATE RecipeViews
+                               SET Views = Views + 1
+                               WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE());
+                             END
+                             ELSE
+                               INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE())), 0);
+                             END
+                             UPDATE Recipes 
+                             SET Views = Views + 1
+                             WHERE RecipeId = @recipeId;
 
                              SELECT @Proteins = SUM(ri.Amount*i.ProteinsInGramsPerBase*u.ValueInStandardUnit),
                                     @Calories = SUM(ri.Amount*i.CaloriesPerBase*u.ValueInStandardUnit),
@@ -484,6 +500,114 @@ const getRecipe = asyncHandler(async (req, res, next) => {
             }
             // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
             responses.resourceFetched(res, result.recordsets);
+            return;
+        })
+    })
+});
+const getTrending = asyncHandler(async (req, res, next) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false, userId = null;
+    const page = req.headers['page'], rows = req.headers['rows'];
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            responses.tokenNoPermission(res);
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            responses.tokenExpired(res);
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            // res.status(500).json({ message: "A mistake happened on our part." });
+            responses.serverError(res);
+            return;
+        }
+        const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('offset', sql.Int, (page - 1) * rows);
+        request.input('rows', sql.Int, rows);
+        const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) 
+                                                    FROM Saved
+                                                    WHERE RecipeId = r.RecipeId AND UserId = @userId) AS IsSaved
+                       ,r.RecipeId, r.PreparationTime, r.ImageUrl, r.Rating, r.Description, COALESCE(r.Views, 0) AS Views, c.Name AS Cuisine
+                       FROM Recipes r
+                        LEFT JOIN RecipeViews rv
+                        ON rv.RecipeId = r.RecipeId AND rv.ViewedAt = CONVERT(DATE, GETDATE())
+                         JOIN Cuisine c
+                         ON c.CuisineId = r.CuisineId
+                       ORDER BY COALESCE(rv.Views, 0) DESC
+                       OFFSET @offset ROWS
+                       FETCH NEXT @rows ROWS ONLY;`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                // res.status(500).json({ message: "An error happened on our part." })
+                responses.serverError(res);
+                return;
+            }
+            // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            responses.resourceFetched(res, result.recordset);
+            return;
+        })
+    })
+});
+const getSaved = asyncHandler(async (req, res, next) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false, userId;
+    const page = req.headers['page'], rows = req.headers['rows'];
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            responses.tokenNoPermission(res);
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            responses.tokenExpired(res);
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            // res.status(500).json({ message: "A mistake happened on our part." });
+            responses.serverError(res);
+            return;
+        }
+        const request = new sql.Request();
+        request.input('offset', sql.Int, (page - 1) * rows);
+        request.input('rows', sql.Int, rows);
+        request.input('userId', sql.Int, userId);
+        const QUERY = `SELECT r.Title, r.CookTime, 1 AS IsSaved, r.RecipeId, r.PreparationTime, r.ImageUrl, r.Rating, r.Description, COALESCE(r.Views, 0) AS Views, c.Name AS Cuisine
+                       FROM Saved s
+                        JOIN Recipes r
+                        ON s.RecipeId = r.RecipeId 
+                         JOIN Cuisine c
+                         ON c.CuisineId = r.CuisineId
+                       WHERE s.UserId = @userId
+                       ORDER BY s.SavedAt DESC
+                       OFFSET @offset ROWS
+                       FETCH NEXT @rows ROWS ONLY;`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                // res.status(500).json({ message: "An error happened on our part." })
+                responses.serverError(res);
+                return;
+            }
+            // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
+            responses.resourceFetched(res, result.recordset);
             return;
         })
     })
@@ -647,10 +771,11 @@ const updateRecipe = asyncHandler(async (req, res) => {
         })
     })
 });
+
 const getRecipesByChef = asyncHandler(async (req, res) => {
     const token = req.params.auth;
     let userId = null, isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -830,7 +955,7 @@ const getPopularRecipes = asyncHandler(async (req, res, next) => {
             return;
         }
         if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is expired." }); 
+            res.status(401).json({ message: "Token is expired." });
             return;
         }
         userId = decoded.userId;
@@ -997,5 +1122,6 @@ module.exports = {
     getRecentRecipes,
     getMostLikedRecipes,
     likeRecipe,
-    unlikeRecipe
+    unlikeRecipe,
+    getTrending
 }

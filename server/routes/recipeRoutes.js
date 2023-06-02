@@ -27,10 +27,12 @@ const {
     getRecentRecipes,
     getMostLikedRecipes,
     likeRecipe,
-    unlikeRecipe
+    unlikeRecipe,
+    getTrending
 } = require('../controllers/recipeController');
 
 router.route('/get').get(getRecipes);
+router.route('/trending').get(getTrending);
 router.route('/get/:id').get(getRecipe);
 router.route('/add').post(upload.single('image'), addRecipe);
 router.route('/delete/:id').delete(deleteRecipe);
@@ -42,8 +44,6 @@ router.route('/get/popular').get(getPopularRecipes);
 router.route('/get/recent').get(getRecentRecipes);
 router.route('/get/mostLiked').get(getMostLikedRecipes);
 router.route('/like/:id').post(likeRecipe).delete(unlikeRecipe);
-// router.route('/like/:id').post(likeRecipe);
-// router.route('/like/:id').delete(unlikeRecipe);
 
 
 module.exports = router;
