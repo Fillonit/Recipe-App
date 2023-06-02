@@ -545,3 +545,51 @@ FROM
 SELECT
     @ @SERVERNAME AS [Server Name],
     @ @SERVICENAME AS [Instance Name]
+INSERT INTO
+    Recipes (
+        Title,
+        Description,
+        ImageUrl,
+        PreparationTime,
+        CookTime,
+        Servings,
+        ChefId,
+        CreatedAt,
+        UpdatedAt,
+        Views,
+        Rating,
+        NumberOfRatings,
+        CuisineId,
+        Edited
+    )
+VALUES
+    (
+        'Pasta',
+        'Pasta with tomato sauce',
+        'https://www.simplyrecipes.com/wp-content/uploads/2019/08/easy-tomato-pasta-lead-4.jpg',
+        10,
+        20,
+        4,
+        16,
+        GETDATE(),
+        GETDATE(),
+        0,
+        0,
+        0,
+        1,
+        0
+    )
+INSERT INTO
+    Chef (
+        ChefId,
+        FollowersCount,
+        AverageRating,
+        WorksAt,
+        Experience
+    )
+VALUES
+    (16, 0, 0, 'Pasta', 0)
+SELECT
+    *
+FROM
+    Recipes

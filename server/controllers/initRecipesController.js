@@ -63,6 +63,21 @@ const initRecipes = asyncHandler(async (req, res) => {
 
     const pool = await sql.connect(config);
     const request = pool.request();
+    // ,[Title]
+    //   ,[Description]
+    //   ,[ImageUrl]
+    //   ,[PreparationTime]
+    //   ,[CookTime]
+    //   ,[Servings]
+    //   ,[ChefId]
+    //   ,[CreatedAt]
+    //   ,[UpdatedAt]
+    //   ,[Views]
+    //   ,[Rating]
+    //   ,[NumberOfRatings]
+    //   ,[CuisineId]
+    //   ,[AdminUpdatedAt]
+    //   ,[Edited]
     request.input('recipeName', sql.NVarChar, recipeName);
     request.input('recipeDescription', sql.NVarChar, recipeDescription);
     request.input('recipeImage', sql.NVarChar, recipeImage);
@@ -70,7 +85,8 @@ const initRecipes = asyncHandler(async (req, res) => {
     request.input('recipeTags', sql.NVarChar, recipeTags);
     request.input('recipeChef', sql.Int, recipeChef);
     request.input('recipeDate', sql.DateTime, recipeDate);
-    const result = await request.query(`INSERT INTO Recipes (recipeName, recipeDescription, recipeImage, recipeCuisine, recipeTags, recipeChef, recipeDate) VALUES (@recipeName, @recipeDescription, @recipeImage, @recipeCuisine, @recipeTags, @recipeChef, @recipeDate)`);
+    // const result = await request.query(`INSERT INTO Recipes (recipeName, recipeDescription, recipeImage, recipeCuisine, recipeTags, recipeChef) VALUES (@recipeName, @recipeDescription, @recipeImage, @recipeCuisine, @recipeTags, @recipeChef)`);
+    const result = await request.query(`INSERT INTO Recipes (Title, Description, ImageUrl, CuisineId, ChefId, CreatedAt, PreparationTime, CookTime, Servings) VALUES (@recipeName, @recipeDescription, @recipeImage, 1, @recipeChef, @recipeDate, 0, 0, 3)`);
     const recipeId = result.recordset[0].recipeId;
 
     for (let i = 0; i < recipeIngredients.length; i++) {

@@ -47,7 +47,7 @@ const Profile = () => {
                   }
                 </div>
               </div>
-              <div className="w-full text-center mt-20">
+              <div className="w-full text-center mt-32">
                 <div className="flex justify-center lg:pt-4 pt-8 pb-0">
                   <div className="p-3 text-center ml-6">
                     <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">0</span>
