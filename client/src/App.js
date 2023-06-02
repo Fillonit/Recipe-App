@@ -19,6 +19,7 @@ import LogInPage from './components/LogInPage';
 import Hero2 from './components/Hero2';
 import DashboardChefApplications from './components/DashboardChefApplications';
 import UsersDashboard from './components/UsersDashboard';
+import Saved from './components/Saved';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
         <Route path="/recipe/:id" element={<Recipe />} />
+        <Route path='/saved' element={<Saved />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/Login' element={<LogInPage />} />
         <Route path='/dashboard' element={<Dashboard2 />} />

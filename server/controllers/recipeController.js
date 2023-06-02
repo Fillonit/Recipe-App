@@ -422,15 +422,17 @@ const getRecipe = asyncHandler(async (req, res, next) => {
 
                              SET @AlreadyLiked = CASE WHEN (SELECT COUNT(*) FROM Likes WHERE RecipeId = @recipeId AND UserId = @userId) = 1 THEN 1 ELSE 0 END;
                              SET @ViewedToday = CASE WHEN (SELECT COUNT(*) FROM RecipeViews WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE())) = 1 THEN 1 ELSE 0 END;
-                             IF(@ViewedToday)
+                             IF(@ViewedToday = 1)
                              BEGIN 
                                UPDATE RecipeViews
                                SET Views = Views + 1
                                WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE());
                              END
                              ELSE
-                               INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE())), 0);
+                             BEGIN
+                               INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE()), 0);
                              END
+
                              UPDATE Recipes 
                              SET Views = Views + 1
                              WHERE RecipeId = @recipeId;
@@ -608,6 +610,125 @@ const getSaved = asyncHandler(async (req, res, next) => {
             }
             // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
             responses.resourceFetched(res, result.recordset);
+            return;
+        })
+    })
+});
+const unsaveRecipe = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
+    const recipeId = req.params.id;
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('recipeId', sql.Int, recipeId);
+        const QUERY = `BEGIN TRANSACTION
+                         BEGIN TRY
+                           DECLARE @Count INT;
+                           SELECT @Count = COUNT(*)
+                           FROM Saved 
+                           WHERE UserId = @userId AND RecipeId = @recipeID
+                           
+                           IF(@Count = 1)
+                           BEGIN 
+                             DELETE FROM Saved
+                             WHERE RecipeId = @recipeId AND UserId = @userId
+                           END
+                         END TRY
+                         BEGIN CATCH
+                           THROW;
+                           ROLLBACK;
+                         END CATCH;
+                       COMMIT;`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected <= 0) {
+                res.status(400).json({ message: "Could not unsave the recipe." });
+                console.log(result.rowsAffected);
+                return;
+            }
+            res.status(204).json({ message: "Recipe created successfully." });
+            return;
+        })
+    })
+});
+const saveRecipe = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
+    const recipeId = req.params.id;
+    sql.connect(config, (err) => {
+        if (err) {
+            handler(err, req, res, "");
+            return;
+        }
+        const request = new sql.Request();
+        request.input('userId', sql.Int, userId);
+        request.input('recipeId', sql.Int, recipeId);
+        const QUERY = `BEGIN TRANSACTION
+                         BEGIN TRY
+                           DECLARE @Count INT;
+                           SELECT @Count = COUNT(*) 
+                           FROM Saved 
+                           WHERE UserId = @userId AND RecipeId = @recipeID
+                           
+                           IF(@Count = 0)
+                           BEGIN 
+                             INSERT INTO Saved(UserId, RecipeId, SavedAt) VALUES(@userId, @recipeId, GETDATE());
+                           END
+                         END TRY
+                         BEGIN CATCH
+                           THROW;
+                           ROLLBACK;
+                         END CATCH;
+                       COMMIT;`;
+
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected <= 0) {
+                res.status(400).json({ message: "Could not save the recipe." });
+                console.log(result.rowsAffected);
+                return;
+            }
+            res.status(201).json({ message: "Recipe created successfully." });
             return;
         })
     })
@@ -1123,5 +1244,8 @@ module.exports = {
     getMostLikedRecipes,
     likeRecipe,
     unlikeRecipe,
-    getTrending
+    getTrending,
+    saveRecipe,
+    unsaveRecipe,
+    getSaved
 }

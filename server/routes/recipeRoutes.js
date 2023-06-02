@@ -28,10 +28,15 @@ const {
     getMostLikedRecipes,
     likeRecipe,
     unlikeRecipe,
-    getTrending
+    getTrending,
+    saveRecipe,
+    unsaveRecipe,
+    getSaved
 } = require('../controllers/recipeController');
 
 router.route('/get').get(getRecipes);
+router.route('/save/:id').post(saveRecipe).delete(unsaveRecipe);
+router.route('/saved').get(getSaved);
 router.route('/trending').get(getTrending);
 router.route('/get/:id').get(getRecipe);
 router.route('/add').post(upload.single('image'), addRecipe);

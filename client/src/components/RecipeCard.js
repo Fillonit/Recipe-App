@@ -49,7 +49,7 @@ const RecipeCard = ({ recipe }) => {
                 </div>
                 <div className="p-4">
                     <div className='flex justify-between w-full'>
-                        <h2 className="font-bold text-lg mb-2">{recipe.Title}</h2>
+                        <h2 className="font-bold text-lg mb-2"><a href={`/recipe/${recipe.RecipeId}`} >{recipe.Title}</a></h2>
                         <FontAwesomeIcon onClick={() => {
                             if (isSaved == false) saveRecipe();
                             else unsaveRecipe();
