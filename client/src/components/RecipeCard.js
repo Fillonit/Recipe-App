@@ -4,7 +4,7 @@ import { useState } from 'react';
 const RecipeCard = ({ recipe }) => {
     const starRating = Math.round(recipe.rating * 2) / 2;
     const [isSaved, setIsSaved] = useState(recipe.IsSaved == 1);
-    async function saveRecipe() {
+    async function  saveRecipe() {
         try {
             const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {
                 method: "POST",
@@ -12,9 +12,10 @@ const RecipeCard = ({ recipe }) => {
                     "R-A-Token": localStorage.getItem('token'),
                 }
             });
-            if (response.status !== 201) return;
+            // if (response.status !== 201) return;
             setIsSaved(true);
         } catch (error) {
+            setIsSaved(true);
             console.log(error);
         }
     }
@@ -26,9 +27,10 @@ const RecipeCard = ({ recipe }) => {
                     "R-A-Token": localStorage.getItem('token'),
                 }
             });
-            if (response.status !== 204) return;
+            // if (response.status !== 204) return;
             setIsSaved(false);
         } catch (error) {
+            setIsSaved(false);
             console.log(error);
         }
     }
@@ -41,6 +43,10 @@ const RecipeCard = ({ recipe }) => {
                         {/* <span className="text-xs font-medium">{recipe.category}</span> */}
                         <span className="text-xs font-medium">{recipe.CookTime}<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'} /></span>
                     </div>
+                    <div className="absolute bottom-2 right-2 bg-gradient-to-r from-white to-white text-indigo-600 px-2 pb-0.5 rounded">
+                        {/* <span className="text-xs font-medium">{recipe.Views}</span> */}
+                            <span className={'text-xs font-medium'}>{recipe.Views} < FontAwesomeIcon className='ml-1' icon={faEye} /></span>
+                    </div>
                     <div className="absolute top-2 left-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-2 py-1 rounded">
                         <span className="text-xs flex items-center">
                             {starRating.toFixed(1)}  <FontAwesomeIcon icon={faStar} className={'ml-1 text-xs'} />
@@ -51,19 +57,22 @@ const RecipeCard = ({ recipe }) => {
                     <div className='flex justify-between w-full'>
                         <h2 className="font-bold text-lg mb-2"><a href={`/recipe/${recipe.RecipeId}`} >{recipe.Title}</a></h2>
                         <FontAwesomeIcon onClick={() => {
-                            if (isSaved == false) saveRecipe();
+                            if (isSaved === false) saveRecipe();
                             else unsaveRecipe();
-                        }} icon={faBookmark} color={isSaved == true ? "black" : "lightgray"} style={{ stroke: "black" }} />
+                        }} icon={faBookmark} className={isSaved === true ? "stroke-indigo-500 text-indigo-500 hover:text-indigo-700 hover:cursor-pointer" : "stroke-gray-300 text-gray-300 hover:text-indigo-300 hover:cursor-pointer"} />
                     </div>
                     <div className='w-full flex align-center'>
-                        <p className="text-gray-700 text-sm line-clamp-3">{recipe.Description}</p>
-                        <div className='flex flex-grow justify-end items-center'>
+                        <p className="text-gray-700 text-sm line-clamp-2">{recipe.Description}</p>
+                        {/* <div className='flex flex-grow justify-end items-center '>
                             {recipe.Views} < FontAwesomeIcon className='ml-1' icon={faEye} />
-                        </div>
+                        </div> */}
                     </div>
-                    <div className="flex justify-between mt-4">
-                        <div className="text-gray-600 text-xs">Prep Time: {recipe.PreparationTime}</div>
-                        <div className="text-gray-600 text-xs">{recipe.Cuisine}</div>
+                    <div className="flex justify-between mt-2">
+                        <div className="bg-indigo-400 text-white px-2 pb-0.5 rounded hover:bg-indigo-700 hover:cursor-pointer">
+                        {/* <span className="text-xs font-medium">{recipe.category}</span> */}
+                        <span className="text-xs font-medium">Prep Time: {recipe.PreparationTime}<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'} /></span>
+                    </div>
+                        <div className="text-gray-800 text-xs font-medium hover:cursor-pointer mt-2">{recipe.Cuisine}</div>
                     </div>
                 </div>
             </div>
