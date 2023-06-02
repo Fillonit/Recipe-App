@@ -18,7 +18,7 @@ import Chef from './pages/Chef';
 import LogInPage from './components/LogInPage';
 import Hero2 from './components/Hero2';
 import DashboardChefApplications from './components/DashboardChefApplications';
-import UsersDashboard from './components/UsersDashboard';
+// import UsersDashboard from './components/UsersDashboard';
 
 function App() {
   return (
@@ -40,7 +40,7 @@ function App() {
         <Route path='/chef' element={<Chef />} />
         <Route path='/dashboard/chefApplications' element={<DashboardChefApplications />} />
         <Route path='/hero2' element={<Hero2 />} />
-        <Route path='/dashboard/users' element={<UsersDashboard />} />
+        {/* <Route path='/dashboard/users' element={<UsersDashboard />} /> */}
       </Routes>
       {
         //check if route is not dashboard
