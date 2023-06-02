@@ -405,7 +405,7 @@ const getUsers = asyncHandler(async (req, res) => {
         request.input('rows', sql.Int, numberOfRows);
         const QUERY = `   SELECT UserId, Username, Email
                           FROM Users
-                          WHERE Role <> 'admin'
+                          WHERE Role <> 'admin' AND Username LIKE CONCAT('%', @pattern, '%')
                           ORDER BY UserId
                           OFFSET @offset ROWS
                           FETCH NEXT @rows ROWS ONLY`;
@@ -415,6 +415,7 @@ const getUsers = asyncHandler(async (req, res) => {
                 console.log(err);
                 return;
             }
+            console.log(result.recordset);
             res.status(200).json({ message: "Resource fetched successfully.", response: result.recordset });
         });
     })

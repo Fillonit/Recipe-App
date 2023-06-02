@@ -381,9 +381,54 @@ const editUser = asyncHandler(async (req, res) => {
     });
 });
 
+const userChart = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired" });
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "You do not have permission to get this resource." });
+            return;
+        }
+        isValid = true;
+    })
+    if (!isValid) return;
+    sql.connect(config, (error) => {
+        if (error) {
+            errorHandler(error, req, res, "");
+            return;
+        }
+        const QUERY = `SELECT wd.DaysAgo, COUNT(u.CreatedAt) AS Users
+                       FROM WeekDays wd
+                         LEFT JOIN Users u
+                         ON DATEDIFF(DAY, CONVERT(DATE, u.CreatedAt), CONVERT(DATE, GETDATE())) = wd.DaysAgo
+                       GROUP BY wd.DaysAgo;
+                       SELECT Role, COUNT(*) AS Count
+                       FROM Users 
+                       GROUP BY Role
+                       ORDER BY Role;`;
+        const request = new sql.Request();
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: err });
+                console.log(err);
+                return;
+            }
+            res.status(200).json({ message: "Resource fetched successfully.", response: result.recordsets });
+        });
+    })
+});
 module.exports = {
     usersIncrease,
     recipeIncrease,
     trafficIncrease,
-    deleteUser
+    deleteUser,
+    userChart
 }

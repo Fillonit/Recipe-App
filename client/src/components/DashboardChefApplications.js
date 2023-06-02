@@ -15,11 +15,7 @@ export default function DashboardChefApplications() {
             })
             if (response.status !== 200) return;
             const json = await response.json();
-            console.log(json);
-            const a = [];
-            for (let i = 0; i < 10; i++)
-                a.push(json.response[0]);
-            setApplications(a);
+            setApplications(json.response);
         } catch (error) {
             console.log(error);
         }
