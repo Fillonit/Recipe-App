@@ -336,7 +336,7 @@ const register = asyncHandler(async (req, res) => {
 
                          SELECT @UserId = UserId
                          FROM Users
-                         WHERE Username = @username
+                         WHERE Username = @username;
 
                          INSERT INTO Following(UserId) VALUES(@UserId);
                          INSERT INTO Normal_User(UserId) VALUES(@UserId);
@@ -349,7 +349,7 @@ const register = asyncHandler(async (req, res) => {
 
         request.query(QUERY, (err, result) => {
             if (err) {
-                res.status(500).json({ message: "A mistake happened on our part." });
+                res.status(500).json({ message: "A mistake happened on our part.", err: err });
                 console.log(err);
                 return;
             }
