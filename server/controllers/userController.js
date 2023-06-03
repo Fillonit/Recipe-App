@@ -350,7 +350,7 @@ const register = asyncHandler(async (req, res) => {
 
         request.query(QUERY, (err, result) => {
             if (err) {
-                res.status(500).json({ message: "A mistake happened on our part." });
+                res.status(500).json({ message: "A mistake happened on our part.", err: err });
                 console.log(err);
                 return;
             }

@@ -3,59 +3,45 @@ import RecipeCard from './RecipeCard';
 
 const recipes = [
   {
-    title: 'Spicy Garlic Shrimp',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A mouthwatering dish with a kick of spice and garlic.',
+    Title: 'Spicy Garlic Shrimp',
+    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+    Description: 'A mouthwatering dish with a kick of spice and garlic.',
     rating: 4.5,
-    category: 'Seafood',
-    prepTime: '30 mins',
-    cookTime: '15 mins',
+    Cuisine: 'Seafood',
+    PreparationTime: '30 mins',
+    CookTime: '15 mins',
+    Views: 100
   },
   {
-    title: 'Avocado Toast',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A classic breakfast recipe with a twist of creamy avocado.',
+    Title: 'Avocado Toast',
+    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+    Description: 'A classic breakfast recipe with a twist of creamy avocado.',
     rating: 5,
-    category: 'Breakfast',
-    prepTime: '10 mins',
-    cookTime: '5 mins',
+    Cuisine: 'Breakfast',
+    PreparationTime: '10 mins',
+    CookTime: '5 mins',
+    Views: 100
   },
   {
-    title: 'Spicy Garlic Shrimp',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A mouthwatering dish with a kick of spice and garlic.',
+    Title: 'Spicy Garlic Shrimp',
+    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+    Description: 'A mouthwatering dish with a kick of spice and garlic.',
     rating: 4.5,
-    category: 'Seafood',
-    prepTime: '30 mins',
-    cookTime: '15 mins',
+    Cuisine: 'Seafood',
+    PreparationTime: '30 mins',
+    CookTime: '15 mins',
+    Views: 100
   },
   {
-    title: 'Avocado Toast',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A classic breakfast recipe with a twist of creamy avocado.',
+    Title: 'Avocado Toast',
+    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+    Description: 'A classic breakfast recipe with a twist of creamy avocado.',
     rating: 5,
-    category: 'Breakfast',
-    prepTime: '10 mins',
-    cookTime: '5 mins',
-  },
-  {
-    title: 'Spicy Garlic Shrimp',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A mouthwatering dish with a kick of spice and garlic.',
-    rating: 4.5,
-    category: 'Seafood',
-    prepTime: '30 mins',
-    cookTime: '15 mins',
-  },
-  {
-    title: 'Avocado Toast',
-    image: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    description: 'A classic breakfast recipe with a twist of creamy avocado.',
-    rating: 5,
-    category: 'Breakfast',
-    prepTime: '10 mins',
-    cookTime: '5 mins',
-  },
+    Cuisine: 'Breakfast',
+    PreparationTime: '10 mins',
+    CookTime: '5 mins',
+    Views: 100
+  }
   // Add more recipe objects here
 ];
 
@@ -103,11 +89,11 @@ const TrendingRecipes = () => {
   }, [])
   return (
     <div className="flex flex-wrap justify-center">
-      {data.map((recipe, index) => (
+      {recipes.map((recipe, index) => (
         <RecipeCard key={index} recipe={recipe} />
       ))}
       <div className='w-full h-24 flex justify-center items-center'>
-        <h2 onClick={seeMore}>See more</h2>
+        <h2 onClick={seeMore} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>
       </div>
     </div>
   );

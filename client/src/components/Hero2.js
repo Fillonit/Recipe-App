@@ -5,13 +5,12 @@ const HeroSection = () => {
     <div className="bg-gradient-to-r from-indigo-600 to-purple-600 pt-16 px-4 md:text-center">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="md:flex md:items-center md:justify-between">
-          <div className="flex-1 min-w-0 mx-2 text-center">
+          <div className="flex-1 min-w-0 mx-2 text-center ">
             <h2 className="text-4xl font-bold leading-tight text-white sm:text-5xl">
               Discover Delicious Recipes
             </h2>
-            <p className="mt-3 text-xl leading-normal text-white sm:mt-5 sm:text-2xl">
-              Browse through a wide collection of mouthwatering recipes and unleash your culinary
-              skills.
+            <p className="mt-3 text-xl leading-normal text-white sm:mt-5 sm:text-2xl px-4">
+              Browse through a wide collection of mouthwatering recipes and unleash your culinary skills.
             </p>
             <div className="mt-8">
               <a
