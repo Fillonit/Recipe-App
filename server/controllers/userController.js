@@ -331,12 +331,13 @@ const register = asyncHandler(async (req, res) => {
         const QUERY = `BEGIN TRANSACTION
                         BEGIN TRY
                          INSERT INTO Users(Username, Password, Role, CreatedAt, Description, Name, Email, ProfilePicture)
-                          VALUES(@username, @password, 'user', GETDATE(), @description, @fullName, @email, @imageUrl);
+                         VALUES(@username, @password, 'user', GETDATE(), @description, @fullName, @email, @imageUrl);
+
                          DECLARE @UserId INT;
 
                          SELECT @UserId = UserId
                          FROM Users
-                         WHERE Username = @username
+                         WHERE Username = @username;
 
                          INSERT INTO Following(UserId) VALUES(@UserId);
                          INSERT INTO Normal_User(UserId) VALUES(@UserId);
