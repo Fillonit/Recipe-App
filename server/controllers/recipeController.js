@@ -419,24 +419,46 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                              DECLARE @Fats INT;
                              DECLARE @AlreadyLiked BIT;
                              DECLARE @ViewedToday BIT;
+                             DECLARE @CanView BIT;
+                             DECLARE @CooldownExists INT;
+                             SELECT @CooldownExists = COUNT(*)
+                             FROM ViewCooldowns 
+                             WHERE UserId = @userId AND @recipeId = RecipeId;
+                             SET @CanView = CASE WHEN (@CooldownExists = 0 OR 
+                                                       (SELECT COUNT(*)
+                                                       FROM ViewCooldowns 
+                                                       WHERE UserId = @userId AND @recipeId = RecipeId AND DATEDIFF_BIG(MILLISECOND, GETDATE(), CooldownUntil) < 0) = 1 ) THEN 1 ELSE 0 END;
 
                              SET @AlreadyLiked = CASE WHEN (SELECT COUNT(*) FROM Likes WHERE RecipeId = @recipeId AND UserId = @userId) = 1 THEN 1 ELSE 0 END;
                              SET @ViewedToday = CASE WHEN (SELECT COUNT(*) FROM RecipeViews WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE())) = 1 THEN 1 ELSE 0 END;
-                             IF(@ViewedToday = 1)
-                             BEGIN 
-                               UPDATE RecipeViews
-                               SET Views = Views + 1
-                               WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE());
-                             END
-                             ELSE
+                             IF(@CanView = 1)
                              BEGIN
-                               INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE()), 0);
+                              IF(@ViewedToday = 1)
+                               BEGIN 
+                                UPDATE RecipeViews
+                                SET Views = Views + 1
+                                WHERE RecipeId = @recipeId AND ViewedAt = CONVERT(DATE, GETDATE());
+                               END
+                              ELSE
+                               BEGIN
+                                INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE()), 0);
+                               END
+
+                              UPDATE Recipes 
+                              SET Views = Views + 1
+                              WHERE RecipeId = @recipeId;
+
+                              IF(@CooldownExists = 1)
+                              BEGIN 
+                                UPDATE ViewCooldowns
+                                SET CooldownUntil = DATEADD(MINUTE, 5, GETDATE())
+                                WHERE UserId = @userId AND @recipeId = RecipeId;
+                              END
+                              ELSE
+                              BEGIN 
+                               INSERT INTO ViewCooldowns (UserId, RecipeId, CooldownUntil) VALUES (@userId, @recipeId, DATEADD(MINUTE, 5, GETDATE()));
+                              END
                              END
-
-                             UPDATE Recipes 
-                             SET Views = Views + 1
-                             WHERE RecipeId = @recipeId;
-
                              SELECT @Proteins = SUM(ri.Amount*i.ProteinsInGramsPerBase*u.ValueInStandardUnit),
                                     @Calories = SUM(ri.Amount*i.CaloriesPerBase*u.ValueInStandardUnit),
                                     @Carbs = SUM(ri.Amount*i.CarbsInGramsPerBase*u.ValueInStandardUnit),
@@ -538,12 +560,14 @@ const getTrending = asyncHandler(async (req, res, next) => {
         const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) 
                                                     FROM Saved
                                                     WHERE RecipeId = r.RecipeId AND UserId = @userId) AS IsSaved
-                       ,r.RecipeId, r.PreparationTime, r.ImageUrl, r.Rating, r.Description, COALESCE(r.Views, 0) AS Views, c.Name AS Cuisine
+                       ,r.RecipeId, r.PreparationTime, r.ImageUrl, r.Rating, r.Description, COALESCE(r.Views, 0) AS Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage, r.ChefId
                        FROM Recipes r
                         LEFT JOIN RecipeViews rv
                         ON rv.RecipeId = r.RecipeId AND rv.ViewedAt = CONVERT(DATE, GETDATE())
                          JOIN Cuisine c
                          ON c.CuisineId = r.CuisineId
+                           JOIN Users u
+                           ON u.UserId = r.ChefId
                        ORDER BY COALESCE(rv.Views, 0) DESC
                        OFFSET @offset ROWS
                        FETCH NEXT @rows ROWS ONLY;`;

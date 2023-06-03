@@ -20,23 +20,24 @@ import Hero2 from './components/Hero2';
 import DashboardChefApplications from './components/DashboardChefApplications';
 import UsersDashboard from './components/UsersDashboard';
 import Saved from './components/Saved';
-
+import { useState } from 'react';
 function App() {
+  const [userId, setUserId] = useState(localStorage.getItem('userId'));
   return (
     <Router>
       {
         //check if route is not dashboard
         !window.location.pathname.includes('/dashboard') &&
-        <Navbar />
+        <Navbar userId={userId} />
       }
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/users/:id" element={<Profile />} />
         <Route path="/about" element={<About />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path='/saved' element={<Saved />} />
         <Route path='/contact' element={<Contact />} />
-        <Route path='/Login' element={<LogInPage />} />
+        <Route path='/Login' element={<LogInPage setUserId={setUserId} />} />
         <Route path='/dashboard' element={<Dashboard2 />} />
         <Route path='/publishRecipe' element={<PublishRecipe />} />
         <Route path='/chef' element={<Chef />} />

@@ -6,7 +6,7 @@ const recipes = [
     Title: 'Spicy Garlic Shrimp',
     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
     Description: 'A mouthwatering dish with a kick of spice and garlic.',
-    rating: 4.5,
+    Rating: 4.5,
     Cuisine: 'Seafood',
     PreparationTime: '30 mins',
     CookTime: '15 mins',
@@ -16,7 +16,7 @@ const recipes = [
     Title: 'Avocado Toast',
     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
     Description: 'A classic breakfast recipe with a twist of creamy avocado.',
-    rating: 5,
+    Rating: 5,
     Cuisine: 'Breakfast',
     PreparationTime: '10 mins',
     CookTime: '5 mins',
@@ -26,7 +26,7 @@ const recipes = [
     Title: 'Spicy Garlic Shrimp',
     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
     Description: 'A mouthwatering dish with a kick of spice and garlic.',
-    rating: 4.5,
+    Rating: 4.5,
     Cuisine: 'Seafood',
     PreparationTime: '30 mins',
     CookTime: '15 mins',
@@ -36,7 +36,7 @@ const recipes = [
     Title: 'Avocado Toast',
     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
     Description: 'A classic breakfast recipe with a twist of creamy avocado.',
-    rating: 5,
+    Rating: 5,
     Cuisine: 'Breakfast',
     PreparationTime: '10 mins',
     CookTime: '5 mins',
@@ -89,7 +89,7 @@ const TrendingRecipes = () => {
   }, [])
   return (
     <div className="flex flex-wrap justify-center">
-      {recipes.map((recipe, index) => (
+      {data.map((recipe, index) => (
         <RecipeCard key={index} recipe={recipe} />
       ))}
       <div className='w-full h-24 flex justify-center items-center'>

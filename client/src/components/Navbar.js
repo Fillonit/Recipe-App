@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Icon from "../images/icon.png"
 import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
-const Navbar = ({ title, image, description }) => {
+const Navbar = ({ title, image, description, userId }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   const toggleNav = () => {
@@ -16,7 +16,7 @@ const Navbar = ({ title, image, description }) => {
     { label: "Random", icon: <FaRandom className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
-    { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: "/profile" },
+    { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId }` },
   ];
 
   return (
@@ -27,13 +27,13 @@ const Navbar = ({ title, image, description }) => {
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
             <>
-            <img className="h-9" src={Icon} alt="Icon" />
-            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
+              <img className="h-9" src={Icon} alt="Icon" />
+              <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
             </>
           ) : (
             <>
-            <img className="h-9" src={Icon} alt="Icon" />
-            <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
+              <img className="h-9" src={Icon} alt="Icon" />
+              <span className="font-semibold text-2xl tracking-tight hover:text-indigo-400 ml-[5rem] lg:ml-2 md:ml-2">Magnolia</span>
             </>
           )}
         </a>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 // import RecipeList from './components/RecipeList';
 // import Navbar from '../components/Navbar';
@@ -9,14 +10,14 @@ import React, { useState, useEffect } from 'react';
 
 
 const Profile = () => {
-  const [data, setData] = useState(undefined);
+  const { id } = useParams();
 
+  const [data, setData] = useState(undefined);
   async function setComponents() {
     try {
-      const response = await fetch(`http://localhost:5000/api/user/`, {
+      const response = await fetch(`http://localhost:5000/api/user${id === undefined ? "" : `/${id}`}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'r-a-token': localStorage.getItem('token')
         }
       });
@@ -25,6 +26,40 @@ const Profile = () => {
       console.log(jsonData);
     } catch (err) {
       console.log(err);
+    }
+  }
+  async function follow() {
+    try {
+      if (id === undefined) return;
+      const response = await fetch(`http://localhost:5000/api/follow/${id}`, {
+        method: "POST",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        },
+      });
+      if (response.status !== 201) return;
+      setData((prev) => {
+        return { ...prev, FollowersCount: prev.FollowersCount + 1, CanFollow: false };
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function unfollow() {
+    try {
+      if (id === undefined) return;
+      const response = await fetch(`http://localhost:5000/api/follow/${id}`, {
+        method: "DELETE",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        },
+      });
+      if (response.status !== 204) return;
+      setData((prev) => {
+        return { ...prev, FollowersCount: prev.FollowersCount - 1, CanFollow: true };
+      });
+    } catch (error) {
+      console.log(error);
     }
   }
   useEffect(() => {
@@ -54,17 +89,17 @@ const Profile = () => {
                     <span className="text-sm text-slate-400">Favorites</span>
                   </div>
                   {
-                    localStorage.getItem('role') === 'chef' &&
+                    data.FollowersCount !== null &&
                     <div className="p-3 text-center">
-                      <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.Followers}</span>
+                      <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowersCount}</span>
                       <span className="text-sm text-slate-400">Followers</span>
                     </div>
                   }
 
-                  <div className="p-3 text-center">
+                  {data.FollowingCount !== null && <div className="p-3 text-center">
                     <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowingCount !== undefined ? data.FollowingCount : '?'}</span>
                     <span className="text-sm text-slate-400">Following</span>
-                  </div>
+                  </div>}
                 </div>
               </div>
             </div>
@@ -78,10 +113,10 @@ const Profile = () => {
               <div className="flex flex-wrap justify-center">
                 <div className="w-full px-4">
                   <p className="font-light leading-relaxed text-slate-600 mb-4">{data.Description}</p>
-                  {
-                    localStorage.getItem('role') === 'chef' &&
-                    <a href="/profile" className="font-normal text-slate-700 hover:text-slate-400">Follow Account</a>
-                  }
+                  {localStorage.getItem('role') != 'admin' && localStorage.getItem('userId') != id && <button onClick={() => {
+                    if (data.CanFollow === true) follow();
+                    else unfollow();
+                  }}>{data.CanFollow === true ? `FOLLOW` : `UNFOLLOW`}</button>}
                 </div>
               </div>
             </div>

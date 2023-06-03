@@ -18,6 +18,7 @@ const recipeRouter = require('./routes/recipeRoutes');
 const cuisineRouter = require('./routes/cuisineRoutes');
 const unitRouter = require('./routes/unitRoutes');
 const tagRouter = require('./routes/tagRoutes');
+const followRouter = require('./routes/followRoutes');
 const ingredientRouter = require('./routes/ingredientRoutes');
 const contactRouter = require('./routes/contactRoutes');
 const adminRouter = require('./routes/adminRoutes');
@@ -48,7 +49,7 @@ app.use('/api/contacts', contactRouter);
 app.use('/api/comments', commentRouter);
 app.use('/api/chefApplications', chefApplicationRouter);
 app.use('/api/initRecipes', initRecipesRouter);
-
+app.use('/api/follow', followRouter);
 app.use('/images', express.static(uploadDirectory));
 app.use('/images/chefApplications', (req, res, next) => {
     const token = req.query.token;

@@ -32,8 +32,7 @@ const salt = SALT, iterations = 1000, keylen = 64, digest = "sha512";
 // @access: Private
 const getUser = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
-    let username = null;
-    let userToGet = null;
+    let userId = null, isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -43,14 +42,14 @@ const getUser = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token expired" });
             return;
         }
-        console.log(decoded);
-        username = decoded.username;
-        userToGet = decoded.userId;
+        userId = decoded.userId;
+        isValid = true;
     });
-    if (req.params.id !== undefined) {
-        userToGet = req.params.id;
+    const userToGet = req.params.id;
+    if (isNaN(Number(userToGet)) || Math.floor(Number(userToGet)) != Number(userToGet)) {
+        res.status().json({ message: "Expected integer for user id, instead got: " + (typeof userToGet) });
     }
-
+    console.log(userToGet);
     if (isNaN(Number(userToGet))) {
         res.status(401).json({
             message: "Expected integer, instead got else"
@@ -63,16 +62,35 @@ const getUser = asyncHandler(async (req, res) => {
             return;
         }
         const request = new sql.Request();
-        request.input('username', sql.Int, userToGet);
-        const QUERY = `SELECT * 
-                       FROM Users u
-                         INNER JOIN Following f
-                         ON f.UserId = u.UserId
-                       WHERE u.UserId = @username;`;
+        request.input('userToGet', sql.Int, userToGet);
+        request.input('currentUserId', sql.Int, userId);
+        console.log(userId, userToGet);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @CanFollow BIT;
+
+                         SET @CanFollow = CASE WHEN(SELECT COUNT(*)
+                           FROM Followers f
+                           WHERE f.FollowerId = @currentUserId AND f.FolloweeId = @userToGet OR @currentUserId = @userToGet) >= 1 THEN 0 ELSE 1 END;
+
+                         SELECT u.*, f.FollowingCount, ch.FollowersCount, @CanFollow AS CanFollow
+                         FROM Users u
+                           LEFT JOIN Following f
+                           ON f.UserId = u.UserId
+                            LEFT JOIN Chef ch
+                            ON ch.ChefId = f.UserId
+                         WHERE u.UserId = @userToGet;
+                        END TRY
+                        BEGIN CATCH
+                          THROW;
+                          ROLLBACK;
+                        END CATCH;
+                       COMMIT;`;
 
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error ocurred on our part" });
+                console.log(err);
                 return;
             }
             if (result.recordset.length === 0) {
@@ -122,7 +140,7 @@ const logUserIn = asyncHandler(async (req, res) => {
                 return;
             }
             const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
-            res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, accUsername: result.recordset[0].Username });
+            res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, userId: result.recordset[0].UserId, accUsername: result.recordset[0].Username });
         });
     })
 });

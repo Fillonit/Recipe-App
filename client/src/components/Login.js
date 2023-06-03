@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Icon from '../images/icon.png';
 
-export default function Login({ setLogIn }) {
+export default function Login({ setLogIn, setUserId }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -18,12 +18,12 @@ export default function Login({ setLogIn }) {
       });
       // if (response.status !== 200) return;
       const data = await response.json();
-      const { accUsername, role, auth } = data;
+      const { accUsername, role, auth, userId } = data;
       localStorage.setItem('token', auth);
       localStorage.setItem('username', accUsername);
       localStorage.setItem('role', role);
+      setUserId(userId);
       alert("Token set: " + localStorage.getItem('token'));
-
       // Do something with the response data, e.g. show a success message
       alert(`Here is the user data: ${JSON.stringify(data)}`)
     } catch (error) {

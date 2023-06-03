@@ -12,12 +12,13 @@ const config = {
         trustedConnection: true
     }
 };
+const TOKEN_KEY = process.env.TOKEN_KEY;
 
 
-const unfollowChef = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
+const followChef = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
     let userId = null, role = null, isValid = false;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -27,7 +28,7 @@ const unfollowChef = asyncHandler(async (req, res) => {
             return;
         }
         if (decoded.role == "admin") {
-            res.status(403).json({ message: "Admins cannot unfollow others." });
+            res.status(403).json({ message: "Admins cannot follow others." });
             return;
         }
         userId = decoded.userId;
@@ -37,28 +38,40 @@ const unfollowChef = asyncHandler(async (req, res) => {
     if (!isValid) return;
     sql.connect(config, async (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            res.status(500).json({ message: "An error occurred on our part." });
             return;
         }
 
         const followerId = userId, followeeId = req.params.id;
+        if (followerId == followeeId) {
+            res.status(409).json({ message: "You cannot follow yourself." });
+            return;
+        }
         const request = new sql.Request();
         request.input('follower', sql.Int, followerId);
         request.input('followee', sql.Int, followeeId);
-        const d = new Date();
-        const date = d.toISOString().slice(0, 10);
         const QUERY = `BEGIN TRANSACTION;
                         BEGIN TRY
                          DECLARE @FollowingCount INT;
                          
                          SELECT @FollowingCount = COUNT(*)
                          FROM Followers
-                         WHERE FollowerId = @follower AND @FolloweeId = @followee; 
-                         
+                         WHERE FollowerId = @follower AND FolloweeId = @followee; 
                          IF(@FollowingCount = 0)
                           BEGIN
+                           DECLARE @FollowerUsername VARCHAR(50);
+                           DECLARE @FolloweeUsername VARCHAR(50);
+
+                           SELECT @FollowerUsername = Username
+                           FROM Users
+                           WHERE UserId = @follower;
+
+                           SELECT @FolloweeUsername = Username
+                           FROM Users
+                           WHERE UserId = @followee;
+
                            INSERT INTO Followers(FollowerId, FolloweeId) VALUES (@follower, @followee);
-                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee, @follower+' just followed you!', '${date}');
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
 
                            UPDATE Chef
                            SET FollowersCount = FollowersCount + 1
@@ -98,17 +111,22 @@ const unfollowChef = asyncHandler(async (req, res) => {
 
         request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
+            if (result.rowsAffected <= 0) {
+                res.status(400).json({ message: "Could not follow chef." });
+                return;
+            }
+            res.status(201).json({ message: "Successfully created resource." });
         });
-        res.status(200).json({ message: "Successfully updated resource." });
     });
 });
-const followChef = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
+const unfollowChef = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
     let userId = null, role = null;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -126,11 +144,16 @@ const followChef = asyncHandler(async (req, res) => {
     });
     sql.connect(config, (error) => {
         if (error) {
-            handler(error, req, res, ""); // im not sure what next is
+            res.status(500).json({ message: "An error occurred on our part." });
             return;
         }
 
         const followerId = userId, followeeId = req.params.id;
+        if (followerId == followeeId) {
+            res.status(409).json({ message: "You cannot follow yourself." });
+            return;
+        }
+
         const request = new sql.Request();
         request.input('follower', sql.Int, followerId);
         request.input('followee', sql.Int, followeeId);
@@ -140,12 +163,12 @@ const followChef = asyncHandler(async (req, res) => {
          
                             SELECT @FollowingCount = COUNT(*)
                             FROM Followers
-                            WHERE FollowerId = @follower AND @FolloweeId = @followee;
+                            WHERE FollowerId = @follower AND FolloweeId = @followee;
          
                             IF(@FollowingCount = 1)
                              BEGIN
                               DELETE FROM Followers
-                              WHERE FollowerId = @follower AND @FolloweeId = @followee;
+                              WHERE FollowerId = @follower AND FolloweeId = @followee;
 
                               UPDATE Chef
                               SET FollowersCount = FollowersCount - 1
@@ -164,11 +187,15 @@ const followChef = asyncHandler(async (req, res) => {
 
         request.query(QUERY, (err, result) => {
             if (err) {
-                handler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
                 return;
             }
+            if (result.rowsAffected <= 0) {
+                res.status(400).json({ message: "Could not unfollow chef." });
+                return;
+            }
+            res.status(204).json({ message: "Successfully deleted resource." });
         });
-        res.status(204).json({ message: "Successfully updated resource." });
     });
 });
 
@@ -191,10 +218,10 @@ const getFollowers = asyncHandler(async (req, res) => {
             handler(error, req, res, ""); // im not sure what next is
             return;
         }
-        
+
         const request = new sql.Request();
         request.input('chefId', sql.Int, chefId);
-        
+
         const QUERY = `SELECT Users.UserId, Users.Username, Users.FirstName, Users.LastName, Users.ProfilePicture
                           FROM Users
                             INNER JOIN Followers
