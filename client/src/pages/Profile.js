@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom';
 
 const Profile = () => {
   const { id } = useParams();
-
   const [data, setData] = useState(undefined);
   async function setComponents() {
     try {
@@ -63,16 +62,20 @@ const Profile = () => {
     }
   }
   useEffect(() => {
-    console.log("herre");
     setComponents();
   }, [])
   if (data !== undefined)
     return (
       <div className="mt-60 h-screen">
         <div className="relative max-w-md mx-auto md:max-w-2xl min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-xl mt-16 border-indigo-500 border-2">
-          <div style={{ transform: "translate(350%, 30%)" }} className='absolute cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
-            <h3><a href='/saved'>My saved recipes</a></h3>
-          </div>
+          {id == localStorage.getItem('userId') && <div className='absolute flex justify-between pl-6 pr-6 pt-6  align-center h-auto w-full'>
+            <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
+              <h3><a href='/saved'>My saved recipes</a></h3>
+            </div>
+            {localStorage.getItem('role') == 'admin' && <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
+              <h3><a href='/dashboard'>Dashboard</a></h3>
+            </div>}
+          </div>}
           <div className="px-6">
             <div className="flex flex-wrap justify-center">
               <div className="w-full flex justify-center">
