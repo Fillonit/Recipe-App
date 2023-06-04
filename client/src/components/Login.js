@@ -22,6 +22,7 @@ export default function Login({ setLogIn, setUserId }) {
       localStorage.setItem('token', auth);
       localStorage.setItem('username', accUsername);
       localStorage.setItem('role', role);
+      localStorage.setItem('userId', userId);
       setUserId(userId);
       alert("Token set: " + localStorage.getItem('token'));
       // Do something with the response data, e.g. show a success message

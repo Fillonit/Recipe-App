@@ -4,7 +4,7 @@ import { useState } from 'react';
 const RecipeCard = ({ recipe }) => {
     const starRating = recipe.Rating != null ? (Math.round(recipe.Rating * 2) / 2).toFixed(1) : 'None';
     const [isSaved, setIsSaved] = useState(recipe.IsSaved == 1);
-
+    console.log(`${recipe.RecipeId}: ${recipe.ProfilePicture}`);
     async function saveRecipe() {
         try {
             const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {

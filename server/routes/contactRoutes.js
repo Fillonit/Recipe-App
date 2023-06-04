@@ -5,9 +5,12 @@ const port = process.env.PORT || 5000;
 
 const {
     createContact,
-    getContacts
+    getContacts,
+    acceptContact,
+    rejectContact
 } = require('../controllers/contactController.js');
 
 router.route('/').post(createContact).get(getContacts);
+router.route('/acknowledge').post(acceptContact).delete(rejectContact);
 
 module.exports = router;

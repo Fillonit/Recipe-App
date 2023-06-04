@@ -369,6 +369,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const token = req.headers['r-a-token'];
+    console.log("here1");
     let userId = null, isValid = false, role = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
@@ -384,6 +385,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         isValid = true;
     });
     if (!isValid) return;
+    console.log("here2");
     if (id === undefined) {
         // res.status(401).json({ message: "Not all required information was provided." });
         responses.inputsNotProvided(res);
@@ -409,7 +411,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         const request = new sql.Request();
         request.input('recipeId', sql.Int, id);
         request.input('userId', sql.Int, userId);
-        request.input('role', sql.VarChar, role)
+        request.input('role', sql.VarChar, role);
         const QUERY = `BEGIN TRANSACTION;
                           BEGIN TRY
                              DECLARE @LikesCount INT;
@@ -522,7 +524,6 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                 responses.serverError(res);
                 return;
             }
-            // res.status(200).json({ message: "Recipe fetched successfully.", response: result.recordsets });
             responses.resourceFetched(res, result.recordsets);
             return;
         })
@@ -614,12 +615,16 @@ const getSaved = asyncHandler(async (req, res, next) => {
         request.input('offset', sql.Int, (page - 1) * rows);
         request.input('rows', sql.Int, rows);
         request.input('userId', sql.Int, userId);
-        const QUERY = `SELECT r.Title, r.CookTime, 1 AS IsSaved, r.RecipeId, r.PreparationTime, r.ImageUrl, r.Rating, r.Description, COALESCE(r.Views, 0) AS Views, c.Name AS Cuisine
+
+        const QUERY = `SELECT r.Title, r.CookTime, 1 AS IsSaved, r.RecipeId, r.PreparationTime,
+                       r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage
                        FROM Saved s
                         JOIN Recipes r
                         ON s.RecipeId = r.RecipeId 
                          JOIN Cuisine c
                          ON c.CuisineId = r.CuisineId
+                           JOIN Users u 
+                           ON u.UserId = r.ChefId
                        WHERE s.UserId = @userId
                        ORDER BY s.SavedAt DESC
                        OFFSET @offset ROWS

@@ -11,7 +11,7 @@ export default function Saved() {
                 headers: {
                     'R-A-Token': localStorage.getItem('token'),
                     page: 1,
-                    rows: 12
+                    rows: 8
                 }
             })
             if (response.status !== 200) return;
@@ -27,10 +27,10 @@ export default function Saved() {
                 method: "GET",
                 headers: {
                     'R-A-Token': localStorage.getItem('token'),
-                    page: nextPage,
-                    rows: 12
+                    'rows': 8,
+                    'page': nextPage
                 }
-            })
+            });
             if (response.status !== 200) return;
             const json = await response.json();
             setData(prev => [...prev, ...json.response]);
@@ -53,7 +53,7 @@ export default function Saved() {
                             return <RecipeCard recipe={recipe} />
                         })}
                         <div className='w-full h-24 flex justify-center items-center'>
-                            <h2 onClick={seeMore}>See more</h2>
+                            <h2 onClick={seeMore} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>
                         </div>
                     </div>
                 </div>
