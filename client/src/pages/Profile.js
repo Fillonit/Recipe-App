@@ -70,6 +70,9 @@ const Profile = () => {
     return (
       <div className="mt-60 h-screen">
         <div className="relative max-w-md mx-auto md:max-w-2xl min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-xl mt-16 border-indigo-500 border-2">
+          <div style={{ transform: "translate(350%, 30%)" }} className='absolute cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
+            <h3><a href='/saved'>My saved recipes</a></h3>
+          </div>
           <div className="px-6">
             <div className="flex flex-wrap justify-center">
               <div className="w-full flex justify-center">
