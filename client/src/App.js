@@ -10,6 +10,7 @@ import About from './pages/About';
 import Recipe from './pages/Recipe';
 import SingleRecipe from './pages/SingleRecipe';
 import Recipes from './pages/Recipes';
+import Random from './pages/Random';
 import Dashboard from './pages/Dashboard';
 import Dashboard2 from './pages/Dashboard2';
 // import Footer from './components/Footer';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/users/:id" element={<Profile />} />
         <Route path="/about" element={<About />} />
+        <Route path="/random" element={<Random />} />
         <Route path="/recipe/:id" element={<Recipe />} />
         <Route path="/recipe" element={<SingleRecipe />} />
         <Route path="/recipes" element={<Recipes />} />
