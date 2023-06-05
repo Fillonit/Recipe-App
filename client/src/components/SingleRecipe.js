@@ -43,7 +43,7 @@ const SingleRecipe = ({ recipe }) => {
           <div className="absolute bottom-0 left-0 right-0 px-6 py-4 bg-gradient-to-t from-black to-transparent">
             <h2 className="text-3xl font-bold text-white">{recipe.Title}</h2>
             <div className="flex items-center mt-2">
-              <FontAwesomeIcon icon={faEye} className="text-yellow-400 mr-1" />
+              <FontAwesomeIcon icon={faEye} className="text-gray-200 mr-1" />
               <span className="text-gray-300">{recipe.Views}</span>
               <FontAwesomeIcon icon={faSave} className={`text-yellow-400 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={handleSaveClick} />
               <span className="text-gray-300">{isSaved ? 'Saved' : 'Save'}</span>
