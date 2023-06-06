@@ -86,10 +86,10 @@ const SingleRecipe = ({ recipe }) => {
               </ol>
             </div>
           </div>
-          <div className="mt-8">
+          {/* <div className="mt-8">
           <h3 className="text-2xl font-bold text-gray-800 mb-4">Calories</h3>
           <p className="text-gray-600 block">{recipe.Calories}</p>
-        </div>
+        </div> */}
         </div>
       </div>
     </div>
