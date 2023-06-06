@@ -18,18 +18,18 @@ const SingleRecipe = ({ recipe }) => {
     stars.forEach((star, index) => {
       if (index < newRating) {
         star.classList.add('text-yellow-400');
-        star.classList.remove('text-gray-500');
+        star.classList.remove('text-gray-400');
       } else {
-        star.classList.add('text-gray-500');
+        star.classList.add('text-gray-400');
         star.classList.remove('text-yellow-400');
       }
     });
     stars.forEach((star, index) => {
       if (index < rating) {
         star.classList.add('text-yellow-400');
-        star.classList.remove('text-gray-500');
+        star.classList.remove('text-gray-400');
       } else {
-        star.classList.add('text-gray-500');
+        star.classList.add('text-gray-400');
         star.classList.remove('text-yellow-400');
       }
     });
@@ -56,11 +56,11 @@ const SingleRecipe = ({ recipe }) => {
           <div className="flex items-center justify-between">
             <ChefCard chef={recipe} />
             <div className="flex items-center">
-              <FontAwesomeIcon icon={faStar} className={`text-yellow-400 mr-1 cursor-pointer ${rating >= 1 ? 'text-yellow-500' : ''}`} onClick={() => handleRatingClick(1)} />
-              <FontAwesomeIcon icon={faStar} className={`text-yellow-400 mr-1 cursor-pointer ${rating >= 2 ? 'text-yellow-500' : ''}`} onClick={() => handleRatingClick(2)} />
-              <FontAwesomeIcon icon={faStar} className={`text-yellow-400 mr-1 cursor-pointer ${rating >= 3 ? 'text-yellow-500' : ''}`} onClick={() => handleRatingClick(3)} />
-              <FontAwesomeIcon icon={faStar} className={`text-yellow-400 mr-1 cursor-pointer ${rating >= 4 ? 'text-yellow-500' : ''}`} onClick={() => handleRatingClick(4)} />
-              <FontAwesomeIcon icon={faStar} className={`text-yellow-400 mr-1 cursor-pointer ${rating >= 5 ? 'text-yellow-500' : ''}`} onClick={() => handleRatingClick(5)} />
+              <FontAwesomeIcon icon={faStar} className={`text-gray-400 mr-1 cursor-pointer ${rating >= 1 ? 'text-yellow-400' : ''}`} onClick={() => handleRatingClick(1)} />
+              <FontAwesomeIcon icon={faStar} className={`text-gray-400 mr-1 cursor-pointer ${rating >= 2 ? 'text-yellow-400' : ''}`} onClick={() => handleRatingClick(2)} />
+              <FontAwesomeIcon icon={faStar} className={`text-gray-400 mr-1 cursor-pointer ${rating >= 3 ? 'text-yellow-400' : ''}`} onClick={() => handleRatingClick(3)} />
+              <FontAwesomeIcon icon={faStar} className={`text-gray-400 mr-1 cursor-pointer ${rating >= 4 ? 'text-yellow-400' : ''}`} onClick={() => handleRatingClick(4)} />
+              <FontAwesomeIcon icon={faStar} className={`text-gray-400 mr-1 cursor-pointer ${rating >= 5 ? 'text-yellow-400' : ''}`} onClick={() => handleRatingClick(5)} />
               <span className="text-gray-600">{rating}</span>
             </div>
           </div>
