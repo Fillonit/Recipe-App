@@ -45,7 +45,7 @@ const SingleRecipe = ({ recipe }) => {
             <div className="flex items-center mt-2">
               <FontAwesomeIcon icon={faEye} className="text-gray-200 mr-1" />
               <span className="text-gray-300">{recipe.Views}</span>
-              <FontAwesomeIcon icon={faSave} className={`text-yellow-400 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={handleSaveClick} />
+              <FontAwesomeIcon icon={faSave} className={`text-gray-200 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={handleSaveClick} />
               <span className="text-gray-300">{isSaved ? 'Saved' : 'Save'}</span>
               <FontAwesomeIcon icon={faClock} className="text-gray-200 ml-4 mr-1" />
               <span className="text-gray-300">Total time: {totalCookTime} min (prep: {recipe.PreparationTime} min)</span>
