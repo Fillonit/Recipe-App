@@ -16,7 +16,7 @@ const tokenKey = process.env.TOKEN_KEY
 
 const addComment = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
-    let userId = null, isValid = false;
+    let userId = null, isValid = false, username = null;
     jwt.verify(token, tokenKey, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -27,6 +27,7 @@ const addComment = asyncHandler(async (req, res) => {
             return;
         }
         isValid = true;
+        username = decoded.username;
         userId = decoded.userId;
     });
     if (!isValid) return;
@@ -50,15 +51,32 @@ const addComment = asyncHandler(async (req, res) => {
         request.input('userId', sql.Int, userId);
         request.input('comment', sql.VarChar, comment);
         request.input('recipeId', sql.Int, recipeId);
-        const commentQuery = `INSERT INTO Comments (UserId, Content, RecipeId, CreatedAt) VALUES (@userId, @comment, @recipeId, GETDATE());
-                              DECLARE @CommentId INT;
-                              SELECT @CommentId = MAX(CommentId) FROM Comments;
+        request.input('username', sql.VarChar, username);
+        const commentQuery = `BEGIN TRANSACTION
+                               BEGIN TRY
+                                 DECLARE @RecipePoster INT;
+                                 SELECT @RecipePoster = ChefId
+                                 FROM Recipes
+                                 WHERE RecipeId = @recipeId;
+                                 
+                                 INSERT INTO Comments (UserId, Content, RecipeId, CreatedAt) VALUES (@userId, @comment, @recipeId, GETDATE());
+                                 INSERT INTO Notifications (UserId, Content, ReceivedAt)
+                                 VALUES(@RecipePoster, CONCAT(@username, ' just commented on your recipe!', GETDATE()));
+                                 
+                                 DECLARE @CommentId INT;
+                                 SELECT @CommentId = MAX(CommentId) FROM Comments;
                               
-                              SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited, 1 AS CanEdit, 0 AS AlreadyLiked 
-                             FROM Comments c
-                                JOIN Users u
-                                ON u.UserId = c.UserId
-                             WHERE CommentId = @commentId`;
+                                 SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited, 1 AS CanEdit, 0 AS AlreadyLiked 
+                                 FROM Comments c
+                                    JOIN Users u
+                                    ON u.UserId = c.UserId
+                                 WHERE CommentId = @commentId;
+                                END TRY
+                                BEGIN CATCH
+                                  THROW;
+                                  ROLLBACK;
+                                END CATCH;
+                              COMMIT;`;
 
         request.query(commentQuery, (err, result) => {
             if (err) {

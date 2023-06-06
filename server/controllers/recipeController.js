@@ -181,18 +181,27 @@ const addRecipe = asyncHandler(async (req, res) => {
         let QUERY = `BEGIN TRANSACTION;
                       BEGIN TRY
                         DECLARE @CountChef INT;
-
+                
                         SELECT @CountChef = COUNT(*)
                         FROM Chef
                         WHERE ChefId = @chefId;
 
                         IF(@CountChef = 1)
                          BEGIN
+                          DECLARE @ChefUsername VARCHAR(50);
+                          SELECT @ChefUsername = Username
+                          FROM Chef 
+                          WHERE ChefId = @chefId;
                           DECLARE @CurrentRecipeId INT;
                 
                           INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ImageUrl, CreatedAt, CuisineId, ChefId)
                           VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,GETDATE(), @cuisineId, @chefId);
-                          
+
+                          INSERT INTO Notifications(UserId, Content, ReceivedAt)
+                          SELECT UserId, CONCAT(@ChefUsername, ' just posted a new recipe!'), GETDATE()
+                          FROM ChefFavorites 
+                          WHERE ChefId = @chefId;
+
                           SELECT @CurrentRecipeId = MAX(RecipeId)
                           FROM Recipes;`;
         let i = 0;
@@ -966,7 +975,7 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
 const likeRecipe = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const token = req.headers['r-a-token'];
-    let userId = null, isValid = false;
+    let userId = null, isValid = false, username = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Not authorized to view recipes." });
@@ -977,6 +986,7 @@ const likeRecipe = asyncHandler(async (req, res, next) => {
             return;
         }
         userId = decoded.userId;
+        username = decoded.username;
         isValid = true;
     });
     if (!isValid) return;
@@ -1000,17 +1010,17 @@ const likeRecipe = asyncHandler(async (req, res, next) => {
         const request = new sql.Request();
         request.input('recipeId', sql.Int, id);
         request.input('userId', sql.Int, userId);
+        request.input('username', sql.VarChar, username);
         const QUERY = `BEGIN TRANSACTION;
                           BEGIN TRY
-                             DECLARE @Count INT;
+                             DECLARE @RecipePoster INT;
+                             SELECT @RecipePoster = ChefId
+                             FROM Recipes
+                             WHERE RecipeId = @recipeId;
 
-                             SELECT @Count = COUNT(*)
-                             FROM Likes 
-                             WHERE RecipeId = @recipeId AND UserId = @userId
-                             IF(@Count = 0)
-                             BEGIN
-                              INSERT INTO Likes(UserId, RecipeId, CreatedAt) VALUES(@userId, @recipeId, GETDATE());
-                             END
+                             INSERT INTO Likes(UserId, RecipeId, CreatedAt) VALUES(@userId, @recipeId, GETDATE());
+                             INSERT INTO Notifications(UserId, Content, ReceivedAt)
+                             VALUES (@userId, (@username, ' just liked your recipe!'), GETDATE());
                           END TRY
                           BEGIN CATCH
                             THROW;

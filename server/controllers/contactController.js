@@ -114,10 +114,10 @@ const createContact = asyncHandler(async (req, res) => {
                           
                           SELECT @ContactCount = COUNT(*)
                           FROM Contacts
-                          WHERE UserId = @userId AND ReceivedAt > DATEADD(DAY, -1, GETDATE()); 
+                          WHERE UserId = @userId AND CreatedAt > DATEADD(DAY, -1, GETDATE()); 
                           IF(@ContactCount = 0)
                           BEGIN
-                            INSERT INTO Contacts(UserId, Name, Email, Message, ReceivedAt) VALUES(@userId, @name, @email, @message, GETDATE());
+                            INSERT INTO Contacts(UserId, Description, CreatedAt) VALUES(@userId, @message, GETDATE());
                           
                             INSERT INTO Notifications(UserId, Content, ReceivedAt) 
                             SELECT AdminId, @username+' just sent a contact!', GETDATE()
@@ -131,7 +131,8 @@ const createContact = asyncHandler(async (req, res) => {
                        COMMIT;`;
         request.query(QUERY, (err, result) => {
             if (err) {
-                errorHandler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
             if (result.rowsAffected === 0) {

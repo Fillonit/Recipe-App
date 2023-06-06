@@ -52,13 +52,9 @@ const followChef = asyncHandler(async (req, res) => {
         request.input('followee', sql.Int, followeeId);
         const QUERY = `BEGIN TRANSACTION;
                         BEGIN TRY
-                         DECLARE @FollowingCount INT;
-                         
-                         SELECT @FollowingCount = COUNT(*)
-                         FROM Followers
-                         WHERE FollowerId = @follower AND FolloweeId = @followee; 
-                         IF(@FollowingCount = 0)
-                          BEGIN
+                           INSERT INTO Followers(FollowerId, FolloweeId) VALUES (@follower, @followee);
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
+                           
                            DECLARE @FollowerUsername VARCHAR(50);
                            DECLARE @FolloweeUsername VARCHAR(50);
 
@@ -69,10 +65,7 @@ const followChef = asyncHandler(async (req, res) => {
                            SELECT @FolloweeUsername = Username
                            FROM Users
                            WHERE UserId = @followee;
-
-                           INSERT INTO Followers(FollowerId, FolloweeId) VALUES (@follower, @followee);
-                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
-
+                           
                            UPDATE Chef
                            SET FollowersCount = FollowersCount + 1
                            WHERE ChefId = @followee;

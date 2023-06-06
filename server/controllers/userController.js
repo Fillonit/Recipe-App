@@ -45,6 +45,7 @@ const getUser = asyncHandler(async (req, res) => {
         userId = decoded.userId;
         isValid = true;
     });
+    if (!isValid) return;
     const userToGet = req.params.id;
     if (isNaN(Number(userToGet)) || Math.floor(Number(userToGet)) != Number(userToGet)) {
         res.status().json({ message: "Expected integer for user id, instead got: " + (typeof userToGet) });
@@ -139,8 +140,12 @@ const logUserIn = asyncHandler(async (req, res) => {
                 res.status(401).json({ message: "Password doesn't match." });
                 return;
             }
-            const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
-            res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, userId: result.recordset[0].UserId, accUsername: result.recordset[0].Username });
+            try {
+                const token = jwt.sign({ userId: result.recordset[0].UserId, username: result.recordset[0].Username, role: result.recordset[0].Role, exp: (Date.now()) / 1000 + 3 * (60 * 60) }, TOKEN_KEY);
+                res.status(200).json({ message: "The log in process was successful.", auth: token, role: result.recordset[0].Role, userId: result.recordset[0].UserId, accUsername: result.recordset[0].Username });
+            } catch (error) {
+                console.log(error);
+            }
         });
     })
 });
@@ -351,7 +356,7 @@ const register = asyncHandler(async (req, res) => {
                          INSERT INTO Users(Username, Password, Role, CreatedAt, Description, Name, Email, ProfilePicture)
                          VALUES(@username, @password, 'user', GETDATE(), @description, @fullName, @email, @imageUrl);
 
-                         DECLARE @UserId INT;
+                         DECLARE @UserId INT; 
 
                          SELECT @UserId = UserId
                          FROM Users

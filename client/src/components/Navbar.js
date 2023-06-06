@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 // import Logo from "../images/logo.png"
 import Icon from "../images/icon.png"
+import NotificationBell from "./NotificationBell";
 import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
 
 const Navbar = ({ title, image, description, userId }) => {
@@ -22,7 +23,7 @@ const Navbar = ({ title, image, description, userId }) => {
   return (
 
     <div className="fixed top-0 inset-x-0 justify-center items-center opacity-90 z-50">
-      <nav className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
+      <nav style={{ width: "900px" }} className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
      xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
@@ -37,6 +38,7 @@ const Navbar = ({ title, image, description, userId }) => {
             </>
           )}
         </a>
+
         <div className="block lg:hidden">
           <button
             className="flex items-center px-3 py-2 border rounded text-indigo-200 border-indigo-400 hover:border-indigo-700"
@@ -53,7 +55,8 @@ const Navbar = ({ title, image, description, userId }) => {
           className={`${isNavOpen ? "block" : "hidden"
             } w-full block flex-grow lg:flex lg:items-center lg:w-auto`}
         >
-          <div className="text-sm lg:flex-grow lg:text-center justify-between">
+          <div className="text-sm flex lg:flex-grow lg:text-center justify-between">
+            <NotificationBell />
             {navItems.map((item, index) => (
               <a
                 key={index}
