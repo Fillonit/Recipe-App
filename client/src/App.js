@@ -21,7 +21,7 @@ import Chef from './pages/Chef';
 import LogInPage from './components/LogInPage';
 import Hero2 from './components/Hero2';
 import DashboardChefApplications from './components/DashboardChefApplications';
-// import UsersDashboard from './components/UsersDashboard';
+import UsersDashboard from './components/UsersDashboard';
 import Saved from './components/Saved';
 import { useState } from 'react';
 import DashboardContacts from './components/DashboardContacts';
@@ -51,7 +51,7 @@ function App() {
         <Route path='/dashboard/chefApplications' element={<DashboardChefApplications />} />
         <Route path='/hero2' element={<Hero2 />} />
         <Route path='/dashboard' element={<Dashboard />} />
-        {/* <Route path='/dashboard/users' element={<UsersDashboard />} /> */}
+        <Route path='/dashboard/users' element={<UsersDashboard />} />
         <Route path='/dashboard/contacts' element={<DashboardContacts />} />
       </Routes>
       {

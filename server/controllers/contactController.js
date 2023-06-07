@@ -61,7 +61,6 @@ const getContacts = asyncHandler(async (req, res, next) => {
         request.query(QUERY, (err, result) => {
             if (err) {
                 console.log(err);
-                // res.status(500).json({ message: "An error happened on our part." })
                 responses.serverError(res);
                 return;
             }
@@ -147,7 +146,6 @@ const acceptContact = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
 
     let isValid = false;
-    console.log(req.body);
     const adminResponse = req.body.response;
     const contacter = req.body.contacter;
     const contactId = req.body.contactId;
@@ -205,7 +203,7 @@ const acceptContact = asyncHandler(async (req, res) => {
                 return;
             }
             if (result.rowsAffected === 0) {
-                res.status(500).json({ message: "Couldn't add the resource." });
+                res.status(400).json({ message: "Couldn't add the resource." });
             }
             res.status(201).json({ message: "Resource added successfully." });
         });

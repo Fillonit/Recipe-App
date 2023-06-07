@@ -21,11 +21,14 @@ const {
     deleteUserr,
     logUserIn,
     updateUser,
+    markChefAsFavorite,
+    unmarkChefAsFavorite
 } = require('../controllers/userController');
 
 router.route('/').get(getUser).post(upload.single('image'), register);
 router.route('/all').get(getUsers);
 router.route('/login').post(logUserIn);
 router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);
+router.route('/favoriteChef/:id').post(markChefAsFavorite).delete(unmarkChefAsFavorite);
 // router.route('/all').get(getUsers);
 module.exports = router;

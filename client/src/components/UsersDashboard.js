@@ -2,18 +2,20 @@ import DashboardSidebar from "./DashboardSidebar";
 import { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
-import { XYPlot, VerticalBarSeries, XAxis, YAxis, RadialChart } from 'react-vis';
-import 'react-vis/dist/style.css';
 import {
-    Chart,
-    initTE,
-} from "tw-elements";
-
-initTE({ Chart });
+    BarChart,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    Legend,
+    Bar,
+    PieChart, Cell, Pie,
+    Label
+} from 'recharts';
 export default function UsersDashboard() {
     const [users, setUsers] = useState([]);
     const [data, setData] = useState([]);
-    const [radialData, setRadialData] = useState({});
+    const [radialData, setRadialData] = useState([]);
     const [lastPage, setLastPage] = useState(1);
     const currentSearchString = useRef();
     const [searchString, setSearchString] = useState('');
@@ -67,16 +69,16 @@ export default function UsersDashboard() {
             const chartData = await chartResponse.json();
             const userData = [];
             for (const row of chartData.response[0])
-                userData.unshift({ x: row.DaysAgo, y: row.Users });
+                userData.unshift({ name: row.DaysAgo, value: row.Users });
             console.log(chartData.response[0]);
             const usersJson = await usersResponse.json();
             if (usersResponse.status === 200 && usersJson.response !== undefined) setUsers(usersJson.response);
             setData(userData);
-            setRadialData({
-                'chefs': chartData.response[1][1].Count,
-                'users': chartData.response[1][2].Count,
-                'admins': chartData.response[1][0].Count
-            })
+            setRadialData([{
+                name: 'chefs', value: chartData.response[1][1].Count
+            },
+            { name: 'users', value: chartData.response[1][2].Count },
+            { name: 'admins', value: chartData.response[1][0].Count }])
         } catch (err) {
             console.log(err);
         }
@@ -118,38 +120,40 @@ export default function UsersDashboard() {
         <div className="flex h-screen">
             <DashboardSidebar />
             <div className="mx-4 w-5/6 flex flex-col justify-start items-center">
-                {data.length !== 0 &&
-                    <div className="bg-slate-800 rounded-2xl h-96 w-11/12 flex justify-evenly items-center mt-11 shadow-lg">
-                        <XYPlot width={600} height={350} xType="ordinal">
-                            <XAxis style={{ text: { fill: 'white' } }} />
-                            <YAxis style={{ text: { fill: 'white' } }} />
-                            <VerticalBarSeries data={data} />
-                            <h2 style={{ transform: "translate(95%, -35px)" }}>Day(s) ago</h2>
-                            <h2 style={{ transform: "translate(-18px, -350px)" }}>User(s)</h2>
-                        </XYPlot>
-                        <div>
-                            <div className="w-full h-10 flex justify-evenly items-center">
-                                <div className="flex justify-evenly items-center w-full h-8">
-                                    <h2 className="text-base text-white">Users</h2>
-                                    <div style={{ backgroundColor: "#FF7F0E" }} className="w-16 h-full"></div>
-                                </div>
-                                <div className="flex justify-evenly items-center w-full h-8">
-                                    <h2 className="text-base text-white">Admins</h2>
-                                    <div style={{ backgroundColor: "#93C572" }} className="w-16 h-full"></div>
-                                </div>
-                                <div className="flex justify-evenly items-center w-full h-8">
-                                    <h2 className="text-base text-white">Chefs</h2>
-                                    <div style={{ backgroundColor: "#1F77B4" }} className="w-16 h-full"></div>
-                                </div>
+                <div className="bg-slate-800 rounded-2xl h-96 w-11/12 flex justify-evenly items-center mt-11 shadow-lg">
+                    {data.length !== 0 && (
+                        <>
+                            <div className="w-2/3 flex justify-center items-center">
+                                <BarChart width={600} height={320} data={data}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" >
+                                        <Label value="Days(s) ago" position="insideBottomRight" offset={-1} />
+                                    </XAxis>
+                                    <YAxis>
+                                        <Label value="Users created" position="insideLeft" angle={-90} />
+                                    </YAxis>
+                                    <Bar dataKey="value" fill="#8884d8" />
+                                </BarChart>
                             </div>
-                            <RadialChart
-                                width={400}
-                                height={300}
-                                data={angles}
-                                colorRange={colorRange}
-                            />
-                        </div>
-                    </div>}
+                            <div className="1/3 flex justify-center items-center">
+                                <PieChart width={400} height={400}>
+                                    <Pie
+                                        data={radialData}
+                                        cx={200}
+                                        cy={200}
+                                        outerRadius={130}
+                                        fill="#8884d8"
+                                        label
+                                    >
+                                        {radialData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={colorRange[index % colorRange.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Legend verticalAlign="bottom" height={36} />
+                                </PieChart>
+                            </div>
+                        </>
+                    )}</div>
                 <div className="w-full  flex justify-evenly items-center h-20" >
                     <h2 className="text-4xl ml-24 font-bold text-gray-800">User List</h2>
                     <div className="h-16 ml-72 flex items-center">

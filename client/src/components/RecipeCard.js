@@ -4,7 +4,6 @@ import { useState } from 'react';
 const RecipeCard = ({ recipe }) => {
     const starRating = recipe.Rating != null ? (Math.round(recipe.Rating * 2) / 2).toFixed(1) : 'None';
     const [isSaved, setIsSaved] = useState(recipe.IsSaved === 1);
-    console.log(`${recipe.RecipeId}: ${recipe.ProfilePicture}`);
     async function saveRecipe() {
         try {
             const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {
@@ -36,7 +35,7 @@ const RecipeCard = ({ recipe }) => {
         }
     }
     return (
-        <div className="w-full flex justify-center text-center lg:text-left xl:text-left">
+        <div className="w-50 mb-8 flex justify-center text-center lg:text-left xl:text-left">
             <div className="max-w-xs rounded-lg overflow-hidden shadow-lg bg-white border-2 border-t  border-slate-950-500">
                 <div className='m-2 max-w-max pl-2 pr-2 pt-1 pb-1 h-auto flex items-center justify-start'>
                     <img src={recipe.ChefImage} className='w-10 h-10 rounded-full border-2 border-t border-slate-950' alt={'Chef Img'} />

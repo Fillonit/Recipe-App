@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBell } from '@fortawesome/free-regular-svg-icons';
+import RecipeCard from '../components/RecipeCard';
 // import RecipeList from './components/RecipeList';
 // import Navbar from '../components/Navbar';
 // import Hero from './components/Hero';
@@ -12,19 +14,127 @@ import { useParams } from 'react-router-dom';
 const Profile = () => {
   const { id } = useParams();
   const [data, setData] = useState(undefined);
+  const [nextSavedPage, setNextSavedPage] = useState(2);
+  const [nextPostedRecipesPage, setNextPostedRecipesPage] = useState(2);
+  async function seeMoreSaved() {
+    try {
+      const favoritesResponse = await fetch(`http://localhost:5000/api/recipe/saved/${id}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'page': nextSavedPage,
+          'rows': 5
+        }
+      });
+      if (favoritesResponse.status !== 200) return;
+      const json = await favoritesResponse.json();
+      setData(prev => {
+        return { ...prev, saved: [...prev.saved, ...json.response] };
+      })
+      setNextSavedPage(prev => prev + 1);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async function seeMorePosted() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipe/chef/${id}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'page': nextPostedRecipesPage,
+          'rows': 8
+        }
+      });
+      if (response.status !== 200) return;
+      const json = await response.json();
+      setData(prev => {
+        return { ...prev, posted: [...prev.posted, ...json.response] };
+      })
+      setNextPostedRecipesPage(prev => prev + 1);
+    } catch (error) {
+      console.log(error)
+    }
+  }
   async function setComponents() {
     try {
-      const response = await fetch(`http://localhost:5000/api/user${id === undefined ? "" : `/${id}`}`, {
+      const profileResponse = await fetch(`http://localhost:5000/api/user${id === undefined ? "" : `/${id}`}`, {
         method: 'GET',
         headers: {
           'r-a-token': localStorage.getItem('token')
         }
       });
-      const jsonData = await response.json();
-      setData(jsonData.response);
-      console.log(jsonData);
+      let favorites = [], postedRecipes = [];
+      if (localStorage.getItem('userId') == id) {
+        const favoritesResponse = await fetch(`http://localhost:5000/api/recipe/saved/6`, {
+          method: "GET",
+          headers: {
+            'R-A-Token': localStorage.getItem('token'),
+            'page': 1,
+            'rows': 5
+          }
+        });
+        console.log("STATUS" + favoritesResponse.status)
+        const favoriteJson = await favoritesResponse.json();
+        favorites = favoriteJson.response;
+      }
+      const profileJsonData = await profileResponse.json();
+      console.log(profileJsonData)
+      console.log(favorites);
+      if (profileJsonData.response.Role == 'chef') {
+        const postedResponse = await fetch(`http://localhost:5000/api/recipe/chef/${id}`, {
+          method: "GET",
+          headers: {
+            'R-A-Token': localStorage.getItem('token'),
+            'page': 1,
+            'rows': 8
+          }
+        });
+        const postedJson = await postedResponse.json();
+        postedRecipes = postedJson.response;
+        console.log(postedRecipes);
+      }
+      const data = { ...profileJsonData.response, saved: [], posted: [] };
+      for (const favorite of favorites)
+        data.saved.unshift(favorite);
+      for (const recipe of postedRecipes)
+        data.posted.unshift(recipe);
+      setData(data);
+      console.log(data);
     } catch (err) {
       console.log(err);
+    }
+  }
+  async function markChefAsFavorite() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/favoriteChef/${id}`, {
+        method: "POST",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 201) return;
+      setData(prev => {
+        return { ...prev, IsFavorite: true }
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function unmarkChefAsFavorite() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/favoriteChef/${id}`, {
+        method: "DELETE",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 204) return;
+      setData(prev => {
+        return { ...prev, IsFavorite: false }
+      })
+    } catch (error) {
+      console.log(error);
     }
   }
   async function follow() {
@@ -66,11 +176,11 @@ const Profile = () => {
   }, [])
   if (data !== undefined)
     return (
-      <div className="mt-60 h-screen">
+      <div className="mt-60 h-auto">
         <div className="relative max-w-md mx-auto md:max-w-2xl min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded-xl mt-16 border-indigo-500 border-2">
           {id == localStorage.getItem('userId') && <div className='absolute flex justify-between pl-6 pr-6 pt-6  align-center h-auto w-full'>
             <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
-              <h3><a href='/saved'>My saved recipes</a></h3>
+              <h3><a href={`/saved/${localStorage.getItem('userId')}`}>My saved recipes</a></h3>
             </div>
             {localStorage.getItem('role') == 'admin' && <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
               <h3><a href='/dashboard'>Dashboard</a></h3>
@@ -88,25 +198,26 @@ const Profile = () => {
                   }
                 </div>
               </div>
-              <div className="w-full text-center mt-32">
-                <div className="flex justify-center lg:pt-4 pt-8 pb-0">
-                  <div className="p-3 text-center ml-6">
-                    <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">0</span>
-                    <span className="text-sm text-slate-400">Favorites</span>
-                  </div>
-                  {
-                    data.FollowersCount !== null &&
-                    <div className="p-3 text-center">
-                      <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowersCount}</span>
-                      <span className="text-sm text-slate-400">Followers</span>
-                    </div>
-                  }
-
-                  {data.FollowingCount !== null && <div className="p-3 text-center">
-                    <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowingCount !== undefined ? data.FollowingCount : '?'}</span>
-                    <span className="text-sm text-slate-400">Following</span>
-                  </div>}
+              <div className="w-full h-30 flex items-center justify-center mt-32">
+                <div className="p-3 text-center ml-6">
+                  <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">0</span>
+                  <span className="text-sm text-slate-400">Favorites</span>
                 </div>
+                {
+                  data.FollowersCount !== null &&
+                  <div className="p-3 text-center">
+                    <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowersCount}</span>
+                    <span className="text-sm text-slate-400">Followers</span>
+                  </div>
+                }
+
+                {data.FollowingCount !== null && <div className="p-3 text-center">
+                  <span className="text-xl font-bold block uppercase tracking-wide text-slate-700">{data.FollowingCount !== undefined ? data.FollowingCount : '?'}</span>
+                  <span className="text-sm text-slate-400">Following</span>
+                </div>}
+                {data.Role == 'chef' && localStorage.getItem('userId') != id && <div className="h-full w-16 flex justify-center items-center">
+                  <FontAwesomeIcon className={`cursor-pointer`} onClick={() => { if (data.IsFavorite == true) unmarkChefAsFavorite(); else markChefAsFavorite(); }} style={{ color: data.IsFavorite == true ? 'green' : 'black' }} icon={faBell} size="lg" />
+                </div>}
               </div>
             </div>
             <div className="text-center mt-2 ml-6">
@@ -128,6 +239,20 @@ const Profile = () => {
             </div>
           </div>
         </div>
+        {data.saved != undefined &&
+          <div className='mt-4 ml-16 overflow-x-auto flex w-full p-2'>
+            {data.saved.map(item => <div className='ml-11'><RecipeCard recipe={item} /></div>)};
+            <button onClick={seeMoreSaved}>see more</button>
+          </div>}
+        {data.Role == 'chef' && data.posted.length != 0 &&
+          <div className="flex mb-8 flex-wrap justify-evenly">
+            {data.posted.map((recipe, index) => (
+              <RecipeCard key={index} recipe={recipe} />
+            ))}
+            <div className='w-full h-24 flex justify-center items-center'>
+              <h2 onClick={seeMorePosted} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>
+            </div>
+          </div>}
       </div>
     )
 }

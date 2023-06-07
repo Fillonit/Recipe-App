@@ -69,18 +69,22 @@ const getUser = asyncHandler(async (req, res) => {
         const QUERY = `BEGIN TRANSACTION
                         BEGIN TRY
                          DECLARE @CanFollow BIT;
+                         DECLARE @IsFavorite BIT;
 
+                         SET @IsFavorite = CASE WHEN(SELECT COUNT(*) FROM ChefFavorites
+                                                WHERE UserId = @currentUserId AND ChefId = @userToGet) = 1 THEN 1 ELSE 0 END;
                          SET @CanFollow = CASE WHEN(SELECT COUNT(*)
                            FROM Followers f
                            WHERE f.FollowerId = @currentUserId AND f.FolloweeId = @userToGet OR @currentUserId = @userToGet) >= 1 THEN 0 ELSE 1 END;
 
-                         SELECT u.*, f.FollowingCount, ch.FollowersCount, @CanFollow AS CanFollow
+                         SELECT u.*, f.FollowingCount, ch.FollowersCount, @CanFollow AS CanFollow, @IsFavorite AS IsFavorite
                          FROM Users u
                            LEFT JOIN Following f
                            ON f.UserId = u.UserId
                             LEFT JOIN Chef ch
                             ON ch.ChefId = f.UserId
                          WHERE u.UserId = @userToGet;
+                         
                         END TRY
                         BEGIN CATCH
                           THROW;
@@ -516,7 +520,91 @@ const getAllUserData = asyncHandler(async (req, res) => {
         );
     });
 });
-
+const markChefAsFavorite = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false, userId = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired" });
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "Forbidden, you don't have access to this resource." });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    })
+    if (!isValid) return;
+    sql.connect(config, (error) => {
+        if (error) {
+            console.log(error);
+            res.status(500).json({ message: "An error occurred on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        const chefId = req.params.id;
+        request.input('userId', sql.Int, userId);
+        request.input('chefId', sql.Int, chefId);
+        const QUERY = `INSERT INTO ChefFavorites(UserId, ChefId) VALUES(@userId, @chefId)`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            console.log(result.rowsAffected);
+            res.status(201).json({ message: "Resource created successfully.", response: result.recordset });
+        });
+    })
+});
+const unmarkChefAsFavorite = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let isValid = false, userId = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is expired" });
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "Forbidden, you don't have access to this resource." });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    })
+    if (!isValid) return;
+    sql.connect(config, (error) => {
+        if (error) {
+            console.log(error);
+            res.status(500).json({ message: "An error occurred on our part." });
+            return;
+        }
+        const request = new sql.Request();
+        const chefId = req.params.id;
+        request.input('userId', sql.Int, userId);
+        request.input('chefId', sql.Int, chefId);
+        const QUERY = `DELETE FROM ChefFavorites WHERE ChefId = @chefId AND UserId = @userId`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            console.log("Chef favorited rows affected")
+            console.log(result.rowsAffected);
+            res.status(204).json({ message: "Resource deleted successfully.", response: result.recordset });
+        });
+    })
+});
 const editUsers = asyncHandler(async (req, res) => {
     //edit users data including role
     const token = req.body.auth;
@@ -589,4 +677,6 @@ module.exports = {
     deleteUserr,
     logUserIn,
     updateUser,
+    markChefAsFavorite,
+    unmarkChefAsFavorite
 };

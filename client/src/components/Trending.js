@@ -88,7 +88,7 @@ const TrendingRecipes = () => {
     setComponents();
   }, [])
   return (
-    <div className="flex flex-wrap justify-center">
+    <div className="flex justify-evenly flex-wrap">
       {data.map((recipe, index) => (
         <RecipeCard key={index} recipe={recipe} />
       ))}

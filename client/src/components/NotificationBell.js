@@ -1,12 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faCircle } from '@fortawesome/free-regular-svg-icons';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faLayerGroup } from '@fortawesome/free-solid-svg-icons';
+import { faBell } from '@fortawesome/free-regular-svg-icons';
 import { useState, useEffect } from 'react';
-library.add(faLayerGroup);
 export default function NotificationBell() {
     const [notificationCount, setNotificationCount] = useState(undefined);
-    console.log(notificationCount);
     async function setComponents() {
         try {
             const response = await fetch('http://localhost:5000/api/notifications/count', {

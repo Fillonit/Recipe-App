@@ -190,8 +190,9 @@ const addRecipe = asyncHandler(async (req, res) => {
                          BEGIN
                           DECLARE @ChefUsername VARCHAR(50);
                           SELECT @ChefUsername = Username
-                          FROM Chef 
-                          WHERE ChefId = @chefId;
+                          FROM Users
+                          WHERE UserId = @chefId;
+
                           DECLARE @CurrentRecipeId INT;
                 
                           INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ImageUrl, CreatedAt, CuisineId, ChefId)
@@ -608,8 +609,8 @@ const getSaved = asyncHandler(async (req, res, next) => {
             responses.tokenExpired(res);
             return;
         }
-        userId = decoded.userId;
         isValid = true;
+        userId = decoded.userId;
     });
     if (!isValid) return;
 
@@ -621,11 +622,12 @@ const getSaved = asyncHandler(async (req, res, next) => {
             return;
         }
         const request = new sql.Request();
+        const profileId = req.params.id;
         request.input('offset', sql.Int, (page - 1) * rows);
         request.input('rows', sql.Int, rows);
-        request.input('userId', sql.Int, userId);
-
-        const QUERY = `SELECT r.Title, r.CookTime, 1 AS IsSaved, r.RecipeId, r.PreparationTime,
+        request.input('userId', sql.Int, profileId);
+        request.input('viewerId', sql.Int, userId);
+        const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) FROM Saved WHERE RecipeId = r.RecipeId AND UserId = @viewerId ) AS IsSaved, r.RecipeId, r.PreparationTime,
                        r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage
                        FROM Saved s
                         JOIN Recipes r
@@ -932,8 +934,9 @@ const updateRecipe = asyncHandler(async (req, res) => {
 });
 
 const getRecipesByChef = asyncHandler(async (req, res) => {
-    const token = req.params.auth;
-    let userId = null, isValid = false;
+    const token = req.headers['r-a-token'];
+    const rows = req.headers['rows'], page = req.headers['page'];
+    let isValid = false, userId = null;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -943,8 +946,8 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        isValid = true;
         userId = decoded.userId;
+        isValid = true;
     });
     if (!isValid) return;
     const chefId = req.params.id;
@@ -956,14 +959,24 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
         const request = new sql.Request();
 
         request.input('chefId', sql.Int, chefId);
-
-        const QUERY = `SELECT *
-                            FROM Recipes
-                            WHERE CreatedBy = @chefId;`
-
+        request.input('offset', sql.Int, (page - 1) * rows);
+        request.input('rows', sql.Int, rows);
+        request.input('userId', sql.Int, userId);
+        const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) FROM Saved WHERE RecipeId = r.RecipeId AND UserId = @userId), r.RecipeId, r.PreparationTime,
+                       r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage
+                       FROM Recipes r
+                          JOIN Cuisine c
+                          ON c.CuisineId = r.CuisineId
+                            JOIN Users u 
+                            ON u.UserId = r.ChefId
+                       WHERE r.ChefId = @chefId
+                       ORDER BY r.CreatedAt DESC
+                       OFFSET @offset ROWS
+                       FETCH NEXT @rows ROWS ONLY;`
         request.query(QUERY, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                console.log(err);
+                res.status(500).json({ message: "An error occurred on our part." })
                 return;
             }
             res.status(200).json({ message: "Recipes fetched successfully.", response: result.recordset });
@@ -1286,5 +1299,5 @@ module.exports = {
     getTrending,
     saveRecipe,
     unsaveRecipe,
-    getSaved
+    getSaved,
 }

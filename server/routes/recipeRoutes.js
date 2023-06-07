@@ -36,14 +36,14 @@ const {
 
 router.route('/get').get(getRecipes);
 router.route('/save/:id').post(saveRecipe).delete(unsaveRecipe);
-router.route('/saved').get(getSaved);
+router.route('/saved/:id').get(getSaved);
 router.route('/trending').get(getTrending);
 router.route('/get/:id').get(getRecipe);
 router.route('/add').post(upload.single('image'), addRecipe);
 router.route('/delete/:id').delete(deleteRecipe);
 router.route('/edit/:id').post(updateRecipe);
 router.route('/get/favorites').get(getFavorites);
-router.route('/getByChef/:id').get(getRecipesByChef);
+router.route('/chef/:id').get(getRecipesByChef);
 router.route('/filter').get(filterRecipes);
 router.route('/get/popular').get(getPopularRecipes);
 router.route('/get/recent').get(getRecentRecipes);
