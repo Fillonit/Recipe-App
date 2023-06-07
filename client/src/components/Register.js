@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Icon from '../images/icon.png';
 import { useRef } from "react";
-
 export default function Register({ setLogIn }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -38,7 +37,7 @@ export default function Register({ setLogIn }) {
 
     return (
         <div className="flex justify-center items-center h-screen w-full bg-indigo-700">
-            <div className="w-1/2 mt-16 bg-indigo-100 rounded p-5">
+            <div className="w-1/2 mt-16 bg-indigo-100 p-5 rounded-xl">
                 <header>
                     <img className="w-20 mx-auto mb-5" src={Icon} alt={'logo'} />
                 </header>
@@ -46,17 +45,17 @@ export default function Register({ setLogIn }) {
                     <div className="w-1/2 p-3">
                         <div>
                             <label className="block mb-2 text-indigo-500">Username</label>
-                            <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="text" name="username" id={'username'} onChange={handleUsernameChange} autoComplete={'off'} />
+                            <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type="text" name="username" id={'username'} onChange={handleUsernameChange} autoComplete={'off'} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Password</label>
-                            <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="password" name="password" id={'password'} onChange={handlePasswordChange} />
+                            <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type="password" name="password" id={'password'} onChange={handlePasswordChange} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Email</label>
                             <input
                                 ref={email}
-                                className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 max-w-xl max-h-20"
+                                className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 max-w-xl max-h-20 rounded-full"
                                 type="text"
                             />
                         </div>
@@ -64,15 +63,15 @@ export default function Register({ setLogIn }) {
                     <div className="w-1/2 p-3">
                         <div>
                             <label className="block mb-2 text-indigo-500">Description</label>
-                            <input ref={description} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type={"text"} />
+                            <input ref={description} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type={"text"} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Full name</label>
-                            <input ref={fullName} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type={"text"} />
+                            <input ref={fullName} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type={"text"} />
                         </div>
                         <div>
                             <label className="block mb-2 text-indigo-500">Profile picture</label>
-                            <input ref={image} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 " type="file" accept="image/*" name="image" />
+                            <input ref={image} className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type="file" accept="image/*" name="image"  />
                         </div>
                     </div>
                 </div>
