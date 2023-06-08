@@ -65,8 +65,8 @@ const Profile = () => {
         }
       });
       let favorites = [], postedRecipes = [];
-      if (localStorage.getItem('userId') == id) {
-        const favoritesResponse = await fetch(`http://localhost:5000/api/recipe/saved/6`, {
+      if (localStorage.getItem('userId') != id) {
+        const favoritesResponse = await fetch(`http://localhost:5000/api/recipe/saved/${id}`, {
           method: "GET",
           headers: {
             'R-A-Token': localStorage.getItem('token'),
@@ -165,7 +165,7 @@ const Profile = () => {
       });
       if (response.status !== 204) return;
       setData((prev) => {
-        return { ...prev, FollowersCount: prev.FollowersCount - 1, CanFollow: true };
+        return { ...prev, FollowersCount: prev.FollowersCount - 1, CanFollow: true, IsFavorite: false };
       });
     } catch (error) {
       console.log(error);
@@ -239,7 +239,7 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        {data.saved != undefined &&
+        {data.saved != undefined && data.saved.length != 0 &&
           <div className='mt-4 ml-16 overflow-x-auto flex w-full p-2'>
             {data.saved.map(item => <div className='ml-11'><RecipeCard recipe={item} /></div>)};
             <button onClick={seeMoreSaved}>see more</button>

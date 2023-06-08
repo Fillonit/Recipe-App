@@ -26,6 +26,7 @@ const commentRouter = require('./routes/commentRoutes');
 const chefApplicationRouter = require('./routes/chefApplicationRoutes');
 const initRecipesRouter = require('./routes/initRecipesRoutes');
 const notificationRouter = require('./routes/notificationRoutes');
+const chefInsightsRouter = require('./routes/insightsRoutes');
 
 const app = express();
 const uploadDirectory = path.join(__dirname, 'uploads');
@@ -52,6 +53,8 @@ app.use('/api/chefApplications', chefApplicationRouter);
 app.use('/api/initRecipes', initRecipesRouter);
 app.use('/api/follow', followRouter);
 app.use('/api/notifications', notificationRouter);
+app.use('/api/insights', chefInsightsRouter);
+
 app.use('/images', express.static(uploadDirectory));
 app.use('/images/chefApplications', (req, res, next) => {
     const token = req.query.token;

@@ -53,7 +53,6 @@ const followChef = asyncHandler(async (req, res) => {
         const QUERY = `BEGIN TRANSACTION;
                         BEGIN TRY
                            INSERT INTO Followers(FollowerId, FolloweeId) VALUES (@follower, @followee);
-                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
                            
                            DECLARE @FollowerUsername VARCHAR(50);
                            DECLARE @FolloweeUsername VARCHAR(50);
@@ -62,10 +61,8 @@ const followChef = asyncHandler(async (req, res) => {
                            FROM Users
                            WHERE UserId = @follower;
 
-                           SELECT @FolloweeUsername = Username
-                           FROM Users
-                           WHERE UserId = @followee;
-                           
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
+
                            UPDATE Chef
                            SET FollowersCount = FollowersCount + 1
                            WHERE ChefId = @followee;
@@ -92,9 +89,8 @@ const followChef = asyncHandler(async (req, res) => {
                              WHERE ReceivedAt = @EarliestDate;
 
                              DELETE FROM Notifications
-                             WHERE NotificationId = @EarliestNotification
+                             WHERE NotificationId = @EarliestNotification;
                            END
-                          END
                         END TRY
                         BEGIN CATCH
                          THROW;
@@ -166,7 +162,10 @@ const unfollowChef = asyncHandler(async (req, res) => {
                               UPDATE Chef
                               SET FollowersCount = FollowersCount - 1
                               WHERE ChefId = @followee;
-           
+
+                              DELETE FROM ChefFavorites
+                              WHERE ChefId = @followee AND UserId = @follower;
+                              
                               UPDATE Following
                               SET FollowingCount = FollowingCount - 1
                               WHERE UserId = @follower;

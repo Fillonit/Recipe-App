@@ -532,7 +532,7 @@ const markChefAsFavorite = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is expired" });
             return;
         }
-        if (decoded.role != 'admin') {
+        if (decoded.role == 'admin') {
             res.status(403).json({ message: "Forbidden, you don't have access to this resource." });
             return;
         }
@@ -550,7 +550,15 @@ const markChefAsFavorite = asyncHandler(async (req, res) => {
         const chefId = req.params.id;
         request.input('userId', sql.Int, userId);
         request.input('chefId', sql.Int, chefId);
-        const QUERY = `INSERT INTO ChefFavorites(UserId, ChefId) VALUES(@userId, @chefId)`;
+        const QUERY = `DECLARE @CanFavorite BIT;
+                       SET @CanFavorite = CASE WHEN(SELECT COUNT(*) 
+                                                    FROM Followers
+                                                    WHERE FollowerId = @userId AND FolloweeId = @chefId) = 1 THEN 1 ELSE 0 END;
+                       IF(@CanFavorite = 1)
+                       BEGIN
+                          INSERT INTO ChefFavorites(UserId, ChefId) VALUES(@userId, @chefId);
+                       END`;
+
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error occurred on our part." });
@@ -574,7 +582,7 @@ const unmarkChefAsFavorite = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is expired" });
             return;
         }
-        if (decoded.role != 'admin') {
+        if (decoded.role == 'admin') {
             res.status(403).json({ message: "Forbidden, you don't have access to this resource." });
             return;
         }

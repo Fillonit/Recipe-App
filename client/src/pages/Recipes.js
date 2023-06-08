@@ -3,203 +3,74 @@ import RecipeCard from '../components/RecipeCard';
 
 function Recipes() {
   const [recipes, setRecipes] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState({ modified: '', current: '' });
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortOrder, setSortOrder] = useState('default');
-  const [sortField, setSortField] = useState('Title');
+  const [sortOrder, setSortOrder] = useState({ modified: 'ASC', current: 'ASC' });
+  const [sortField, setSortField] = useState({ modified: 'title', current: 'title' });
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/recipes/all')
-      .then(response => response.json())
-      .then(data => {
-        setRecipes(data);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching recipes:', error);
-        setRecipes([
-            {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 1',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 1',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'https://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 1',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-              {
-                ChefImage: 'https://picsum.photos/800/600',
-                ChefId: 1,
-                Username: 'Default Chef 2',
-                ImageUrl: 'https://picsum.photos/800/600',
-                Title: 'Default Recipe 2',
-                CookTime: 30,
-                Views: 0,
-                Rating: 0,
-                RecipeId: 1,
-                ProfilePicture: 'dhttps://picsum.photos/800/600',
-                Description: 'This is a default recipe.',
-                PreparationTime: 15,
-                Cuisine: 'Default Cuisine 2',
-              },
-        ]);
-        setIsLoading(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 10;
+  async function setComponents() {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/recipe/get?sortBy=${sortField.current}&sortOrder=${sortOrder.current}&pageSize=${pageSize}&page=1&search=${searchQuery.current}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
       });
+      if (response.status != 200 && response.status != 304) return;
+      const json = await response.json();
+      setRecipes(json.response[0]);
+      setTotalPages(json.response[1][0].TotalPages);
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function searchRecipes() {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/recipe/get?sortBy=${sortField.modified}&sortOrder=${sortOrder.modified}&pageSize=${pageSize}&page=${page}&search=${searchQuery.modified}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status != 200 && response.status != 304) return;
+      const json = await response.json();
+      setRecipes(json.response[0]);
+      setSortField(prev => { return { ...prev, current: prev.modified } });
+      setSearchQuery(prev => { return { ...prev, current: prev.modified } });
+      setSortOrder(prev => { return { ...prev, current: prev.modified } });
+      setTotalPages(json.response[1].TotalPages)
+      setPage(1);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function changePage(incrementor) {
+    try {
+      if (page - incrementor <= 0 || (incrementor != -1 && incrementor != 1)) return;
+      const response = await fetch(
+        `http://localhost:5000/api/recipe/get?sortBy=${sortField.current}&sortOrder=${sortOrder.current}&pageSize=${pageSize}&page=${page + incrementor}&search=${searchQuery.current}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status != 200 && response.status != 304) return;
+      const json = await response.json();
+      setRecipes(json.response);
+      setPage(prev => prev + incrementor);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  console.log(recipes)
+  useEffect(() => {
+    setComponents();
   }, []);
-
-  const filteredRecipes = recipes
-    .filter(recipe =>
-      recipe.Title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortOrder === 'default') {
-        return 0;
-      } else if (sortOrder === 'fileNames') {
-        return a[sortField].localeCompare(b[sortField], undefined, {
-          numeric: true,
-          sensitivity: 'base',
-        });
-      } else if (sortOrder === 'type') {
-        return a[sortField].split('.').pop().localeCompare(b[sortField].split('.').pop());
-      } else if (sortOrder === 'modified') {
-        return new Date(b[sortField]) - new Date(a[sortField]);
-      } else if (sortOrder === 'countDescending') {
-        return b[sortField].length - a[sortField].length;
-      } else if (sortOrder === 'countAscending') {
-        return a[sortField].length - b[sortField].length;
-      }
-    })
-    .slice((page - 1) * pageSize, page * pageSize);
-
-  const totalPages = Math.ceil(recipes.length / pageSize);
 
   return (
     <div className="container mx-auto px-4 mt-16">
@@ -209,14 +80,14 @@ function Recipes() {
           type="text"
           placeholder="Search recipes"
           className="border border-gray-400 rounded py-2 px-4 mr-2 flex-1"
-          value={searchQuery}
-          onChange={event => setSearchQuery(event.target.value)}
+          value={searchQuery.modified}
+          onChange={event => setSearchQuery(prev => { return { ...prev, modified: event.target.value } })}
         />
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => setSearchQuery('')}
+          onClick={() => searchRecipes()}
         >
-          Clear
+          SEARCH
         </button>
       </div>
       <div className="flex mb-4">
@@ -226,28 +97,24 @@ function Recipes() {
         <select
           id="sortOrder"
           className="border border-gray-400 rounded py-2 px-4 mr-2"
-          value={sortOrder}
-          onChange={event => setSortOrder(event.target.value)}
+          value={sortOrder.modified}
+          onChange={event => setSortOrder(prev => { return { ...prev, modified: event.target.value } })}
         >
-          <option value="default">Default</option>
-          <option value="fileNames">File Names</option>
-          <option value="type">Type</option>
-          <option value="modified">Modified</option>
-          <option value="countDescending">Count (Descending)</option>
-          <option value="countAscending">Count (Ascending)</option>
+          <option value="DESC">Count (Descending)</option>
+          <option value="ASC">Count (Ascending)</option>
         </select>
         <select
           id="sortField"
           className="border border-gray-400 rounded py-2 px-4"
-          value={sortField}
-          onChange={event => setSortField(event.target.value)}
+          value={sortField.modified}
+          onChange={event => setSortField(prev => { return { ...prev, modified: event.target.value } })}
         >
-          <option value="Title">Title</option>
-          <option value="Cuisine">Cuisine</option>
-          <option value="CookTime">Cook Time</option>
-          <option value="PreparationTime">Preparation Time</option>
-          <option value="Rating">Rating</option>
-          <option value="Views">Views</option>
+          <option value="title">Title</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="cookTime">Cook Time</option>
+          <option value="prepTime">Preparation Time</option>
+          <option value="rating">Rating</option>
+          <option value="views">Views</option>
         </select>
       </div>
       {isLoading ? (
@@ -277,7 +144,7 @@ function Recipes() {
       ) : (
         <>
           <ul className="grid grid-cols-5 gap-4">
-            {filteredRecipes.map(recipe => (
+            {recipes.map(recipe => (
               <li key={recipe.RecipeId} className="w-full mb-4">
                 <RecipeCard recipe={recipe} className="w-full" />
               </li>
@@ -285,11 +152,10 @@ function Recipes() {
           </ul>
           <div className="flex justify-center mt-4">
             <button
-              className={`bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${
-                page === 1 ? 'cursor-not-allowed opacity-50' : ''
-              }`}
+              className={`bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l ${page === 1 ? 'cursor-not-allowed opacity-50' : ''
+                }`}
               disabled={page === 1}
-              onClick={() => setPage(page - 1)}
+              onClick={() => changePage(-1)}
             >
               Previous
             </button>
@@ -297,11 +163,10 @@ function Recipes() {
               Page {page} of {totalPages}
             </span>
             <button
-              className={`bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r ${
-                page === totalPages ? 'cursor-not-allowed opacity-50' : ''
-              }`}
+              className={`bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r ${page === totalPages ? 'cursor-not-allowed opacity-50' : ''
+                }`}
               disabled={page === totalPages}
-              onClick={() => setPage(page + 1)}
+              onClick={() => changePage(1)}
             >
               Next
             </button>

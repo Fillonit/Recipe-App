@@ -104,15 +104,6 @@ export default function UsersDashboard() {
         }
     }
     const colorRange = ['#FF7F0E', '#1F77B4', '#93C572']
-    const chefPercentage = (radialData.chefs / (radialData.chefs + radialData.users + radialData.admins)) * 100;
-    const adminPercentage = (radialData.admins / (radialData.chefs + radialData.users + radialData.admins)) * 100;
-    const userPercentage = (radialData.users / (radialData.chefs + radialData.users + radialData.admins)) * 100;
-    const angles = [
-        { angle: chefPercentage, label: `${Math.round(chefPercentage)}%` },
-        { angle: adminPercentage, label: `${Math.round(adminPercentage)}%` },
-        { angle: userPercentage, label: `${Math.round(userPercentage)}%` },
-    ];
-
     useEffect(() => {
         setComponents();
     }, []);
@@ -120,23 +111,23 @@ export default function UsersDashboard() {
         <div className="flex h-screen">
             <DashboardSidebar />
             <div className="mx-4 w-5/6 flex flex-col justify-start items-center">
-                <div className="bg-slate-800 rounded-2xl h-96 w-11/12 flex justify-evenly items-center mt-11 shadow-lg">
+                <div style={{ height: "350px" }} className="bg-slate-800 rounded-2xl w-11/12 flex justify-evenly items-center mt-4 shadow-lg">
                     {data.length !== 0 && (
                         <>
                             <div className="w-2/3 flex justify-center items-center">
-                                <BarChart width={600} height={320} data={data}>
+                                <BarChart width={600} height={300} data={data}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="name" >
+                                    <XAxis dataKey="name" stroke="#fff">
                                         <Label value="Days(s) ago" position="insideBottomRight" offset={-1} />
                                     </XAxis>
-                                    <YAxis>
+                                    <YAxis stroke="#fff">
                                         <Label value="Users created" position="insideLeft" angle={-90} />
                                     </YAxis>
                                     <Bar dataKey="value" fill="#8884d8" />
                                 </BarChart>
                             </div>
-                            <div className="1/3 flex justify-center items-center">
-                                <PieChart width={400} height={400}>
+                            <div className="1/3 flex justify-center mb-6 items-center">
+                                <PieChart width={400} height={380}>
                                     <Pie
                                         data={radialData}
                                         cx={200}

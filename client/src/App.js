@@ -25,40 +25,44 @@ import UsersDashboard from './components/UsersDashboard';
 import Saved from './components/Saved';
 import { useState } from 'react';
 import DashboardContacts from './components/DashboardContacts';
+import Insights from './components/Insights';
 function App() {
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   return (
     <Router>
-      {
-        //check if route is not dashboard
-        !window.location.pathname.includes('/dashboard') &&
-        <Navbar userId={userId} />
-      }
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/users/:id" element={<Profile />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/random" element={<Random />} />
-        <Route path="/recipe/:id" element={<Recipe />} />
-        <Route path="/recipe" element={<SingleRecipe />} />
-        <Route path="/recipes" element={<Recipes />} />
-        <Route path='/saved' element={<Saved />} />
-        <Route path='/contact' element={<Contact />} />
-        <Route path='/Login' element={<LogInPage setUserId={setUserId} />} />
-        <Route path='/dashboard' element={<Dashboard2 />} />
-        <Route path='/publishRecipe' element={<PublishRecipe />} />
-        <Route path='/chef' element={<Chef />} />
-        <Route path='/dashboard/chefApplications' element={<DashboardChefApplications />} />
-        <Route path='/hero2' element={<Hero2 />} />
-        <Route path='/dashboard' element={<Dashboard />} />
-        <Route path='/dashboard/users' element={<UsersDashboard />} />
-        <Route path='/dashboard/contacts' element={<DashboardContacts />} />
-      </Routes>
-      {
-        //check if route is not dashboard
-        !window.location.pathname.includes('/dashboard') &&
-        <Footer />
-      }
+      <div className='min-h-screen flex flex-col'>
+        {
+          //check if route is not dashboard
+          !window.location.pathname.includes('/dashboard') &&
+          <Navbar userId={userId} />
+        }
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path='/insights' element={<Insights />} />
+          <Route path="/users/:id" element={<Profile />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/random" element={<Random />} />
+          <Route path="/recipe/:id" element={<Recipe />} />
+          <Route path="/recipe" element={<SingleRecipe />} />
+          <Route path="/recipes" element={<Recipes />} />
+          <Route path='/saved/:id' element={<Saved />} />
+          <Route path='/contact' element={<Contact />} />
+          <Route path='/Login' element={<LogInPage setUserId={setUserId} />} />
+          <Route path='/dashboard' element={<Dashboard2 />} />
+          <Route path='/publishRecipe' element={<PublishRecipe />} />
+          <Route path='/chef' element={<Chef />} />
+          <Route path='/dashboard/chefApplications' element={<DashboardChefApplications />} />
+          <Route path='/hero2' element={<Hero2 />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/dashboard/users' element={<UsersDashboard />} />
+          <Route path='/dashboard/contacts' element={<DashboardContacts />} />
+        </Routes>
+        {
+          //check if route is not dashboard
+          !window.location.pathname.includes('/dashboard') &&
+          <Footer />
+        }
+      </div>
     </Router>
   );
 }

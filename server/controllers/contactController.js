@@ -35,6 +35,10 @@ const getContacts = asyncHandler(async (req, res, next) => {
             responses.tokenExpired(res);
             return;
         }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "You do not have access to this resource" });
+            return;
+        }
         isValid = true;
     });
     if (!isValid) return;

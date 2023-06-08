@@ -453,9 +453,8 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                                END
                               ELSE
                                BEGIN
-                                INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE()), 0);
+                                INSERT INTO RecipeViews(RecipeId, ViewedAt, Views) VALUES (@recipeId, CONVERT(DATE, GETDATE()), 1);
                                END
-
                               UPDATE Recipes 
                               SET Views = Views + 1
                               WHERE RecipeId = @recipeId;
@@ -627,6 +626,7 @@ const getSaved = asyncHandler(async (req, res, next) => {
         request.input('rows', sql.Int, rows);
         request.input('userId', sql.Int, profileId);
         request.input('viewerId', sql.Int, userId);
+        console.log(profileId + ".........................");
         const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) FROM Saved WHERE RecipeId = r.RecipeId AND UserId = @viewerId ) AS IsSaved, r.RecipeId, r.PreparationTime,
                        r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage
                        FROM Saved s
