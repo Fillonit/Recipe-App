@@ -53,7 +53,7 @@ const Contact = () => {
       <div className="max-w-screen-lg mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-8">
           <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            <h2 className="text-3xl font-extrabold text-indigo-700 sm:text-4xl uppercase underline">
               Get in touch
             </h2>
             <p className="mt-4 text-lg text-gray-500">

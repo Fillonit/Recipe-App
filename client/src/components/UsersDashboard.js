@@ -1,7 +1,7 @@
 import DashboardSidebar from "./DashboardSidebar";
 import { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
+import {faEdit, faTrash, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import {
     BarChart,
     CartesianGrid,

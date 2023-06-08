@@ -13,17 +13,18 @@ const Navbar = ({ title, image, description, userId }) => {
 
   const navItems = [
     // { label: "Home", icon: <FaHome className="inline-block mr-1 ml-4 text-lg"/>, link: "/" },
-    { label: "Recipes", icon: <FaUtensils className="inline-block mr-1 ml-4 text-kg" />, link: "/recipes" },
+    { label: "Recipes", icon: <FaUtensils className="inline-block mr-1 ml-4 text-lg" />, link: "/recipes" },
     { label: "Random", icon: <FaRandom className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
-    { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId}` },
+    { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `` },
+    { label: "", icon: <NotificationBell />, link: `` },
   ];
 
   return (
 
     <div className="fixed top-0 inset-x-0 justify-center items-center opacity-90 z-50">
-      <nav style={{ width: "900px" }} className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
+      <nav className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
      xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
@@ -55,8 +56,7 @@ const Navbar = ({ title, image, description, userId }) => {
           className={`${isNavOpen ? "block" : "hidden"
             } w-full block flex-grow lg:flex lg:items-center lg:w-auto`}
         >
-          <div className="text-sm flex lg:flex-grow lg:text-center justify-between">
-            <NotificationBell />
+          <div className="text-sm lg:flex-grow lg:text-center justify-between">
             {navItems.map((item, index) => (
               <a
                 key={index}

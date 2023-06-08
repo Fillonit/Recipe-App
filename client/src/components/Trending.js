@@ -1,49 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import RecipeCard from './RecipeCard';
 
-const recipes = [
-  {
-    Title: 'Spicy Garlic Shrimp',
-    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    Description: 'A mouthwatering dish with a kick of spice and garlic.',
-    Rating: 4.5,
-    Cuisine: 'Seafood',
-    PreparationTime: '30 mins',
-    CookTime: '15 mins',
-    Views: 100
-  },
-  {
-    Title: 'Avocado Toast',
-    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    Description: 'A classic breakfast recipe with a twist of creamy avocado.',
-    Rating: 5,
-    Cuisine: 'Breakfast',
-    PreparationTime: '10 mins',
-    CookTime: '5 mins',
-    Views: 100
-  },
-  {
-    Title: 'Spicy Garlic Shrimp',
-    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    Description: 'A mouthwatering dish with a kick of spice and garlic.',
-    Rating: 4.5,
-    Cuisine: 'Seafood',
-    PreparationTime: '30 mins',
-    CookTime: '15 mins',
-    Views: 100
-  },
-  {
-    Title: 'Avocado Toast',
-    ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
-    Description: 'A classic breakfast recipe with a twist of creamy avocado.',
-    Rating: 5,
-    Cuisine: 'Breakfast',
-    PreparationTime: '10 mins',
-    CookTime: '5 mins',
-    Views: 100
-  }
-  // Add more recipe objects here
-];
+// const recipes = [
+//   {
+//     Title: 'Spicy Garlic Shrimp',
+//     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+//     Description: 'A mouthwatering dish with a kick of spice and garlic.',
+//     Rating: 4.5,
+//     Cuisine: 'Seafood',
+//     PreparationTime: '30 mins',
+//     CookTime: '15 mins',
+//     Views: 100
+//   },
+//   {
+//     Title: 'Avocado Toast',
+//     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+//     Description: 'A classic breakfast recipe with a twist of creamy avocado.',
+//     Rating: 5,
+//     Cuisine: 'Breakfast',
+//     PreparationTime: '10 mins',
+//     CookTime: '5 mins',
+//     Views: 100
+//   },
+//   {
+//     Title: 'Spicy Garlic Shrimp',
+//     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+//     Description: 'A mouthwatering dish with a kick of spice and garlic.',
+//     Rating: 4.5,
+//     Cuisine: 'Seafood',
+//     PreparationTime: '30 mins',
+//     CookTime: '15 mins',
+//     Views: 100
+//   },
+//   {
+//     Title: 'Avocado Toast',
+//     ImageUrl: 'https://www.jocooks.com/wp-content/uploads/2021/09/garlic-butter-shrimp-1-10.jpg',
+//     Description: 'A classic breakfast recipe with a twist of creamy avocado.',
+//     Rating: 5,
+//     Cuisine: 'Breakfast',
+//     PreparationTime: '10 mins',
+//     CookTime: '5 mins',
+//     Views: 100
+//   }
+//   // Add more recipe objects here
+// ];
 
 const TrendingRecipes = () => {
   const [data, setData] = useState([]);
