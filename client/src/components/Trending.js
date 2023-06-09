@@ -90,7 +90,7 @@ const TrendingRecipes = () => {
   return (
     <div className="flex justify-evenly flex-wrap">
       {data.map((recipe, index) => (
-        <RecipeCard key={index} recipe={recipe} />
+        <RecipeCard key={index} recipe={recipe} setRecipes={setData} index={index} />
       ))}
       <div className='w-full h-24 flex justify-center items-center'>
         <h2 onClick={seeMore} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>

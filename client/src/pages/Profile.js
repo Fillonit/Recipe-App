@@ -14,6 +14,8 @@ import RecipeCard from '../components/RecipeCard';
 const Profile = () => {
   const { id } = useParams();
   const [data, setData] = useState(undefined);
+  const [recipes, setRecipes] = useState([]);
+  const [savedRecipes, setSavedRecipes] = useState([]);
   const [nextSavedPage, setNextSavedPage] = useState(2);
   const [nextPostedRecipesPage, setNextPostedRecipesPage] = useState(2);
   async function seeMoreSaved() {
@@ -28,9 +30,10 @@ const Profile = () => {
       });
       if (favoritesResponse.status !== 200) return;
       const json = await favoritesResponse.json();
-      setData(prev => {
-        return { ...prev, saved: [...prev.saved, ...json.response] };
-      })
+      if (json.response === undefined) return;
+      setSavedRecipes(prev => {
+        return [...prev, ...json.response]
+      });
       setNextSavedPage(prev => prev + 1);
     } catch (error) {
       console.log(error)
@@ -48,8 +51,8 @@ const Profile = () => {
       });
       if (response.status !== 200) return;
       const json = await response.json();
-      setData(prev => {
-        return { ...prev, posted: [...prev.posted, ...json.response] };
+      setRecipes(prev => {
+        return [...prev, ...json.response];
       })
       setNextPostedRecipesPage(prev => prev + 1);
     } catch (error) {
@@ -79,8 +82,6 @@ const Profile = () => {
         favorites = favoriteJson.response;
       }
       const profileJsonData = await profileResponse.json();
-      console.log(profileJsonData)
-      console.log(favorites);
       if (profileJsonData.response.Role == 'chef') {
         const postedResponse = await fetch(`http://localhost:5000/api/recipe/chef/${id}`, {
           method: "GET",
@@ -94,12 +95,10 @@ const Profile = () => {
         postedRecipes = postedJson.response;
         console.log(postedRecipes);
       }
-      const data = { ...profileJsonData.response, saved: [], posted: [] };
-      for (const favorite of favorites)
-        data.saved.unshift(favorite);
-      for (const recipe of postedRecipes)
-        data.posted.unshift(recipe);
+      const data = { ...profileJsonData.response };
       setData(data);
+      setRecipes(postedRecipes);
+      setSavedRecipes(favorites);
       console.log(data);
     } catch (err) {
       console.log(err);
@@ -239,15 +238,15 @@ const Profile = () => {
             </div>
           </div>
         </div>
-        {data.saved != undefined && data.saved.length != 0 &&
+        {savedRecipes != undefined && savedRecipes.length != 0 &&
           <div className='mt-4 ml-16 overflow-x-auto flex w-full p-2'>
-            {data.saved.map(item => <div className='ml-11'><RecipeCard recipe={item} /></div>)};
+            {savedRecipes.map(item => { return <div className='ml-11'><RecipeCard recipe={item} setRecipes={setRecipes} /></div> })};
             <button onClick={seeMoreSaved}>see more</button>
           </div>}
         {data.Role == 'chef' && data.posted.length != 0 &&
           <div className="flex mb-8 flex-wrap justify-evenly">
-            {data.posted.map((recipe, index) => (
-              <RecipeCard key={index} recipe={recipe} />
+            {recipes.map((recipe, index) => (
+              <RecipeCard key={index} recipe={recipe} setRecipes={setRecipes} />
             ))}
             <div className='w-full h-24 flex justify-center items-center'>
               <h2 onClick={seeMorePosted} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>

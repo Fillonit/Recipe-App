@@ -144,11 +144,11 @@ function Recipes() {
       ) : (
         <>
           <ul className="grid grid-cols-5 gap-4">
-            {recipes.map(recipe => (
-              <li key={recipe.RecipeId} className="w-full mb-4">
-                <RecipeCard recipe={recipe} className="w-full" />
+            {recipes.map((recipe) => {
+              return <li key={recipe.RecipeId} className="w-full mb-4">
+                <RecipeCard recipe={recipe} setRecipes={setRecipes} index={0} className="w-full" />
               </li>
-            ))}
+            })}
           </ul>
           <div className="flex justify-center mt-4">
             <button

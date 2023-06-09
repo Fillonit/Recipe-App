@@ -34,13 +34,13 @@ const {
     getSaved
 } = require('../controllers/recipeController');
 
+router.route('/:id').delete(deleteRecipe);
 router.route('/get').get(getRecipes);
 router.route('/save/:id').post(saveRecipe).delete(unsaveRecipe);
 router.route('/saved/:id').get(getSaved);
 router.route('/trending').get(getTrending);
 router.route('/get/:id').get(getRecipe);
 router.route('/add').post(upload.single('image'), addRecipe);
-router.route('/delete/:id').delete(deleteRecipe);
 router.route('/edit/:id').post(updateRecipe);
 router.route('/get/favorites').get(getFavorites);
 router.route('/chef/:id').get(getRecipesByChef);

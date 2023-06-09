@@ -16,8 +16,8 @@ const config = {
 const TOKEN_KEY = process.env.TOKEN_KEY;
 
 const deleteRecipe = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let userId, isAdmin;
+    const token = req.headers['r-a-token'];
+    let userId, isValid = false, role;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
@@ -27,77 +27,51 @@ const deleteRecipe = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
+        isValid = true;
+        role = decoded.role;
+        userId = decoded.userId;
     });
-    userId = token.userId;
-    isAdmin = token.role == "admin";
+    if (!isValid) return;
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            res.status(500).json({ message: "An error occurred on our part." })
             return;
         }
         const request = new sql.Request();
-        const recipeId = req.body.recipeId;
-        const commentIdQuery = `SELECT CommentId FROM Comments WHERE RecipeId = ${recipeId}`;
-        let commentIds = [];
-        request.query(commentIdQuery, (err, result) => {
+        const recipeId = req.params.id;
+        request.input('recipeId', sql.Int, recipeId);
+        request.input('userId', sql.Int, userId);
+        request.input('role', sql.VarChar, role);
+        const QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @CanDelete BIT;
+                        
+                         SET @CanDelete = CASE WHEN (SELECT COUNT(*)
+                                                     FROM Recipes r
+                                                     WHERE r.RecipeId = @recipeId AND r.ChefId = @userId OR @role = 'admin') >= 1 THEN 1 ELSE 0 END;
+                         IF(@CanDelete = 1)
+                         BEGIN          
+                            DELETE FROM ViewCooldowns 
+                            WHERE RecipeId = @recipeId;
+                            DELETE FROM Comments
+                            WHERE RecipeId = @recipeId;
+                            DELETE FROM Likes
+                            WHERE RecipeId = @recipeId;   
+                            DELETE FROM RecipeViews 
+                            WHERE RecipeId = @recipeId;
+                            DELETE FROM Recipes
+                            WHERE RecipeId = @recipeId;
+                         END
+                        END TRY
+                        BEGIN CATCH
+                          THROW;
+                          ROLLBACK;
+                        END CATCH;
+                       COMMIT;`
+        request.query(QUERY, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) return; //this just means that there are no comments so no need to include them;
-            for (const element of result.recordset)
-                commentIds.push(element.CommentId);
-        });
-        const getQuery = `SELECT ChefId FROM Recipes WHERE RecipeId = ${recipeId}`
-
-        let deleteQuery = `
-        BEGIN TRANSACTION
-        DELETE FROM Recipes WHERE RecipeId = ${recipeId};
-        DELETE FROM Comments WHERE RecipeId = ${recipeId};
-        `;
-        if (commentIds.length !== 0) queries += `DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`;
-        queries += `COMMIT`;
-        // const deleteQuery = queries;
-        // const queries = [`BEGIN TRANSACTION`];
-        // queries.push(`DELETE FROM Recipes WHERE RecipeId = ${recipeId}`);
-        // queries.push(`DELETE FROM Comments WHERE RecipeId = ${recipeId}`);
-        // if (commentIds.length !== 0) queries.push(`DELETE FROM CommentLikes WHERE CommentId IN (${commentIds.join(", ")})`);
-        // queries.push(`COMMIT`);
-        // const deleteQuery = queries.join("; ") + ";";
-
-        if (isAdmin) {
-            request.query(deleteQuery, (err, result) => {
-                if (err) {
-                    handler(err, req, res, "");
-                    return;
-                }
-                if (result.rowsAffected === 0) {
-                    res.status(204).json({ message: "Could not find resource." });
-                    return;
-                }
-                res.status(204).json({ message: "Recipe deleted successfully." });
-                return;
-            });
-        }
-        let recipePoster = null;
-        request.query(getQuery, (err, result) => {
-            if (err) {
-                handler(err, req, res, "");
-                return;
-            }
-            if (result.recordset.length === 0) {
-                res.status(404).json({ message: "Could not find resource." });
-                return;
-            }
-            recipePoster = result.recordset[0].ChefId;
-        });
-        if (recipePoster != userId) {
-            res.status(403).json({ message: "Unauthorized request, access denied." });
-            return;
-        }
-        request.query(deleteQuery, (err, result) => {
-            if (err) {
-                handler(err, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
             if (result.rowsAffected === 0) {
@@ -251,55 +225,91 @@ const addRecipe = asyncHandler(async (req, res) => {
     });
 });
 const getRecipes = asyncHandler(async (req, res, next) => {
-    const { page, pageSize, cuisineId, title, ingredients, sortBy, sortOrder } = req.query;
-    const { userId } = req.params;
-    console.log('hereee');
+    const { page, pageSize, search, sortBy, sortOrder } = req.query;
+    console.log(req.query)
     const token = req.headers['r-a-token'];
     let chefId = null, isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
-            res.status(401).json({ message: "Not authorized to view recipes." });
+            res.status(401).json({ message: "Token is invalid." });
+            return;
+        }
+        if (decoded.exp < Date.now() / 1000) {
+            res.status(401).json({ message: "Token is expired." });
             return;
         }
         chefId = decoded.userId;
+        isValid = true;
     });
     if (!isValid) return;
-    if (page === undefined || pageSize === undefined || cuisineId === undefined || title === undefined || ingredients === undefined || sortBy === undefined || sortOrder === undefined) {
-        res.status(400).json({ message: "Not all required information was provided." });
-        return;
+    try {
+        if (sortOrder.toUpperCase() != 'ASC' && sortOrder.toUpperCase() != 'DESC') {
+            res.status(401).json({ message: "Sort order parameter is not valid, it should be 'DESC', or 'ASC'" });
+            return;
+        }
+    } catch (error) {
+        console.log(error);
     }
-    if (typeof page != 'number' || typeof pageSize != 'number' || typeof cuisineId != 'number' || typeof title != 'string' || typeof ingredients != 'object' || typeof sortBy != 'string' || typeof sortOrder != 'string') {
-        res.status(400).json({ message: "Information is not in the expected format." });
-        return;
+    const mappings = {
+        proteins: { field: `ProteinsInGramsPerBase`, name: 'Proteins', key: 'nutritients' },
+        calories: { field: `CaloriesPerBase`, name: 'Calories', key: 'nutritients' },
+        carbs: { field: `CarbsInGramsPerBase`, name: 'Carbs', key: 'nutritients' },
+        fats: { field: `FatsInGramsPerBase`, name: 'Fats', key: 'nutritients' },
+        title: { key: 'title' },
+        cookTime: { key: 'cookTime' },
+        prepTime: { key: 'prepTime' },
+        rating: { key: 'rating' },
+        views: { key: 'views' }
     }
-    if (page < 0 || pageSize <= 0 || cuisineId < 0 || title.length > 100 || Object.keys(ingredients).length === 0 || (sortBy != 'title' && sortBy != 'createdAt') || (sortOrder != 'asc' && sortOrder != 'desc')) {
-        res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
-        return;
+    const order = sortOrder === undefined ? "" : sortOrder;
+    const sortingQueries = {
+        nutritients: {
+            select: `(SELECT SUM(ri.Amount*i.${mappings[sortBy].field}*u.ValueInStandardUnit) 
+                           FROM RecipeIngredients ri
+                             JOIN Ingredients i 
+                             ON i.IngredientId = ri.IngredientId
+                               JOIN Units u
+                               ON u.Unit = ri.Unit
+                           WHERE ri.RecipeId = r.RecipeId) AS ${mappings[sortBy].name}`,
+            orderBy: `${mappings[sortBy].name} ${order}`
+        },
+        title: { select: ``, orderBy: `Title ${order}` },
+        cookTime: { select: ``, orderBy: `CookTime ${order}` },
+        prepTime: { select: ``, orderBy: `PreparationTime ${order}` },
+        rating: { select: ``, orderBy: `Rating ${order}` },
+        views: { select: ``, orderBy: `Views ${order}` }
     }
     sql.connect(config, (err) => {
         if (err) {
-            handler(err, req, res, "");
+            res.status(500).json({ message: "An error occurred on our part." });
+            console.log(err);
             return;
         }
         const request = new sql.Request();
-        const queries = [];
-        const queryList = `
-        SELECT * FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%' ORDER BY ${sortBy} ${sortOrder} OFFSET ${page * pageSize} ROWS FETCH NEXT ${pageSize} ROWS ONLY;
-        SELECT COUNT(*) AS Total FROM Recipes WHERE ChefId = ${chefId} AND CuisineId = ${cuisineId} AND Title LIKE '%${title}%';
-        `;
-        queries.push(queryList);
-        request.query(queryList, (err, result) => {
+        request.input('offset', sql.Int, (page - 1) * pageSize);
+        request.input('rows', sql.Int, pageSize);
+        request.input('substring', sql.VarChar, search);
+        const QUERY = `SELECT r.* ${sortingQueries[mappings[sortBy].key].select}
+                       FROM Recipes r
+                       WHERE Title LIKE CONCAT('%', @substring,'%')
+                       ORDER BY ${sortingQueries[mappings[sortBy].key].orderBy}
+                       OFFSET @offset ROWS
+                       FETCH NEXT @rows ROWS ONLY;
+                       
+                       SELECT CEILING(COUNT(*)/CAST(@rows AS FLOAT)) AS TotalPages
+                       FROM Recipes r
+                       WHERE Title LIKE CONCAT('%', @substring,'%');`;
+        console.log(QUERY);
+        request.query(QUERY, (err, result) => {
             if (err) {
-                handler(err, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
                 return;
             }
             if (result.recordset.length === 0) {
-                handler(err, req, res, "");
+                res.status(400).json({ message: "Could not get recipes." });
                 return;
             }
-            const recipes = result.recordset[0];
-            const total = result.recordset[1];
-            res.status(200).json({ recipes, total });
+            res.status(200).json({ message: "Successfully fetched resource", response: result.recordsets });
             return;
         });
     });
@@ -963,7 +973,7 @@ const getRecipesByChef = asyncHandler(async (req, res) => {
         request.input('rows', sql.Int, rows);
         request.input('userId', sql.Int, userId);
         const QUERY = `SELECT r.Title, r.CookTime, (SELECT COUNT(*) FROM Saved WHERE RecipeId = r.RecipeId AND UserId = @userId), r.RecipeId, r.PreparationTime,
-                       r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage
+                       r.ImageUrl, r.Rating, r.Description, r.Views, c.Name AS Cuisine, u.Username, u.ProfilePicture AS ChefImage, r.ChefId
                        FROM Recipes r
                           JOIN Cuisine c
                           ON c.CuisineId = r.CuisineId
