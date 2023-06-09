@@ -73,9 +73,9 @@ export default function PublishRecipe() {
         setComponents();
     }, []);
     return (
-        <div className="w-full h-4/5 flex mt-36 items-center justify-start">
+        <div className="w-full h-full  flex mt-36 items-center justify-start">
             <RecipeForm recipeIngredients={recipeIngredients} steps={steps} cuisines={cuisines} addStep={addStep} addIngredient={addIngredient} tags={tags} recipeTags={recipeTags} setRecipeTags={setRecipeTags} ingredients={ingredients} units={units} ingredientChange={ingredientChange} selectedIngredient={selectedIngredient} />
-            <Ingredients steps={steps} units={units} ingredients={ingredients} recipeIngredients={recipeIngredients} />
+            <Ingredients steps={steps} setSteps={setSteps} setRecipeIngredients={setRecipeIngredients} units={units} ingredients={ingredients} recipeIngredients={recipeIngredients} />
         </div>
     );
 }
