@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import RecipeCard from '../components/RecipeCard';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowUpWideShort, faArrowUpShortWide } from '@fortawesome/free-solid-svg-icons';
 
 function Recipes() {
   const [recipes, setRecipes] = useState([]);
@@ -73,7 +75,7 @@ function Recipes() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 mt-16">
+    <div className="container mx-auto px-4 mt-24">
       <h1 className="text-3xl font-bold mb-4">Recipes</h1>
       <div className="flex mb-4">
         <input
@@ -100,8 +102,8 @@ function Recipes() {
           value={sortOrder.modified}
           onChange={event => setSortOrder(prev => { return { ...prev, modified: event.target.value } })}
         >
-          <option value="DESC">Count (Descending)</option>
-          <option value="ASC">Count (Ascending)</option>
+          <option value="DESC"><FontAwesomeIcon icon={faArrowUpShortWide} />Descending</option>
+          <option value="ASC"><FontAwesomeIcon icon={faArrowUpWideShort} />Ascending</option>
         </select>
         <select
           id="sortField"

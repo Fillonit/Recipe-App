@@ -11,7 +11,7 @@ Powered by React, Express, and Tailwind CSS, the app provides a seamless and res
 
 - Browse and search for recipes
 - Create and manage your own recipe collection
-- Favorite and rate recipes
+- Save and rate recipes
 - Share recipes with others
 
 ## Installation
