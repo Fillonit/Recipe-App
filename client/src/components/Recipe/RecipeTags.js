@@ -1,8 +1,8 @@
 import "../../styles/recipeTags.css";
 import RecipeTag from "./RecipeTag";
 import { useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faPlus } from '@fortawesome/free-solid-svg-icons';
 export default function RecipeTags({ tags, recipeTags, setRecipeTags }) {
     const currentTag = useRef();
     function addTag(e) {

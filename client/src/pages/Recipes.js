@@ -19,7 +19,7 @@ function Recipes() {
           'R-A-Token': localStorage.getItem('token')
         }
       });
-      if (response.status != 200 && response.status != 304) return;
+      if (response.status !== 200 && response.status !== 304) return;
       const json = await response.json();
       setRecipes(json.response[0]);
       setTotalPages(json.response[1][0].TotalPages);
@@ -37,7 +37,7 @@ function Recipes() {
           'R-A-Token': localStorage.getItem('token')
         }
       });
-      if (response.status != 200 && response.status != 304) return;
+      if (response.status !== 200 && response.status !== 304) return;
       const json = await response.json();
       setRecipes(json.response[0]);
       setSortField(prev => { return { ...prev, current: prev.modified } });
@@ -51,7 +51,7 @@ function Recipes() {
   }
   async function changePage(incrementor) {
     try {
-      if (page - incrementor <= 0 || (incrementor != -1 && incrementor != 1)) return;
+      if (page - incrementor <= 0 || (incrementor !== -1 && incrementor !== 1)) return;
       const response = await fetch(
         `http://localhost:5000/api/recipe/get?sortBy=${sortField.current}&sortOrder=${sortOrder.current}&pageSize=${pageSize}&page=${page + incrementor}&search=${searchQuery.current}`, {
         method: "GET",
@@ -59,7 +59,7 @@ function Recipes() {
           'R-A-Token': localStorage.getItem('token')
         }
       });
-      if (response.status != 200 && response.status != 304) return;
+      if (response.status !== 200 && response.status !== 304) return;
       const json = await response.json();
       setRecipes(json.response);
       setPage(prev => prev + incrementor);

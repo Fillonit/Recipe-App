@@ -13,7 +13,7 @@ const RecipeCard = ({ recipe, index, setRecipes }) => {
                     'R-A-Token': localStorage.getItem('token')
                 }
             });
-            if (response.status != 204) return;
+            if (response.status !== 204) return;
             window.location.reload();
         } catch (error) {
             console.log(error);
@@ -58,10 +58,11 @@ const RecipeCard = ({ recipe, index, setRecipes }) => {
             <div className="max-w-xs rounded-lg overflow-hidden shadow-lg bg-white border-2 border-t  border-slate-950-500">
                 <div className='relative flex justify-between items-center w-full'>
                     <div className='m-2 max-w-max pl-2 pr-2 pt-1 pb-1 h-auto flex items-center justify-start'>
-                        <img src={recipe.ChefImage} className='w-10 h-10 rounded-full border-2 border-t border-slate-950' />
+                        <img src={recipe.ChefImage} className='w-10 h-10 rounded-full border-2 border-t border-slate-950' alt={'Chef'} />
                         <h1 className='ml-2 cursor-pointer'><a href={`/users/${recipe.ChefId}`}>@{recipe.Username}</a></h1>
                     </div>
-                    {localStorage.getItem('role') == 'admin' || localStorage.getItem('userId') == recipe.ChefId && <div>
+                    {/* eslint-disable-next-line no-mixed-operators */}
+                    {localStorage.getItem('role') === 'admin' || localStorage.getItem('userId') === recipe.ChefId && <div>
                         {optionsDisplayed && <div style={{ transform: "translate(-100%, -10%)" }} className='absolute w-20 h-12 bg-gray-100 rounded-lg overflow-hidden'>
                             <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400 w-full cursor-pointer' onClick={deleteRecipe}>DELETE</div>
                             <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400  w-full cursor-pointer'>EDIT</div>
@@ -74,7 +75,7 @@ const RecipeCard = ({ recipe, index, setRecipes }) => {
                     </div>}
                 </div>
                 <div className="relative min-h-40">
-                    <img src={recipe.ImageUrl} style={{ width: "500px" }} className="min-h-40 h-40 object-cover transform transition duration-300 ease-in-out hover:scale-105" />
+                    <img src={recipe.ImageUrl} style={{ width: "500px" }} className="min-h-40 h-40 object-cover transform transition duration-300 ease-in-out hover:scale-105" alt={'Img'} />
                     <div className="absolute top-2 right-2 bg-gray-800 text-white px-2 pb-0.5 rounded">
                         {/* <span className="text-xs font-medium">{recipe.category}</span> */}
                         <span className="text-xs font-medium">{recipe.CookTime}<FontAwesomeIcon icon={faClock} className={'ml-1 text-xs'} /></span>

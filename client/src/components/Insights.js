@@ -128,7 +128,7 @@ export default function Insights() {
                         </ResponsiveContainer>
                     </div>
                 </div>
-                {data.ratio != undefined &&
+                {data.ratio !== undefined &&
                     <div className="flex flex-grow w-full ">
                         < PieChart width={300} height={280} className="ml-11">
                             <Pie
