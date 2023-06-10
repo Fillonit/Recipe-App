@@ -26,6 +26,7 @@ import Saved from './components/Saved';
 import { useState } from 'react';
 import DashboardContacts from './components/DashboardContacts';
 import Insights from './components/Insights';
+import NotFound from './components/NotFound';
 function App() {
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   return (
@@ -56,6 +57,7 @@ function App() {
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/dashboard/users' element={<UsersDashboard />} />
           <Route path='/dashboard/contacts' element={<DashboardContacts />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         {
           //check if route is not dashboard

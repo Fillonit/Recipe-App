@@ -44,3 +44,12 @@ input[type=file]::file-selector-button:hover {
 input[type=file] {
     background-color: #fff;
 }
+
+body {
+  @apply min-h-screen;
+}
+
+/* Add this section to create the gradient background */
+.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
