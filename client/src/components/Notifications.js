@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 export default function Notifications() {
     const [notifs, setNotifs] = useState([]);
     const [nextPage, setNextPage] = useState(2);
+
+    // eslint-disable-next-line no-unused-vars
     async function seeMore() {
         try {
             const response = await fetch(`http://localhost:5000/api/notifications`, {
@@ -20,6 +22,7 @@ export default function Notifications() {
             console.log(error)
         }
     }
+    
     async function setComponents() {
         try {
             const response = await fetch(`http://localhost:5000/api/notifications`, {
