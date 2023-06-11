@@ -18,7 +18,7 @@ const Navbar = ({ title, image, description, userId }) => {
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
     { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId ?? 1}` },
-    { label: "", icon: <NotificationBell />, link: `` },
+    { label: "", icon: <NotificationBell />, link: `/notifications` },
   ];
 
   return (
