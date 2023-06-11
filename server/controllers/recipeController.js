@@ -51,14 +51,6 @@ const deleteRecipe = asyncHandler(async (req, res) => {
                                                      WHERE r.RecipeId = @recipeId AND r.ChefId = @userId OR @role = 'admin') >= 1 THEN 1 ELSE 0 END;
                          IF(@CanDelete = 1)
                          BEGIN          
-                            DELETE FROM ViewCooldowns 
-                            WHERE RecipeId = @recipeId;
-                            DELETE FROM Comments
-                            WHERE RecipeId = @recipeId;
-                            DELETE FROM Likes
-                            WHERE RecipeId = @recipeId;   
-                            DELETE FROM RecipeViews 
-                            WHERE RecipeId = @recipeId;
                             DELETE FROM Recipes
                             WHERE RecipeId = @recipeId;
                          END
@@ -226,7 +218,6 @@ const addRecipe = asyncHandler(async (req, res) => {
 });
 const getRecipes = asyncHandler(async (req, res, next) => {
     const { page, pageSize, search, sortBy, sortOrder } = req.query;
-    console.log(req.query)
     const token = req.headers['r-a-token'];
     let chefId = null, isValid = false;
     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
@@ -289,8 +280,11 @@ const getRecipes = asyncHandler(async (req, res, next) => {
         request.input('offset', sql.Int, (page - 1) * pageSize);
         request.input('rows', sql.Int, pageSize);
         request.input('substring', sql.VarChar, search);
-        const QUERY = `SELECT r.* ${sortingQueries[mappings[sortBy].key].select}
+        console.log((page - 1) * pageSize + ", " + pageSize);
+        const QUERY = `SELECT u.Username, r.* ${sortingQueries[mappings[sortBy].key].select}
                        FROM Recipes r
+                         JOIN Users u
+                         ON u.UserId = r.ChefId
                        WHERE Title LIKE CONCAT('%', @substring,'%')
                        ORDER BY ${sortingQueries[mappings[sortBy].key].orderBy}
                        OFFSET @offset ROWS
@@ -299,7 +293,6 @@ const getRecipes = asyncHandler(async (req, res, next) => {
                        SELECT CEILING(COUNT(*)/CAST(@rows AS FLOAT)) AS TotalPages
                        FROM Recipes r
                        WHERE Title LIKE CONCAT('%', @substring,'%');`;
-        console.log(QUERY);
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error occurred on our part." });
@@ -309,82 +302,12 @@ const getRecipes = asyncHandler(async (req, res, next) => {
                 res.status(400).json({ message: "Could not get recipes." });
                 return;
             }
+            console.log(result.recordsets[0].length);
             res.status(200).json({ message: "Successfully fetched resource", response: result.recordsets });
             return;
         });
     });
 });
-// const getRecipe = asyncHandler(async (req, res, next) => {
-//     const { recipeId } = req.params;
-//     const token = req.headers['r-a-token'];
-//     let chefId = null, isValid = false;
-//     jwt.verify(token, TOKEN_KEY, (err, decoded) => {
-//         if (err) {
-//             res.status(401).json({ message: "Not authorized to view recipes." });
-//             return;
-//         }
-//         if (Date.now() / 1000 > decoded.exp) {
-//             res.status(401).json({ message: "Token is expired." });
-//             return;
-//         }
-//         chefId = decoded.userId;
-//     });
-//     if (!isValid) return;
-//     if (recipeId === undefined) {
-//         res.status(400).json({ message: "Not all required information was provided." });
-//         return;
-//     }
-//     if (typeof recipeId != 'number') {
-//         res.status(400).json({ message: "Information is not in the expected format." });
-//         return;
-//     }
-//     if (recipeId < 0) {
-//         res.status(400).json({ message: "Information was in the expected format, but values were invalid." });
-//         return;
-//     }
-//     sql.connect(config, (err) => {
-//         if (err) {
-//             handler(err, req, res, "");
-//             return;
-//         }
-//         const request = new sql.Request();
-//         request.input('recipeId', sql.Int, recipeId);
-//         request.input('userId', sql.Int, userId);
-//         const QUERY = `BEGIN TRANSACTION;
-//                           BEGIN TRY
-//                              DECLARE @LikesCount INT;
-
-//                              SELECT @LikesCount = COUNT(*)
-//                              FROM Likes
-//                              WHERE RecipeId = @recipeId;
-
-//                              SELECT r.*, u.Username, @LikesCount AS Likes
-//                              FROM Recipes r
-//                                JOIN Users u 
-//                                ON u.UserId = r.ChefId
-//                              WHERE RecipeId = @recipeId;
-
-//                              SELECT c.Content, u.Username, (SELECT COUNT(*) FROM CommentsLikes WHERE CommentId = c.CommentId)
-//                              FROM Comments c
-//                                 JOIN Users u
-//                                 ON u.UserId = c.UserId
-//                              WHERE RecipeId = @recipeId
-//                           END TRY
-//                           BEGIN CATCH
-//                             THROW;
-//                             ROLLBACK;
-//                           END CATCH;
-//                         COMMIT;`
-//         request.query(QUERY, (err, result) => {
-//             if (err) {
-//                 handler(err, req, res, "");
-//                 return;
-//             }
-//             res.status(201).json({ message: "Recipe added successfully." });
-//             return;
-//         })
-//     })
-// });
 
 const getRecipe = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
@@ -1042,8 +965,11 @@ const likeRecipe = asyncHandler(async (req, res, next) => {
                              WHERE RecipeId = @recipeId;
 
                              INSERT INTO Likes(UserId, RecipeId, CreatedAt) VALUES(@userId, @recipeId, GETDATE());
-                             INSERT INTO Notifications(UserId, Content, ReceivedAt)
-                             VALUES (@userId, (@username, ' just liked your recipe!'), GETDATE());
+                             IF(@RecipePoster <> @userId)
+                             BEGIN
+                               INSERT INTO Notifications(UserId, Content, ReceivedAt)
+                               VALUES (@RecipePoster, CONCAT(@username, ' just liked your recipe!'), GETDATE());
+                             END
                           END TRY
                           BEGIN CATCH
                             THROW;

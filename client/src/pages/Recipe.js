@@ -245,7 +245,7 @@ const Recipe = () => {
             {data.comments.map((item, index) => {
               return <> <li>{item.Username}: {item.editingMode ? <input value={comments[index]} ref={item.ref} onChange={(e) => { handleCommentChange(e, index) }} type='text' /> : item.Content}, {new Date(item.CreatedAt).toLocaleString()}, Likes: {item.Likes}</li><button onClick={() => {
                 likeComment(item.AlreadyLiked, item.CommentId, index);
-              }}>{item.AlreadyLiked === 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
+              }}>{item.AlreadyLiked === 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit == 1 && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
                 if (item.editingMode === true) editComment(item.CommentId, item.ref, index);
                 else setEditingMode(index);
               }}>{item.editingMode ? 'CONFIRM EDIT' : "EDIT"}</button></>}</>

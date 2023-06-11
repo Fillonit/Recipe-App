@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStar, faClock, faEye, faBookmark } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-const RecipeCard = ({ recipe, index, setRecipes }) => {
+const RecipeCard = ({ recipe }) => {
     const starRating = recipe.Rating != null ? (Math.round(recipe.Rating * 2) / 2).toFixed(1) : 'None';
     const [isSaved, setIsSaved] = useState(recipe.IsSaved === 1);
     const [optionsDisplayed, setOptionsDisplayed] = useState(false);
@@ -53,16 +53,17 @@ const RecipeCard = ({ recipe, index, setRecipes }) => {
     function displayOptions() {
         setOptionsDisplayed(prev => !prev);
     }
+    console.log(localStorage.getItem('role') == 'admin');
     return (
         <div className="w-50 mb-8 flex justify-center text-center lg:text-left xl:text-left">
             <div className="max-w-xs rounded-lg overflow-hidden shadow-lg bg-white border-2 border-t  border-slate-950-500">
                 <div className='relative flex justify-between items-center w-full'>
                     <div className='m-2 max-w-max pl-2 pr-2 pt-1 pb-1 h-auto flex items-center justify-start'>
                         <img src={recipe.ChefImage} className='w-10 h-10 rounded-full border-2 border-t border-slate-950' alt={'Chef'} />
-                        <h1 className='ml-2 cursor-pointer'><a href={`/users/${recipe.ChefId}`}>@{recipe.Username}</a></h1>
+                        <h1 className='ml-2 cursor-pointer'><a href={`/users/${recipe.ChefId}`}>@{recipe.Username}, {recipe.RecipeId}</a></h1>
                     </div>
                     {/* eslint-disable-next-line no-mixed-operators */}
-                    {localStorage.getItem('role') === 'admin' || localStorage.getItem('userId') === recipe.ChefId && <div>
+                    {(localStorage.getItem('role') == 'admin' || localStorage.getItem('userId') == recipe.ChefId) && <div>
                         {optionsDisplayed && <div style={{ transform: "translate(-100%, -10%)" }} className='absolute w-20 h-12 bg-gray-100 rounded-lg overflow-hidden'>
                             <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400 w-full cursor-pointer' onClick={deleteRecipe}>DELETE</div>
                             <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400  w-full cursor-pointer'>EDIT</div>

@@ -91,7 +91,7 @@ const getUser = asyncHandler(async (req, res) => {
                           ROLLBACK;
                         END CATCH;
                        COMMIT;`;
-
+        console.log("I AM HERE");
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error ocurred on our part" });
@@ -102,6 +102,7 @@ const getUser = asyncHandler(async (req, res) => {
                 res.status(404).json({ message: "No such user was found." });
                 return;
             }
+            console.log(result.recordset)
             res.status(200).json({ message: "Successfully fetched user.", response: { ...result.recordset[0], UserId: result.recordset[0].UserId[0] } });
         });
     });

@@ -54,10 +54,8 @@ const getContacts = asyncHandler(async (req, res, next) => {
         request.input('offset', sql.Int, (page - 1) * rows);
         request.input('rows', sql.Int, rows);
         console.log(request.parameters)
-        const QUERY = `SELECT u.Username, c.Description, c.CreatedAt, u.UserId, c.ContactId
+        const QUERY = `SELECT c.Name, c.Description, c.CreatedAt, c.ContactId, c.Email
                        FROM Contacts c
-                         JOIN Users u
-                         ON c.UserId = u.UserId
                        ORDER BY c.CreatedAt DESC
                        OFFSET @offset ROWS
                        FETCH NEXT @rows ROWS ONLY;`;
@@ -75,27 +73,6 @@ const getContacts = asyncHandler(async (req, res, next) => {
     })
 });
 const createContact = asyncHandler(async (req, res) => {
-    const token = req.headers['r-a-token'];
-
-    let isValid = false, userId, username;
-    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
-        if (err) {
-            res.status(401).json({ message: "Token is invalid" });
-            return;
-        }
-        if (Date.now() / 1000 > decoded.exp) {
-            res.status(401).json({ message: "Token is expired" });
-            return;
-        }
-        if (decoded.role != 'user' && decoded.role != 'chef') {
-            res.status(403).json({ message: "Couldn't send the contact because you are an admin." });
-            return;
-        }
-        username = decoded.username;
-        userId = decoded.userId;
-        isValid = true;
-    })
-    if (!isValid) return;
     const email = req.body.email, name = req.body.name, description = req.body.description;
 
     sql.connect(config, (error) => {
@@ -105,25 +82,17 @@ const createContact = asyncHandler(async (req, res) => {
         }
         const request = new sql.Request();
 
-        request.input('userId', sql.Int, userId);
         request.input('email', sql.VarChar, email);
         request.input('name', sql.VarChar, name);
         request.input('message', sql.VarChar, description);
-        request.input('username', sql.VarChar, username);
 
         const QUERY = `BEGIN TRANSACTION
                          BEGIN TRY
-                          DECLARE @ContactCount INT;
-                          
-                          SELECT @ContactCount = COUNT(*)
-                          FROM Contacts
-                          WHERE UserId = @userId AND CreatedAt > DATEADD(DAY, -1, GETDATE()); 
                           IF(@ContactCount = 0)
                           BEGIN
-                            INSERT INTO Contacts(UserId, Description, CreatedAt) VALUES(@userId, @message, GETDATE());
-                          
+                            INSERT INTO Contacts(Name, Email, Description, CreatedAt) VALUES(@name, @email, @message, GETDATE())
                             INSERT INTO Notifications(UserId, Content, ReceivedAt) 
-                            SELECT AdminId, @username+' just sent a contact!', GETDATE()
+                            SELECT AdminId, @name+' just sent a contact!', GETDATE()
                             FROM Admin;
                           END
                          END TRY

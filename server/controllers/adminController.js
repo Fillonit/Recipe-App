@@ -275,8 +275,24 @@ const deleteUser = asyncHandler(async (req, res) => {
         request.input('userId', sql.Int, Number(id));
         const QUERY = `BEGIN TRANSACTION
                         BEGIN TRY
-                           DELETE FROM Users WHERE UserId = @userId;
+                          DECLARE @CanDelete BIT;
+                          SET @CanDelete = CASE WHEN (SELECT COUNT(*) FROM Users WHERE UserId = @userId AND Role <>'admin') = 1 THEN 1 ELSE 0 END;
+                          IF(@CanDelete)
+                           BEGIN
+                           UPDATE Chef c
+                           SET c.FollowersCount = c.FollowersCount - 1
+                           WHERE (SELECT COUNT(*) 
+                                 FROM Followers f
+                                 WHERE @userId = f.FollowerId AND c.ChefId = f.FolloweeId);
+                           DELETE FROM Likes WHERE UserId = @userId;
                            DELETE FROM CommentLikes WHERE UserId = @userId;
+                           DELETE FROM Comments WHERE UserId = @userId;
+                           DELETE FROM Likes WHERE RecipeId = @userId;
+                           DELETE FROM Recipes WHERE ChefId = @userId;
+                           DELETE FROM Followers WHERE FolloweeId = @userId;
+                           DELETE FROM Saved WHERE UserId = @userId;
+                           DELETE FROM Users WHERE UserId = @userId;
+                           END
                         END TRY
                         BEGIN CATCH
                            THROW;

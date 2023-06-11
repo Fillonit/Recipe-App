@@ -33,7 +33,7 @@ function Recipes() {
   async function searchRecipes() {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/recipe/get?sortBy=${sortField.modified}&sortOrder=${sortOrder.modified}&pageSize=${pageSize}&page=${page}&search=${searchQuery.modified}`, {
+        `http://localhost:5000/api/recipe/get?sortBy=${sortField.modified}&sortOrder=${sortOrder.modified}&pageSize=${pageSize}&page=1&search=${searchQuery.modified}`, {
         method: "GET",
         headers: {
           'R-A-Token': localStorage.getItem('token')
@@ -45,7 +45,7 @@ function Recipes() {
       setSortField(prev => { return { ...prev, current: prev.modified } });
       setSearchQuery(prev => { return { ...prev, current: prev.modified } });
       setSortOrder(prev => { return { ...prev, current: prev.modified } });
-      setTotalPages(json.response[1].TotalPages)
+      setTotalPages(json.response[1][0].TotalPages)
       setPage(1);
     } catch (error) {
       console.log(error);
@@ -53,7 +53,8 @@ function Recipes() {
   }
   async function changePage(incrementor) {
     try {
-      if (page - incrementor <= 0 || (incrementor !== -1 && incrementor !== 1)) return;
+      if (page + incrementor <= 0 || (incrementor !== -1 && incrementor !== 1)) return;
+      console.log("---------------------------")
       const response = await fetch(
         `http://localhost:5000/api/recipe/get?sortBy=${sortField.current}&sortOrder=${sortOrder.current}&pageSize=${pageSize}&page=${page + incrementor}&search=${searchQuery.current}`, {
         method: "GET",
@@ -63,7 +64,7 @@ function Recipes() {
       });
       if (response.status !== 200 && response.status !== 304) return;
       const json = await response.json();
-      setRecipes(json.response);
+      setRecipes(json.response[0]);
       setPage(prev => prev + incrementor);
     } catch (error) {
       console.log(error);

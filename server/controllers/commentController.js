@@ -60,8 +60,11 @@ const addComment = asyncHandler(async (req, res) => {
                                  WHERE RecipeId = @recipeId;
                                  
                                  INSERT INTO Comments (UserId, Content, RecipeId, CreatedAt) VALUES (@userId, @comment, @recipeId, GETDATE());
-                                 INSERT INTO Notifications (UserId, Content, ReceivedAt)
-                                 VALUES(@RecipePoster, CONCAT(@username, ' just commented on your recipe!', GETDATE()));
+                                 IF(@RecipePoster <> @userId)
+                                 BEGIN
+                                   INSERT INTO Notifications (UserId, Content, ReceivedAt)
+                                   VALUES(@RecipePoster, CONCAT(@username, ' just commented on your recipe!'), GETDATE());
+                                 END;
                                  
                                  DECLARE @CommentId INT;
                                  SELECT @CommentId = MAX(CommentId) FROM Comments;
@@ -71,6 +74,7 @@ const addComment = asyncHandler(async (req, res) => {
                                     JOIN Users u
                                     ON u.UserId = c.UserId
                                  WHERE CommentId = @commentId;
+
                                 END TRY
                                 BEGIN CATCH
                                   THROW;
@@ -81,6 +85,7 @@ const addComment = asyncHandler(async (req, res) => {
         request.query(commentQuery, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error occurred on our part." })
+                console.log(err);
                 return;
             }
             if (result.rowsAffected === 0) {
@@ -191,17 +196,17 @@ const likeComment = asyncHandler(async (req, res) => {
                          FROM CommentLikes 
                          WHERE UserId = @userId AND CommentId = @commentId;
 
-        IF(@Count = 0)
-        BEGIN
+                        IF(@Count = 0)
+                        BEGIN
                           INSERT INTO CommentLikes(UserId, CommentId, CreatedAt) VALUES(@userId, @commentId, GETDATE());
                           UPDATE Comments SET Likes = Likes + 1 WHERE CommentId = @commentId;
-        END
+                        END
                         END TRY
                         BEGIN CATCH
-        THROW;
-        ROLLBACK;
+                            THROW;
+                            ROLLBACK;
                         END CATCH;
-        COMMIT; `
+                     COMMIT; `
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error happened on our part." });

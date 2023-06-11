@@ -181,8 +181,8 @@ const Profile = () => {
             <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
               <h3><a href={`/saved/${localStorage.getItem('userId')}`}>My saved recipes</a></h3>
             </div>
-            {localStorage.getItem('role') == 'admin' && <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
-              <h3><a href='/dashboard'>Dashboard</a></h3>
+            {(localStorage.getItem('role') == 'admin' || localStorage.getItem('role') == 'chef') && <div className='cursor-pointer rounded-2xl hover:bg-indigo-500 hover:text-white h-auto p-3 w-auto bg-indigo-200'>
+              <h3><a href={localStorage.getItem('role') == 'admin' ? "/dashboard" : "/insights"}>{localStorage.getItem('role') == 'admin' ? "Dashboard" : "Insights"}</a></h3>
             </div>}
           </div>}
           <div className="px-6">
@@ -243,7 +243,7 @@ const Profile = () => {
             {savedRecipes.map(item => { return <div className='ml-11'><RecipeCard recipe={item} setRecipes={setRecipes} /></div> })};
             <button onClick={seeMoreSaved}>see more</button>
           </div>}
-        {data.Role == 'chef' && data.posted.length != 0 &&
+        {data.Role == 'chef' && recipes.length != 0 &&
           <div className="flex mb-8 flex-wrap justify-evenly">
             {recipes.map((recipe, index) => (
               <RecipeCard key={index} recipe={recipe} setRecipes={setRecipes} />

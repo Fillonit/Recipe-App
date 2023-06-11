@@ -103,7 +103,9 @@ export default function Insights() {
               <Legend verticalAlign="bottom" height={36} />
             </PieChart>
             <div className="flex items-center ml-11">
-              <h3 className="text-white">Out of {data.ratio[0].value + data.ratio[1].value} users that viewed your<br />recipes, {data.ratio[1].value} decided to like, your<br /> Likes/User ratio is {(data.ratio[1].value / (data.ratio[1].value + data.ratio[0].value)).toFixed(2)}</h3>
+              <h3 className="text-white">Out of {data.ratio[0].value + data.ratio[1].value} users that viewed your<br />recipes,
+                {data.ratio[1].value} decided to like, you<br />
+                Likes/User ratio is {isNaN((data.ratio[1].value / (data.ratio[1].value + data.ratio[0].value))) == true ? "undefined" : (data.ratio[1].value / (data.ratio[1].value + data.ratio[0].value)).toFixed(2)}</h3>
             </div>
           </div>}
       </div>
