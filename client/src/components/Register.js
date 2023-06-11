@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
+import Icon from '../images/icon.png';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Icon from '../images/icon.png';
+import notifyConfig from "./notifyConfig";
 
 export default function Register({ setLogIn }) {
   const [username, setUsername] = useState("");
@@ -11,16 +12,6 @@ export default function Register({ setLogIn }) {
   const fullName = useRef();
   const description = useRef();
 
-  const notify = (msg) => toast(msg, {
-    position: "top-right",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light"
-  });
 
   async function handleRegistration() {
     try {
@@ -36,10 +27,10 @@ export default function Register({ setLogIn }) {
         body: form
       });
       if (response.status !== 201) return;
-      notify(`Registration successful!`);
+      toast.success('Registered sucessfully!', notifyConfig);
     } catch (error) {
       console.error(error);
-      notify(`Registration failed!`);
+      toast.error('An error has occured!', notifyConfig);
     }
   }
 

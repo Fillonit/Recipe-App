@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUtensils, faEdit, faTrash, faChartPie, faChartBar, faArrowUp, faArrowDown, faCommentAlt, faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect, useRef } from 'react';
 import DashboardSidebar from '../components/DashboardSidebar';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "../components/notifyConfig";
 
 const Dashboard = () => {
   const [stats, setStats] = useState({});
@@ -20,7 +23,8 @@ const Dashboard = () => {
       },
     });
     if (usersResponse.status !== 204) {
-      alert("Could not delete user: " + usersResponse.status);
+      // alert("Could not delete user: " + usersResponse.status);
+      toast.error(`Could not delete user: ${usersResponse.status}`, notifyConfig)
       return;
     }
     changePage(lastPage);
@@ -271,6 +275,7 @@ const Dashboard = () => {
           <button onClick={() => { changePage(page.current.value) }} className={'text-white bg-gray-800 p-2 rounded-md border-2 border-gray-800 hover:bg-indigo-500 hover:border-indigo-500'}><FontAwesomeIcon icon={faSearch} className={'px-2'}/></button>
           </div> */}
         </div>
+        <ToastContainer />
       </div>
     </div>
   );

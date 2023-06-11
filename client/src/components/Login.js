@@ -1,5 +1,8 @@
 import { useState } from "react";
 import Icon from '../images/icon.png';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 
 export default function Login({ setLogIn, setUserId }) {
   const [username, setUsername] = useState("");
@@ -16,21 +19,22 @@ export default function Login({ setLogIn, setUserId }) {
         },
         body: JSON.stringify({ username: username, password: password }),
       });
-      // if (response.status !== 200) return;
       const data = await response.json();
+      if (response.status !== 200) return toast.error('Logged in failed!', notifyConfig);
       const { accUsername, role, auth, userId } = data;
       localStorage.setItem('token', auth);
       localStorage.setItem('username', accUsername);
       localStorage.setItem('role', role);
       localStorage.setItem('userId', userId);
       setUserId(userId);
-      alert("Token set: " + localStorage.getItem('token'));
-      // Do something with the response data, e.g. show a success message
-      alert(`Here is the user data: ${JSON.stringify(data)}`)
+      // alert("Token set: " + localStorage.getItem('token'));
+      toast.success('Logged in sucessfully!', notifyConfig);
+      if (response.status !== 200) {
+        toast.error('Logged in failed!', notifyConfig);
+      }
     } catch (error) {
+      toast.error('Logged in failed!', notifyConfig);
       console.error(error);
-
-      // Show an error message to the user
     }
   }
 
@@ -64,6 +68,7 @@ export default function Login({ setLogIn, setUserId }) {
           <button className="text-indigo-700 hover:text-indigo-900 text-sm float-right" onClick={() => { setLogIn(false) }}>Create Account</button>
         </footer>
       </div>
+      <ToastContainer />
     </div>
   );
 }

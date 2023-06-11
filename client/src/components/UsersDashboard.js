@@ -12,6 +12,9 @@ import {
     PieChart, Cell, Pie,
     Label
 } from 'recharts';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 export default function UsersDashboard() {
     const [users, setUsers] = useState([]);
     const [data, setData] = useState([]);
@@ -29,7 +32,8 @@ export default function UsersDashboard() {
             },
         });
         if (usersResponse.status !== 204) {
-            alert("Could not delete user: " + usersResponse.status);
+            // alert("Could not delete user: " + usersResponse.status);
+            toast.error(`Could not delete user: ${usersResponse.status}`, notifyConfig);
             return;
         }
         changePage(lastPage);
@@ -200,6 +204,7 @@ export default function UsersDashboard() {
                         </tbody>
                     </table>
                 </div>
+                <ToastContainer />
             </div>
             <script
                 type="text/javascript"

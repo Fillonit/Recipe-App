@@ -1,5 +1,9 @@
 import React from 'react';
 import { useRef } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "../components/notifyConfig";
+
 const Chef = () => {
   const description = useRef(), experience = useRef(), worksAt = useRef(), image = useRef();
   const handleSubmit = async (event) => {
@@ -18,10 +22,12 @@ const Chef = () => {
         },
         body: form
       });
-      if (response.status !== 201) return;
-      alert("Added application");
+      if (response.status !== 201) return toast.error('An error has occured!', notifyConfig);
+      // alert("Added application");
+      toast.success('Added application!', notifyConfig);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
+      toast.error('An error has occured!', notifyConfig);
     }
   };
 
@@ -37,6 +43,7 @@ const Chef = () => {
           <button className="w-full p-4 bg-indigo-500 text-white text-xl rounded hover:bg-indigo-600" type="submit">Submit</button>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 };

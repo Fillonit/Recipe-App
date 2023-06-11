@@ -3,6 +3,9 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Link } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 
 const schema = yup.object().shape({
   name: yup.string().required(),
@@ -42,9 +45,12 @@ const Contact = () => {
           description: values.message,
         }),
       });
-      if (response.status === 201) alert("Sent contact successfully.");
+      if (response.status === 201) {
+        toast.success('Message sent!', notifyConfig);
+      }
     } catch (err) {
       console.log(err);
+      toast.error('An error has occured!', notifyConfig);
     }
   }
 
@@ -157,6 +163,7 @@ const Contact = () => {
           />
           </div>
         </div>
+        <ToastContainer />
       </div>
     </div>
   );
