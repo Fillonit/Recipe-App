@@ -10,6 +10,7 @@ export default function Login({ setLogIn, setUserId }) {
 
   console.log(setLogIn)
   async function handleLogin() {
+    const id = toast.loading("Loggin In...")
     try {
       console.log({ username: username, password: password });
       const response = await fetch('http://localhost:5000/api/user/login', {
@@ -28,12 +29,49 @@ export default function Login({ setLogIn, setUserId }) {
       localStorage.setItem('userId', userId);
       setUserId(userId);
       // alert("Token set: " + localStorage.getItem('token'));
-      toast.success('Logged in sucessfully!', notifyConfig);
+      // toast.success('Logged in sucessfully!', notifyConfig);
+      toast.update(id, { 
+          render: "Logged in sucessfully!", 
+          type: "success", 
+          isLoading: false, 
+          autoClose: 3000, 
+          position: "top-right",
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light" 
+  });
       if (response.status !== 200) {
-        toast.error('Logged in failed!', notifyConfig);
+        toast.update(id, { 
+          render: "Logged in sucessfully!", 
+          type: "success", 
+          isLoading: false, 
+          autoClose: 3000, 
+          position: "top-right",
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light" 
+  });
       }
     } catch (error) {
-      toast.error('Logged in failed!', notifyConfig);
+      toast.update(id, { 
+          render: "Log in failed!", 
+          type: "error", 
+          isLoading: false, 
+          autoClose: 3000, 
+          position: "top-right",
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light" 
+  });
       console.error(error);
     }
   }
