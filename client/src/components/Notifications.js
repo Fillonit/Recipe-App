@@ -44,9 +44,9 @@ export default function Notifications() {
         setComponents();
     }, []);
     return (
-        <div className="h-full">
+        <div className="min-h-screen">
             {notifs.map((item) => {
-                return <h4 className={item.Seen == 1 ? "text-emerald-50" : "text-red-300"}>{item.Content}, {item.TimeDifference}</h4>
+                return <h4 className={item.Seen === 1 ? "text-emerald-50" : "text-red-300"}>{item.Content}, {item.TimeDifference}</h4>
             })}
         </div>
     );
