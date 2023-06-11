@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ChefCard from './ChefCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faEye, faHeart, faSave, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faEye, faSave, faStar } from '@fortawesome/free-solid-svg-icons';
 
 const SingleRecipe = ({ recipe }) => {
   const totalCookTime = recipe.CookTime + recipe.PreparationTime;

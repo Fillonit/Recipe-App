@@ -13,7 +13,7 @@ export default function DashboardSidebar() {
             <div className="p-6 pl-6">
                 <h2 className="text-3xl font-bold mb-12 px-3">Magnolia</h2>
                 <ul className="space-y-4">
-                    <li className={getLastPartOfUrl(window.location.href) == 'dashboard' ? `py-4 rounded-lg bg-gray-800` : ''}>
+                    <li className={getLastPartOfUrl(window.location.href) === 'dashboard' ? `py-4 rounded-lg bg-gray-800` : ''}>
                         <a
                             href="/dashboard"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
@@ -22,7 +22,7 @@ export default function DashboardSidebar() {
                             Dashboard
                         </a>
                     </li>
-                    <li className={getLastPartOfUrl(window.location.href) == 'users' ? `py-4 rounded-lg bg-gray-800` : ''}>
+                    <li className={getLastPartOfUrl(window.location.href) === 'users' ? `py-4 rounded-lg bg-gray-800` : ''}>
                         <a
                             href="/dashboard/users"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
@@ -31,7 +31,7 @@ export default function DashboardSidebar() {
                             Users
                         </a>
                     </li>
-                    <li className={getLastPartOfUrl(window.location.href) == 'recipes' ? `py-4 rounded-lg bg-gray-800` : ''}>
+                    <li className={getLastPartOfUrl(window.location.href) === 'recipes' ? `py-4 rounded-lg bg-gray-800` : ''}>
                         <a
                             href="/dashboard/recipes"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
@@ -40,7 +40,7 @@ export default function DashboardSidebar() {
                             Recipes
                         </a>
                     </li>
-                    <li className={getLastPartOfUrl(window.location.href) == 'chefApplications' ? `py-4 rounded-lg bg-gray-800` : ''}>
+                    <li className={getLastPartOfUrl(window.location.href) === 'chefApplications' ? `py-4 rounded-lg bg-gray-800` : ''}>
                         <a
                             href="/dashboard/chefApplications"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
@@ -49,7 +49,7 @@ export default function DashboardSidebar() {
                             Chef Applications
                         </a>
                     </li>
-                    <li className={getLastPartOfUrl(window.location.href) == 'contacts' ? `py-4 rounded-lg bg-gray-800` : ''}>
+                    <li className={getLastPartOfUrl(window.location.href) === 'contacts' ? `py-4 rounded-lg bg-gray-800` : ''}>
                         <a
                             href="/dashboard/contacts"
                             className="flex items-center text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg py-2 px-4"
