@@ -27,6 +27,7 @@ import { useState } from 'react';
 import DashboardContacts from './components/DashboardContacts';
 import Insights from './components/Insights';
 import NotFound from './components/NotFound';
+import Notifications from './components/Notifications';
 function App() {
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   return (
@@ -39,6 +40,7 @@ function App() {
         }
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path='/insights' element={<Insights />} />
           <Route path="/users/:id" element={<Profile />} />
           <Route path="/about" element={<About />} />

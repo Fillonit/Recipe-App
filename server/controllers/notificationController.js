@@ -45,11 +45,11 @@ const getNotifications = asyncHandler(async (req, res) => {
                         CASE
                           WHEN diff < 60 THEN CAST(diff AS VARCHAR(10))+ 's'
                           WHEN diff < 3600 THEN CAST(CAST(diff/60 AS INT) AS VARCHAR(10))+ 'm'
-                          WHEN diff < 86400 THEN CAST(CAST(diff/3600) AS VARCHAR(10))+ 'h'
+                          WHEN diff < 86400 THEN CAST(CAST(diff/3600 AS INT) AS VARCHAR(10))+ 'h'
                           WHEN diff < 604800 THEN CAST(CAST(diff/86400 AS INT) AS VARCHAR(10))+ 'd'
                           ELSE CAST(CAST(diff/604800 AS INT) AS VARCHAR(10))+'w'
                         END AS TimeDifference
-                        FROM (SELECT Content, Seen, DATEDIFF_BIG(MINUTES, ReceivedAt, GETDATE()) AS diff
+                        FROM (SELECT Content, Seen, DATEDIFF_BIG(SECOND, ReceivedAt, GETDATE()) AS diff
                               FROM Notifications
                               WHERE UserId = @userId
                               ORDER BY ReceivedAt DESC
