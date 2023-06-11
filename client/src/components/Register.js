@@ -19,7 +19,7 @@ export default function Register({ setLogIn }) {
     pauseOnHover: true,
     draggable: true,
     progress: undefined,
-    theme: "dark"
+    theme: "light"
   });
 
   async function handleRegistration() {
