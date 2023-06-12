@@ -41,6 +41,24 @@ export default function Notifications() {
             console.log(error)
         }
     }
+    async function seeMore() {
+        try {
+            const response = await fetch(`http://localhost:5000/api/notifications`, {
+                method: "GET",
+                headers: {
+                    'R-A-Token': localStorage.getItem('token'),
+                    'page': nextPage,
+                    'rows': 8
+                }
+            });
+            if (response.status !== 200 && response.status !== 304) return;
+            const json = await response.json();
+            setNotifs(prev => [...prev, ...json.response]);
+            setNextPage(prev => prev + 1)
+        } catch (error) {
+            console.log(error)
+        }
+    }
     useEffect(() => {
         setComponents();
     }, []);
@@ -51,6 +69,9 @@ export default function Notifications() {
                     return <Notification notification={item} setNotifications={setNotifs} index={index} />
                 })}
             </div>
-        </div>
+            <div className='w-full h-24 flex justify-center items-center'>
+                <h2 onClick={seeMore} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>
+            </div>
+        </div >
     );
 }
