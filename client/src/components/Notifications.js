@@ -12,7 +12,7 @@ export default function Notifications() {
                 headers: {
                     'R-A-Token': localStorage.getItem('token'),
                     'page': nextPage,
-                    'rows': 5
+                    'rows': 8
                 }
             });
             if (response.status !== 200 && response.status !== 304) return;

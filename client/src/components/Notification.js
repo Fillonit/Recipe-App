@@ -36,7 +36,7 @@ export default function Notification({ notification, setNotifications, index }) 
         }
     }
     return (
-        <div className={`w-3/4 pl-3 h-20 rounded-lg flex justify-between items-center mt-2 ${notification.Seen === 1 ? "bg-gray-100" : "border-2 border-black bg-gray-100"}`}>
+        <div className={`w-3/4 pl-3 h-20 rounded-lg flex justify-between items-center mt-2 ${notification.Seen == 1 ? "bg-gray-100" : "border-2 border-black bg-gray-100"}`}>
             <h3>{notification.Content}</h3>
             <div className="flex flex-col items-center">
                 <h4 className="text-gray">{notification.TimeDifference} ago</h4>
