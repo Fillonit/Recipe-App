@@ -41,7 +41,7 @@ const getNotifications = asyncHandler(async (req, res) => {
         request.input('userId', sql.Int, userId);
         request.input('offset', sql.Int, (page - 1) * rows);
         request.input('rows', sql.Int, rows);
-        const QUERY = `SELECT Content, Seen,
+        const QUERY = `SELECT NotificationId, Content, Seen,
                         CASE
                           WHEN diff < 60 THEN CAST(diff AS VARCHAR(10))+ 's'
                           WHEN diff < 3600 THEN CAST(CAST(diff/60 AS INT) AS VARCHAR(10))+ 'm'
@@ -49,7 +49,7 @@ const getNotifications = asyncHandler(async (req, res) => {
                           WHEN diff < 604800 THEN CAST(CAST(diff/86400 AS INT) AS VARCHAR(10))+ 'd'
                           ELSE CAST(CAST(diff/604800 AS INT) AS VARCHAR(10))+'w'
                         END AS TimeDifference
-                        FROM (SELECT Content, Seen, DATEDIFF_BIG(SECOND, ReceivedAt, GETDATE()) AS diff
+                        FROM (SELECT NotificationId, Content, Seen, DATEDIFF_BIG(SECOND, ReceivedAt, GETDATE()) AS diff
                               FROM Notifications
                               WHERE UserId = @userId
                               ORDER BY ReceivedAt DESC

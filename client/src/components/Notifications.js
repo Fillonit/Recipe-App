@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Notification from "./Notification";
 export default function Notifications() {
     const [notifs, setNotifs] = useState([]);
     const [nextPage, setNextPage] = useState(2);
@@ -22,7 +23,7 @@ export default function Notifications() {
             console.log(error)
         }
     }
-    
+
     async function setComponents() {
         try {
             const response = await fetch(`http://localhost:5000/api/notifications`, {
@@ -44,10 +45,12 @@ export default function Notifications() {
         setComponents();
     }, []);
     return (
-        <div className="min-h-screen">
-            {notifs.map((item) => {
-                return <h4 className={item.Seen === 1 ? "text-emerald-50" : "text-red-300"}>{item.Content}, {item.TimeDifference}</h4>
-            })}
+        <div className="min-h-screen  w-full bg-indigo-200">
+            <div className="h-full w-full flex flex-col items-center mt-40">
+                {notifs.map((item, index) => {
+                    return <Notification notification={item} setNotifications={setNotifs} index={index} />
+                })}
+            </div>
         </div>
     );
 }
