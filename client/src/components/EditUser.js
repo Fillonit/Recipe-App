@@ -19,9 +19,7 @@ const EditUser = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission and update user data
     console.log(formData);
-    // Reset form fields
     setFormData({
       username: "",
       name: "",
