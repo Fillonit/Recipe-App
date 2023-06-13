@@ -31,13 +31,13 @@ const EditUser = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-28 pb-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-24">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg">
         <div className="p-6">
-          <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
+          <h2 className="text-3xl font-bold mb-4 text-center text-gray-800">
             Edit Profile
           </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-2">
             <div>
               <label className="block text-lg font-semibold mb-1" htmlFor="username">
                 Username
