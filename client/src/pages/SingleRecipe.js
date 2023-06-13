@@ -190,19 +190,19 @@ const RecipePage = () => {
 
           <ol className="mt-4 w-full h-auto flex flex-col items-center">
             {data.comments.map((item, index) => (
-              <div className="w-1/2 h-200 border-2 border-black p-4 pl-8 mb-2">
+              <div className="w-1/2 border-2 border-black p-4 pl-8 mb-2">
                 <li key={item.CommentId}>
                   <div className="flex w-full">
-                    <div className="flex items-center mb-2 w-1/2 h-8">
+                    <div className="flex items-start mb-2 w-1/2 min-h-8 h-auto">
                       <span className="mr-2 font-bold">{item.Username}:</span>
                       {item.editingMode ? (
-                        <input
+                        <textarea
                           value={comments[index]}
                           ref={item.ref}
                           onChange={(e) => handleCommentChange(e, index)}
                           type="text"
                           className="w-full px-4 py-2 border border-gray-300 rounded"
-                        />
+                        ></textarea>
                       ) : (
                         <span>{item.Content}</span>
                       )}
