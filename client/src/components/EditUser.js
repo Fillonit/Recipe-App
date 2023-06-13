@@ -35,6 +35,7 @@ const EditUser = () => {
       });
     } catch (error) {
       console.log(error);
+      toast.error("Error occured while fetching user data", notifyConfig);
     }
   }
   const handleChange = (e) => {
@@ -62,9 +63,11 @@ const EditUser = () => {
         body: form
       });
       if (response.status !== 200) return;
-      alert("successfullly updated");
+      // alert("successfullly updated");
+      toast.success("Successfully updated", notifyConfig);
     } catch (error) {
       console.log(error);
+      toast.error("Error occured while updating user data", notifyConfig);
     }
   };
   useEffect(() => {
@@ -174,6 +177,7 @@ const EditUser = () => {
           </form>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

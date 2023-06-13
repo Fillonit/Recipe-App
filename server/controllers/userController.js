@@ -687,6 +687,60 @@ const editUsers = asyncHandler(async (req, res) => {
     });
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, role = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        userId = decoded.userId;
+        role = decoded.role;
+    });
+    const { currentPassword, newPassword } = req.body;
+    console.log(req.body);
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error ocurred in our part." });
+            return;
+        }
+        const request = new sql.Request();
+        const hashedOldPassword = crypto.pbkdf2Sync(currentPassword, salt, iterations, keylen, digest).toString('hex');
+        const hashedNewPassword = crypto.pbkdf2Sync(newPassword, salt, iterations, keylen, digest).toString('hex');
+        request.input('userId', sql.VarChar, userId);
+        request.input('oldPassword', sql.VarChar, hashedOldPassword);
+        request.input('newPassword', sql.VarChar, hashedNewPassword);
+        const QUERY = `DECLARE @CanChange BIT;
+                        
+                       SET @CanChange = CASE WHEN (SELECT COUNT(*)
+                                                   FROM Users
+                                                   WHERE UserId = @userId AND Password = @oldPassword) = 1 THEN 1 ELSE 0 END;
+                       IF(@CanChange = 1)
+                       BEGIN 
+                         UPDATE Users
+                         SET Password = @newPassword
+                         WHERE UserId = @userId;
+                       END`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error ocurred in our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(401).json({ message: "The data provided conflicts with our database" });
+                return;
+            }
+            res.status(200).json({ message: "Updated resource successfully." });
+        })
+    });
+});
+
 module.exports = {
     getUsers,
     register,
