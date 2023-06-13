@@ -1415,6 +1415,33 @@ const getMostLikedRecipes = asyncHandler(async (req, res, next) => {
     })
 });
 
+const randomRecipes = asyncHandler(async (req, res, next) => {
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error occurred on our part." });
+            console.log(err);
+            return;
+        }
+        const request = new sql.Request();
+        const QUERY = `SELECT TOP(1) r.RecipeId
+                       FROM Recipes r
+                       ORDER BY NEWID();`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                return;
+            }
+            if (result.recordset.length === 0) {
+                res.status(400).json({ message: "Could not get recipes." });
+                return;
+            }
+            console.log(result.recordsets[0].length);
+            res.status(200).json({ message: "Successfully fetched resource", response: result.recordset });
+            return;
+        });
+    });
+});
+
 module.exports = {
     deleteRecipe,
     addRecipe,
@@ -1434,5 +1461,7 @@ module.exports = {
     unsaveRecipe,
     getSaved,
     editRecipe,
-    getRecipePost
+    getRecipePost,
+    getRecipePosts,
+    randomRecipes
 }
