@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { ToastContainer, toast } from 'react-toastify';
@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import notifyConfig from "./notifyConfig";
 
 const EditUser = () => {
+  const image = useRef();
   const [formData, setFormData] = useState({
     username: "",
     name: "",
@@ -14,7 +15,28 @@ const EditUser = () => {
     description: "",
     profilePicture: ""
   });
+  async function setComponents() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/${localStorage.getItem('userId')}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 200) return;
+      const json = await response.json();
 
+      setFormData({
+        username: json.response.Username,
+        name: json.response.Name,
+        email: json.response.Email,
+        password: "",
+        description: json.response.Description,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,19 +44,32 @@ const EditUser = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    setFormData({
-      username: "",
-      name: "",
-      email: "",
-      password: "",
-      description: "",
-      profilePicture: ""
-    });
+    try {
+      const form = new FormData();
+      form.append('username', formData.username);
+      form.append('name', formData.name);
+      form.append('email', formData.email);
+      form.append('password', formData.password);
+      form.append('description', formData.description);
+      form.append('image', image.current.files[0]);
+      const response = await fetch(`http://localhost:5000/api/user`, {
+        method: "PUT",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        },
+        body: form
+      });
+      if (response.status !== 200) return;
+      alert("successfullly updated");
+    } catch (error) {
+      console.log(error);
+    }
   };
-
+  useEffect(() => {
+    setComponents();
+  }, [])
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 pt-24">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg">
@@ -100,7 +135,7 @@ const EditUser = () => {
               />
             </div>
             <label className="block text-xs font-lighter mb-1 float-right text-gray-400">
-              Change Password? <FontAwesomeIcon icon={faLock} className={'text-indigo-500 text-xs'}/>
+              <a href="/me/password">Change Password? <FontAwesomeIcon icon={faLock} className={'text-indigo-500 text-xs'} /></a>
             </label>
             <div>
               <label className="block text-lg font-semibold mb-1 mt-4" htmlFor="description">
@@ -123,7 +158,7 @@ const EditUser = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-indigo-500 placeholder-gray-400 text-gray-800"
                 type="file"
                 name="profilePicture"
-                onChange={handleChange}
+                ref={image}
                 accept="image/*"
                 required
               />
