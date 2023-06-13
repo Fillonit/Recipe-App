@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 export default function Notifications() {
     const [notifs, setNotifs] = useState([]);
     const [nextPage, setNextPage] = useState(2);
@@ -38,6 +41,7 @@ export default function Notifications() {
             setNotifs(json.response);
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
     useEffect(() => {
@@ -48,6 +52,7 @@ export default function Notifications() {
             {notifs.map((item) => {
                 return <h4 className={item.Seen === 1 ? "text-emerald-50" : "text-red-300"}>{item.Content}, {item.TimeDifference}</h4>
             })}
+            <ToastContainer />
         </div>
     );
 }
