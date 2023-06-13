@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ChefCard from './ChefCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faEye, faSave, faStar, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
@@ -8,6 +8,7 @@ const SingleRecipe = ({ recipe, setLike }) => {
   const totalCookTime = recipe.CookTime + recipe.PreparationTime;
   const [isSaved, setIsSaved] = useState(false);
   const [rating, setRating] = useState(recipe.Rating);
+  const [nutrition, setNutrition] = useState({});
 
   const handleSaveClick = () => {
     setIsSaved(!isSaved);
@@ -63,6 +64,24 @@ const SingleRecipe = ({ recipe, setLike }) => {
     });
   };
 
+  useEffect(() => {
+    async function fetchNutrition() {
+      try {
+        const response = await fetch(`http://localhost:5000/api/recipe/nutrition/${recipe.RecipeId}`, {
+          headers: {
+            "R-A-Token": localStorage.getItem('token'),
+          }
+        });
+        if (response.status !== 200) return;
+        const data = await response.json();
+        setNutrition(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchNutrition();
+  }, [recipe.RecipeId]);
+
   return (
     <div className="mt-32 mb-8">
       <div className="max-w-4xl mx-auto">
@@ -74,11 +93,11 @@ const SingleRecipe = ({ recipe, setLike }) => {
               <FontAwesomeIcon icon={faEye} className="text-gray-200 mr-1" />
               <span className="text-gray-300">{recipe.Views}</span>
               <FontAwesomeIcon icon={faSave} className={`text-gray-200 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={() => {
-                if (isSaved == true) unsaveRecipe();
+                if (isSaved === true) unsaveRecipe();
                 else saveRecipe()
               }} />
               <span className="text-gray-300" onClick={() => {
-                if (isSaved == true) unsaveRecipe();
+                if (isSaved === true) unsaveRecipe();
                 else saveRecipe()
               }}>{isSaved ? 'Saved' : 'Save'}</span>
               <FontAwesomeIcon icon={faClock} className="text-gray-200 ml-4 mr-1" />
@@ -122,12 +141,21 @@ const SingleRecipe = ({ recipe, setLike }) => {
             <div className="flex items-center mt-4">
               <h1 className="mr-2">{recipe.Likes}</h1>
               <button
-                className={`px-4 py-2 text-white rounded ${recipe.AlreadyLiked == 1 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
+                className={`px-4 py-2 text-white rounded ${recipe.AlreadyLiked === 1 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
                   }`}
                 onClick={() => setLike(recipe.AlreadyLiked)}
               >
                 <FontAwesomeIcon icon={faThumbsUp} />
               </button>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Nutrition</h3>
+              <ul className="list-disc list-inside text-gray-600">
+                <li>Protein: {nutrition.protein} g</li>
+                <li>Calories: {nutrition.calories} kcal</li>
+                <li>Fats: {nutrition.fats} g</li>
+                <li>Carbs: {nutrition.carbs} g</li>
+              </ul>
             </div>
           </div>
           {/* <div className="mt-8">
