@@ -68,12 +68,20 @@ const addComment = asyncHandler(async (req, res) => {
                                  
                                  DECLARE @CommentId INT;
                                  SELECT @CommentId = MAX(CommentId) FROM Comments;
-                              
-                                 SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited, 1 AS CanEdit, 0 AS AlreadyLiked 
+                                 
+                                 SELECT Content, Username, Likes, CreatedAt, CommentId, Edited, CanEdit, AlreadyLiked,
+                                 CASE
+                                     WHEN diff < 60 THEN CAST(diff AS VARCHAR(10))+ 's'
+                                     WHEN diff < 3600 THEN CAST(CAST(diff/60 AS INT) AS VARCHAR(10))+ 'm'
+                                     WHEN diff < 86400 THEN CAST(CAST(diff/3600 AS INT) AS VARCHAR(10))+ 'h'
+                                     WHEN diff < 604800 THEN CAST(CAST(diff/86400 AS INT) AS VARCHAR(10))+ 'd'
+                                     ELSE CAST(CAST(diff/604800 AS INT) AS VARCHAR(10))+'w'
+                                 END AS TimeDifference
+                                 FROM(SELECT c.Content, u.Username, c.Likes, DATEDIFF_BIG(SECOND, c.CreatedAt, GETDATE()) AS diff, c.CommentId, c.Edited, 1 AS CanEdit, 0 AS AlreadyLiked 
                                  FROM Comments c
                                     JOIN Users u
                                     ON u.UserId = c.UserId
-                                 WHERE CommentId = @commentId;
+                                 WHERE CommentId = @commentId) AS subquery;
 
                                 END TRY
                                 BEGIN CATCH
@@ -92,6 +100,7 @@ const addComment = asyncHandler(async (req, res) => {
                 res.status(500).json({ message: "Could not insert the resource." });
                 return;
             }
+            console.log(result.recordset);
             res.status(201).json({ message: "Successfully added resource.", response: result.recordset });
         });
     });

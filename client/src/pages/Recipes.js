@@ -27,6 +27,7 @@ function Recipes() {
       setTotalPages(json.response[1][0].TotalPages);
       setIsLoading(false);
     } catch (error) {
+      console.log("error:");
       console.log(error);
     }
   }

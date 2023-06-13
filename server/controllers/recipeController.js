@@ -532,13 +532,21 @@ const getRecipePost = asyncHandler(async (req, res, next) => {
                                  ON c.CuisineId = r.CuisineId
                              WHERE RecipeId = @recipeId;
                              
-                             SELECT c.Content, u.Username, c.Likes, c.CreatedAt, c.CommentId, c.Edited,
+                             SELECT Content, Username, Likes, CommentId, Edited, CanEdit, AlreadyLiked,
+                             CASE
+                                 WHEN diff < 60 THEN CAST(diff AS VARCHAR(10))+ 's'
+                                 WHEN diff < 3600 THEN CAST(CAST(diff/60 AS INT) AS VARCHAR(10))+ 'm'
+                                 WHEN diff < 86400 THEN CAST(CAST(diff/3600 AS INT) AS VARCHAR(10))+ 'h'
+                                 WHEN diff < 604800 THEN CAST(CAST(diff/86400 AS INT) AS VARCHAR(10))+ 'd'
+                                 ELSE CAST(CAST(diff/604800 AS INT) AS VARCHAR(10))+'w'
+                             END AS TimeDifference
+                             FROM(SELECT c.Content, u.Username, c.Likes, DATEDIFF_BIG(SECOND, c.CreatedAt, GETDATE()) AS diff, c.CommentId, c.Edited,
                               (SELECT COUNT(*) FROM Comments WHERE (CommentId = c.CommentId AND c.UserId = @userId) OR (@role = 'admin' AND CommentId = c.CommentId)) AS CanEdit,
                               (SELECT COUNT(*) FROM CommentLikes WHERE UserId = @userId AND CommentId = c.CommentId) AS AlreadyLiked 
                              FROM Comments c
                                 JOIN Users u
                                 ON u.UserId = c.UserId
-                             WHERE RecipeId = @recipeId
+                             WHERE RecipeId = @recipeId) AS subquery;
 
                              SELECT i.Name, ri.Amount, u.UnitName
                              FROM RecipeIngredients ri
@@ -595,7 +603,7 @@ const getRecipe = asyncHandler(async (req, res, next) => {
         isValid = true;
     });
     if (!isValid) return;
-    console.log("here2");
+    console.log("here2222");
     if (id === undefined) {
         // res.status(401).json({ message: "Not all required information was provided." });
         responses.inputsNotProvided(res);

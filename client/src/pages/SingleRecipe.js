@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 // import ChefCard from '../components/ChefCard';
 import SingleRecipe from '../components/SingleRecipe';
 import { useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faPen, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
+
 const RecipePage = () => {
   const { id } = useParams();
   const [data, setData] = useState({});
@@ -173,22 +176,70 @@ const RecipePage = () => {
   if (Object.keys(data).length !== 0)
     return (
       <div>
-        <SingleRecipe recipe={data} />
-        <h1>LIKES: {data.Likes}</h1>
-        <button onClick={() => {
-          setLike(data.AlreadyLiked);
-        }}>{data.AlreadyLiked === true ? 'UNLIKE' : 'LIKE'}</button><br />
-        <input ref={comment} type='text' /><button onClick={publishComment}>COMMENT</button>
-        <ol>
-          {data.comments.map((item, index) => {
-            return <> <li>{item.Username}: {item.editingMode ? <input value={comments[index]} ref={item.ref} onChange={(e) => { handleCommentChange(e, index) }} type='text' /> : item.Content}, {new Date(item.CreatedAt).toLocaleString()}, Likes: {item.Likes}</li><button onClick={() => {
-              likeComment(item.AlreadyLiked, item.CommentId, index);
-            }}>{item.AlreadyLiked === 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit == 1 && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
-              if (item.editingMode === true) editComment(item.CommentId, item.ref, index);
-              else setEditingMode(index);
-            }}>{item.editingMode ? 'CONFIRM EDIT' : "EDIT"}</button></>}</>
-          })}
-        </ol>
+        <SingleRecipe recipe={data} setLike={setLike} />
+        <div className="w-full h-auto flex flex-col items-center">
+          <div className="mt-4">
+            <textarea ref={comment} type="text" className="w-full px-4 py-2 border border-gray-300 rounded" ></textarea>
+            <button
+              className="px-4 py-2 ml-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+              onClick={publishComment}
+            >
+              COMMENT
+            </button>
+          </div>
+
+          <ol className="mt-4 w-full h-auto flex flex-col items-center">
+            {data.comments.map((item, index) => (
+              <div className="w-1/2 h-200 border-2 border-black p-2">
+                <li key={item.CommentId} className="mb-4 h-200">
+                  <div className="flex w-full h-100">
+                    <div className="flex items-center mb-2 w-1/2">
+                      <span className="mr-2 font-bold">{item.Username}:</span>
+                      {item.editingMode ? (
+                        <input
+                          value={comments[index]}
+                          ref={item.ref}
+                          onChange={(e) => handleCommentChange(e, index)}
+                          type="text"
+                          className="w-full px-4 py-2 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        <span>{item.Content}</span>
+                      )}
+                      <span className="ml-2 text-xs text-gray-500">{item.TimeDifference} ago</span>
+                      <span className="ml-2 text-xs text-gray-500">{item.Edited === 1 ? "(Edited)" : ""}</span>
+                    </div>
+                    <div className="w-1/2 h-100 flex justify-end">
+                      <FontAwesomeIcon className="px-4 py-2 ml-2 text-gray hover:text-gray-600 cursor-pointer"
+                        onClick={() => {
+                          if (item.editingMode) editComment(item.CommentId, item.ref, index);
+                          else setEditingMode(index);
+                        }} icon={faPen} />
+                      <FontAwesomeIcon className="px-4 py-2 ml-2 text-red-400 rounded hover:text-red-700 cursor-pointer"
+                        onClick={() => deleteComment(item.CommentId, index)} icon={faTrash} />
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <button
+                      className={`px-4 py-2 text-white rounded ${item.AlreadyLiked ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
+                        }`}
+                      onClick={() => likeComment(item.AlreadyLiked, item.CommentId, index)}
+                    >
+                      <FontAwesomeIcon icon={faThumbsUp} />
+                    </button>
+                    {item.CanEdit === 1 && (
+                      <>
+                        <button
+
+                        >
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </li></div>
+            ))}
+          </ol>
+        </div>
       </div>
     );
 };

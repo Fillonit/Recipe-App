@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import ChefCard from './ChefCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faEye, faSave, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faEye, faSave, faStar, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
 
-const SingleRecipe = ({ recipe }) => {
+const SingleRecipe = ({ recipe, setLike }) => {
   console.log(recipe);
   const totalCookTime = recipe.CookTime + recipe.PreparationTime;
   const [isSaved, setIsSaved] = useState(false);
@@ -40,7 +40,6 @@ const SingleRecipe = ({ recipe }) => {
       console.log(error);
     }
   }
-
   const handleRatingClick = (newRating) => {
     setRating(newRating);
     const stars = document.querySelectorAll('.fa-star');
@@ -119,6 +118,16 @@ const SingleRecipe = ({ recipe }) => {
                   <li key={index} className="mb-2">{instruction.StepDescription}</li>
                 ))}
               </ol>
+            </div>
+            <div className="flex items-center mt-4">
+              <h1 className="mr-2">{recipe.Likes}</h1>
+              <button
+                className={`px-4 py-2 text-white rounded ${recipe.AlreadyLiked == 1 ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
+                  }`}
+                onClick={() => setLike(recipe.AlreadyLiked)}
+              >
+                <FontAwesomeIcon icon={faThumbsUp} />
+              </button>
             </div>
           </div>
           {/* <div className="mt-8">
