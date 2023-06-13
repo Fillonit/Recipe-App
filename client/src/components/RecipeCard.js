@@ -66,7 +66,7 @@ const RecipeCard = ({ recipe }) => {
                     {(localStorage.getItem('role') == 'admin' || localStorage.getItem('userId') == recipe.ChefId) && <div>
                         {optionsDisplayed && <div style={{ transform: "translate(-100%, -10%)" }} className='absolute w-20 h-12 bg-gray-100 rounded-lg overflow-hidden'>
                             <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400 w-full cursor-pointer' onClick={deleteRecipe}>DELETE</div>
-                            <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400  w-full cursor-pointer'>EDIT</div>
+                            <div className='flex justify-center items-center bg-gray-200 h-1/2 hover:bg-gray-400  w-full cursor-pointer'><a href={`/edit/${recipe.RecipeId}`}>EDIT</a></div>
                         </div>}
                         <div onClick={displayOptions} className='mr-3 cursor-pointer w-6 h-8 flex flex-col items-center rounded-full hover:bg-gray-300 justify-evenly'>
                             <div className='rounded-full bg-black h-1 w-1'></div>

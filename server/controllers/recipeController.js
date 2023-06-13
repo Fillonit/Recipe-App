@@ -14,7 +14,113 @@ const config = {
     }
 };
 const TOKEN_KEY = process.env.TOKEN_KEY;
+const editRecipe = asyncHandler(async (req, res) => {
+    const token = req.headers['r-a-token'];
+    let userId, isValid = false;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            res.status(401).json({ message: "Token is invalid" });
+            return;
+        }
+        isValid = true;
+        userId = decoded.userId;
+    });
+    if (!isValid) return;
+    const title = req.body.title, description = req.body.description;
+    const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;
+    const cookTime = req.body.cookTime, servings = req.body.servings;
+    const steps = req.body.steps.split(","), prepTime = req.body.preparationTime;
+    const tags = req.body.tags.split(",");
+    for (let i = 0; i < ingredients.length; i++)
+        ingredients[i] = ingredients[i].split("-");
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "An error occurred on our part." })
+            return;
+        }
+        const request = new sql.Request();
+        const recipeId = req.params.id;
+        request.input('recipeId', sql.VarChar, recipeId);
+        request.input('title', sql.VarChar, title);
+        request.input('description', sql.VarChar, description);
+        request.input('servings', sql.Int, servings);
+        request.input('cookTime', sql.Int, cookTime);
+        request.input('preparationTime', sql.Int, prepTime);
+        request.input('cuisineId', sql.Int, cuisineId);
+        request.input('userId', sql.Int, userId);
+        if (req.file !== undefined)
+            request.input('imageUrl', sql.VarChar, `http://localhost:5000/images/${req.file.filename}`);
+        let QUERY = `BEGIN TRANSACTION
+                        BEGIN TRY
+                         DECLARE @CanEdit BIT;
+                         
+                         SET @CanEdit = CASE WHEN (SELECT COUNT(*)
+                                                   FROM Recipes
+                                                   WHERE RecipeId = @recipeId AND ChefId = @userId) = 1 THEN 1 ELSE 0 END;
+                         IF(@CanEdit = 1)
+                         BEGIN 
+                           DELETE FROM RecipeTags
+                           WHERE RecipeId = @recipeId;
 
+                           DELETE FROM RecipeIngredients
+                           WHERE RecipeId = @recipeId;
+
+                           DELETE FROM Steps
+                           WHERE RecipeId = @recipeId;
+
+                           UPDATE Recipes
+                           SET Title = @title, Description = @description, CookTime = @cookTime, Servings = @servings, CuisineId = @cuisineId${req.file !== undefined ? ", ImageUrl = @imageUrl" : ""}
+                           WHERE RecipeId = @recipeId;`;
+
+
+        let i = 0;
+        for (const ingredient of ingredients) {
+            request.input('ingredient' + i, sql.Int, ingredient[0]);
+            request.input('amount' + i, sql.Int, ingredient[1]);
+            request.input('unit' + i, sql.VarChar, ingredient[2]);
+            QUERY += `INSERT INTO RecipeIngredients(RecipeId, IngredientId, Amount, Unit)
+                           VALUES (@recipeId, @ingredient${i}, @amount${i}, @unit${i});`
+            i++;
+        }
+        i = 1;
+        for (const step of steps) {
+            request.input('step' + i, sql.VarChar, step);
+            QUERY += `INSERT INTO Steps (RecipeId, StepNumber, StepDescription)
+                           VALUES (@recipeId, ${i}, @step${i});`
+            i++;
+        }
+        i = 0;
+        for (const tagId of tags) {
+            request.input('tag' + i, sql.Int, tagId);
+            QUERY += `INSERT INTO RecipeTags(TagId, RecipeId) VALUES (@tag${i}, @recipeId);`;
+            i++;
+        }
+        QUERY += `END
+                 END TRY
+                 BEGIN CATCH
+                   THROW;
+                   ROLLBACK;
+                 END CATCH;
+                COMMIT;`
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
+                return;
+            }
+            if (result.rowsAffected === 0) {
+                res.status(404).json({ message: "Could not find resource." });
+                return;
+            }
+            res.status(200).json({ message: "Recipe deleted successfully." });
+            return;
+        })
+    })
+});
 const deleteRecipe = asyncHandler(async (req, res) => {
     const token = req.headers['r-a-token'];
     let userId, isValid = false, role;
@@ -210,7 +316,6 @@ const addRecipe = asyncHandler(async (req, res) => {
                 res.status(401).json({ message: "Invalid information." })
                 return;
             }
-            console.log("Rows affected: " + result.rowsAffected);
             res.status(201).json({ message: "Recipe was successfully added." });
             return;
         });
@@ -309,7 +414,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
     });
 });
 
-const getRecipe = asyncHandler(async (req, res, next) => {
+const getRecipePost = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const token = req.headers['r-a-token'];
     console.log("here1");
@@ -453,6 +558,90 @@ const getRecipe = asyncHandler(async (req, res, next) => {
                                JOIN Tags t
                                ON t.TagId = rt.TagId
                              WHERE rt.RecipeId = @recipeId
+                          END TRY
+                          BEGIN CATCH
+                            THROW;
+                            ROLLBACK;
+                          END CATCH;
+                        COMMIT;`;
+        request.query(QUERY, (err, result) => {
+            if (err) {
+                console.log(err);
+                // res.status(500).json({ message: "An error happened on our part." })
+                responses.serverError(res);
+                return;
+            }
+            responses.resourceFetched(res, result.recordsets);
+            return;
+        })
+    })
+});
+const getRecipe = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+    const token = req.headers['r-a-token'];
+    console.log("here1");
+    let userId = null, isValid = false, role = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            responses.tokenNoPermission(res);
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            responses.tokenExpired(res);
+            return;
+        }
+        role = decoded.role;
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+    console.log("here2");
+    if (id === undefined) {
+        // res.status(401).json({ message: "Not all required information was provided." });
+        responses.inputsNotProvided(res);
+        return;
+    }
+    if (isNaN(Number(id))) {
+        // res.status(401).json({ message: "Information is not in the expected format." });
+        responses.invalidDataType(res);
+        return;
+    }
+    if (id < 0) {
+        // res.status(401).json({ message: "Information was in the expected format, but values were invalid." });
+        responses.inputsInvalid(res);
+        return;
+    }
+    sql.connect(config, (err) => {
+        if (err) {
+            res.status(500).json({ message: "A mistake happened on our part." });
+            // res.status(500).json({ message: "A mistake happened on our part." });
+            responses.serverError(res);
+            return;
+        }
+        const request = new sql.Request();
+        request.input('recipeId', sql.Int, id);
+        request.input('userId', sql.Int, userId);
+        request.input('role', sql.VarChar, role);
+        const QUERY = `BEGIN TRANSACTION;
+                          BEGIN TRY
+                             SELECT * 
+                             FROM Recipes
+                             WHERE RecipeId = @recipeId;
+
+                             SELECT * 
+                             FROM RecipeIngredients
+                             WHERE RecipeId = @recipeId;
+
+                             SELECT t.TagId, t.Name
+                             FROM RecipeTags rt
+                               JOIN Tags t
+                               ON t.TagId = rt.TagId
+                             WHERE RecipeId = @recipeId;
+
+                             SELECT * 
+                             FROM Steps
+                             WHERE RecipeId = @recipeId
+                             ORDER BY StepNumber DESC;
                           END TRY
                           BEGIN CATCH
                             THROW;
@@ -1236,4 +1425,6 @@ module.exports = {
     saveRecipe,
     unsaveRecipe,
     getSaved,
+    editRecipe,
+    getRecipePost
 }

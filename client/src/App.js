@@ -13,7 +13,7 @@ import Recipes from './pages/Recipes';
 import Random from './pages/Random';
 import Dashboard from './pages/Dashboard';
 import Dashboard2 from './pages/Dashboard2';
-// import Footer from './components/Footer';
+import EditRecipe from './components/EditRecipe';
 import Contact from './components/Contact';
 import PublishRecipe from './components/Recipe/PublishRecipe';
 import Footer from './components/Footer';
@@ -47,6 +47,7 @@ function App() {
           <Route path="/random" element={<Random />} />
           <Route path="/recipe/:id" element={<Recipe />} />
           <Route path="/recipe" element={<SingleRecipe />} />
+          <Route path="/edit/:id" element={<EditRecipe />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path='/saved/:id' element={<Saved />} />
           <Route path='/contact' element={<Contact />} />

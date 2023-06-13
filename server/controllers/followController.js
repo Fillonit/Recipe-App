@@ -61,7 +61,7 @@ const followChef = asyncHandler(async (req, res) => {
                            FROM Users
                            WHERE UserId = @follower;
 
-                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@follower, ' just followed you!'), GETDATE());
+                           INSERT INTO Notifications(UserId, Content, ReceivedAt) VALUES (@followee,CONCAT(@FollowerUsername, ' just followed you!'), GETDATE());
 
                            UPDATE Chef
                            SET FollowersCount = FollowersCount + 1
