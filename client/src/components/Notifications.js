@@ -24,6 +24,7 @@ export default function Notifications() {
             setNextPage(prev => prev + 1);
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
 
@@ -61,6 +62,7 @@ export default function Notifications() {
             setNextPage(prev => prev + 1)
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
     useEffect(() => {
