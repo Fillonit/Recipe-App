@@ -18,7 +18,7 @@ const Error404 = () => {
       <a
         // href="/recipes"
         onClick={() => navigate(-1)}
-        className="mt-6 px-6 py-3 rounded-lg bg-white text-indigo-600 font-semibold hover:bg-indigo-600 hover:text-white transition-colors cursor-pointer"
+        className="mt-6 px-6 py-3 rounded-lg bg-white text-indigo-600 font-semibold hover:bg-transparent hover:border-2 hover:text-white transition-colors cursor-pointer"
       >
         Go Back!
       </a>
