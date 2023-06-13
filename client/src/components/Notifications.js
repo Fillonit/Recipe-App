@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 import Notification from "./Notification";
 export default function Notifications() {
     const [notifs, setNotifs] = useState([]);
@@ -21,6 +24,7 @@ export default function Notifications() {
             setNextPage(prev => prev + 1);
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
 
@@ -39,6 +43,7 @@ export default function Notifications() {
             setNotifs(json.response);
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
     async function seeMore() {
@@ -57,6 +62,7 @@ export default function Notifications() {
             setNextPage(prev => prev + 1)
         } catch (error) {
             console.log(error)
+            toast.error('Failed to get notifications!', notifyConfig);
         }
     }
     useEffect(() => {
@@ -72,6 +78,7 @@ export default function Notifications() {
             <div className='w-full h-24 flex justify-center items-center'>
                 <h2 onClick={seeMore} className={'hover:cursor-pointer text-xl border-indigo-300 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 uppercase'}>See more?</h2>
             </div>
+            <ToastContainer />
         </div >
     );
 }
