@@ -321,6 +321,7 @@ const addRecipe = asyncHandler(async (req, res) => {
         });
     });
 });
+
 const getRecipes = asyncHandler(async (req, res, next) => {
     const { page, pageSize, search, sortBy, sortOrder } = req.query;
     const token = req.headers['r-a-token'];

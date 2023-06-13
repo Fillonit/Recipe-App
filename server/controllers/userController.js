@@ -212,7 +212,6 @@ const editUser = asyncHandler(async (req, res) => {
         })
     });
 });
-const changePassword = asyncHandler(async (req, res) => { });
 // @desc: Update user from the database
 // @route: /api/users
 // @access: Private
