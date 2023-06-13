@@ -86,17 +86,17 @@ export default function Login({ setLogIn, setUserId }) {
 
   return (
     <div className="flex h-screen bg-indigo-700">
-      <div className="w-full max-w-xs m-auto bg-indigo-100 rounded p-5">
+      <div className="w-full max-w-xs m-auto bg-indigo-100 rounded-xl p-5">
         <header>
           <img className="w-20 mx-auto mb-5" src={Icon} alt={'logo'} />
         </header>
         <div>
           <label className="block mb-2 text-indigo-500">Username</label>
-          <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="text" name="username" id={'username'} onChange={handleUsernameChange} autoComplete={'off'} />
+          <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type="text" name="username" id={'username'} onChange={handleUsernameChange} autoComplete={'off'} />
         </div>
         <div>
           <label className="block mb-2 text-indigo-500">Password</label>
-          <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200" type="password" name="password" id={'password'} onChange={handlePasswordChange} />
+          <input className="w-full p-2 mb-6 text-indigo-700 border-b-2 border-indigo-500 outline-none focus:bg-indigo-200 rounded-full" type="password" name="password" id={'password'} onChange={handlePasswordChange} />
         </div>
         <div>
           <button className="w-full bg-indigo-700 hover:bg-indigo-900 text-white font-bold py-2 px-4 mb-6 rounded" onClick={handleLogin}>Login</button>
