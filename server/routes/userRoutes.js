@@ -25,10 +25,10 @@ const {
     unmarkChefAsFavorite
 } = require('../controllers/userController');
 
-router.route('/').get(getUser).post(upload.single('image'), register);
+router.route('/').post(upload.single('image'), register).put(upload.single('image'), editUser);
 router.route('/all').get(getUsers);
 router.route('/login').post(logUserIn);
-router.route('/:id').get(getUser).put(editUser).delete(deleteUserr).patch(updateUser);
+router.route('/:id').get(getUser).delete(deleteUserr).patch(updateUser);
 router.route('/favoriteChef/:id').post(markChefAsFavorite).delete(unmarkChefAsFavorite);
 // router.route('/all').get(getUsers);
 module.exports = router;
