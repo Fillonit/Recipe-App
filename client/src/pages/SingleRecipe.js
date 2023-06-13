@@ -220,13 +220,10 @@ const RecipePage = () => {
                     </div>
                   </div>
                   <div className="flex items-center">
-                    <button
-                      className={`px-4 py-2 text-white rounded ${item.AlreadyLiked ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-500 hover:bg-gray-600'
-                        }`}
-                      onClick={() => likeComment(item.AlreadyLiked, item.CommentId, index)}
-                    >
-                      <FontAwesomeIcon icon={faThumbsUp} />
-                    </button>
+                    <h1>{item.Likes}</h1>
+                    <FontAwesomeIcon icon={faThumbsUp} className={`px-4 py-2 cursor-pointer rounded ${item.AlreadyLiked ? 'text-blue-500 hover:text-blue-600' : 'text-gray-500 hover:text-gray-600'
+                      }`}
+                      onClick={() => likeComment(item.AlreadyLiked, item.CommentId, index)} />
                     {item.CanEdit === 1 && (
                       <>
                         <button

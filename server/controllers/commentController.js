@@ -69,7 +69,7 @@ const addComment = asyncHandler(async (req, res) => {
                                  DECLARE @CommentId INT;
                                  SELECT @CommentId = MAX(CommentId) FROM Comments;
                                  
-                                 SELECT Content, Username, Likes, CreatedAt, CommentId, Edited, CanEdit, AlreadyLiked,
+                                 SELECT Content, Username, Likes, CommentId, Edited, CanEdit, AlreadyLiked,
                                  CASE
                                      WHEN diff < 60 THEN CAST(diff AS VARCHAR(10))+ 's'
                                      WHEN diff < 3600 THEN CAST(CAST(diff/60 AS INT) AS VARCHAR(10))+ 'm'
