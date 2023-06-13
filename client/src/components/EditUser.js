@@ -1,4 +1,9 @@
 import React, { useState } from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "./notifyConfig";
 
 const EditUser = () => {
   const [formData, setFormData] = useState({
@@ -94,8 +99,11 @@ const EditUser = () => {
                 required
               />
             </div>
+            <label className="block text-xs font-lighter mb-1 float-right text-gray-400">
+              Change Password? <FontAwesomeIcon icon={faLock} className={'text-indigo-500 text-xs'}/>
+            </label>
             <div>
-              <label className="block text-lg font-semibold mb-1" htmlFor="description">
+              <label className="block text-lg font-semibold mb-1 mt-4" htmlFor="description">
                 Description
               </label>
               <textarea

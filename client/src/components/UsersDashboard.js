@@ -187,7 +187,7 @@ export default function UsersDashboard() {
                         </thead>
                         <tbody>
                             {users.map((user) => (
-                                <tr key={user.UserId} className="border-b hover:bg-gray-900">
+                                <tr key={user.UserId} className="border-b hover:bg-gray-500">
                                     <td className="py-4 px-6 group-hover:bg-slate-100">{user.UserId}</td>
                                     <td className="py-4 px-6 group-hover:bg-slate-100" >{user.Username}</td>
                                     <td className="py-4 px-6 group-hover:bg-slate-100" >{user.Email == null ? "User doesnt have email." : user.Email}</td>
