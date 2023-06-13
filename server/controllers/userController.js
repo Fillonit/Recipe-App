@@ -202,7 +202,6 @@ const editUser = asyncHandler(async (req, res) => {
         })
     });
 });
-
 // @desc: Update user from the database
 // @route: /api/users
 // @access: Private
@@ -687,5 +686,6 @@ module.exports = {
     logUserIn,
     updateUser,
     markChefAsFavorite,
-    unmarkChefAsFavorite
+    unmarkChefAsFavorite,
+    changePassword
 };

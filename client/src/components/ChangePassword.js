@@ -13,13 +13,26 @@ const ChangePassword = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(passwords);
-    setPasswords({
-      currentPassword: "",
-      newPassword: ""
-    });
+    try {
+      const response = await fetch(`http://localhost:5000/api/user/changePassword`, {
+        method: "PUT",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(passwords)
+      });
+      if (response.status !== 200) return;
+      localStorage.setItem('token', '');
+      localStorage.setItem('userId', '');
+      localStorage.setItem('role', '');
+      localStorage.setItem('username', '');
+      alert("changed password");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
