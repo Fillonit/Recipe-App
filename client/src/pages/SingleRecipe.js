@@ -1,60 +1,196 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // import ChefCard from '../components/ChefCard';
 import SingleRecipe from '../components/SingleRecipe';
-
-const recipe = {
-    "ChefImage": "https://picsum.photos/800/600",
-    "ChefId": 1,
-    "Username": "Fillonit",
-    "ImageUrl": "https://picsum.photos/800/600",
-    "Title": "French Fries",
-    "CookTime": 30,
-    "Views": 20,
-    "Rating": 5,
-    "RecipeId": 1,
-    "ProfilePicture": "https://picsum.photos/800/600",
-    "Description": "French Fries are the best! They are so easy to make and taste delicious! I like to eat them with ketchup. Yum!",
-    "PreparationTime": 15,
-    "Cuisine": "French",
-    "Ingredients": [
-      "1 cup flour",
-      "1/2 cup sugar",
-      "1/2 cup milk",
-      "1/4 cup butter",
-      "1 egg",
-      "1 tsp baking powder",
-      "1/2 tsp salt"
-    ],
-    "Instructions": [
-      "Preheat oven to 350°F.",
-      "In a large bowl, cream together butter and sugar until light and fluffy.",
-      "Beat in egg and milk.",
-      "In a separate bowl, combine flour, baking powder, and salt.",
-      "Gradually add dry ingredients to wet mixture, mixing until just combined.",
-      "Pour batter into greased 9x9 inch baking dish.",
-      "Bake for 25-30 minutes, or until golden brown and a toothpick inserted into the center comes out clean."
-    ]
-  };
-
+import { useParams } from 'react-router-dom';
 const RecipePage = () => {
-    const [recipeData, setRecipeData] = useState(null);
-  
-    useEffect(() => {
-      fetch('/api/recipe/12')
-        .then(response => response.json())
-        .then(data => setRecipeData(data))
-        .catch(error => console.error(error));
-    }, []);
-  
+  const { id } = useParams();
+  const [data, setData] = useState({});
+  const comment = useRef();
+  const [comments, setComments] = useState([]);
+  async function likeComment(liked, id, index) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/like/${id}`, {
+        method: liked === 1 ? "DELETE" : "POST",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== (liked === 1 ? 204 : 201)) return;
+      setData((prev) => {
+        const newComments = prev.comments.slice();
+        newComments[index] = {
+          ...newComments[index],
+          AlreadyLiked: liked === 1 ? 0 : 1,
+          Likes: liked === 1 ? newComments[index].Likes - 1 : newComments[index].Likes + 1
+        }
+        return { ...prev, comments: newComments };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function publishComment() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments`, {
+        method: "POST",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          comment: comment.current.value,
+          recipeId: id
+        })
+      });
+      if (response.status !== 201) return;
+      const json = await response.json();
+      setComments((prev) => {
+        return [...prev, json.response[0].Content];
+      })
+      setData((prev) => {
+        return { ...prev, comments: [...prev.comments, json.response[0]] };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  console.log(data);
+  async function setComponents() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipe/get/${id}`, {
+        method: "GET",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 200) return;
+      const json = await response.json();
+      console.log(json.response);
+      const obj = {};
+      for (const prop in json.response[0][0])
+        obj[prop] = json.response[0][0][prop];
+      const comments = [...json.response[1]];
+      for (let i = 0; i < comments.length; i++)
+        if (comments[i].IsOwnComment === 1) comments[i]['editingMode'] = false;
+      obj["comments"] = [...comments];
+      obj["ingredients"] = json.response[2].slice();
+      obj['steps'] = json.response[3].slice();
+      console.log(obj)
+      for (let i = 0; i < comments.length; i++)
+        comments[i] = comments[i].Content
+      setComments([...comments]);
+      setData(obj);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  function handleCommentChange(e, index) {
+    setComments((prev) => {
+      const comments = [...prev];
+      comments[index] = e.target.value;
+      return comments
+    })
+  }
+  async function editComment(commentId, ref, index) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+        method: "PUT",
+        headers: {
+          'R-A-Token': localStorage.getItem('token'),
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: comments[index]
+        })
+      });
+      if (response.status !== 200) return;
+      const json = await response.json();
+      setComments((prev) => {
+        const comments = [...prev];
+        comments[index] = json.response;
+        return comments;
+      })
+      setData((prev) => {
+        const comments = [...prev.comments];
+        comments[index] = { ...comments[index], Content: json.response, editingMode: false, Edited: true };
+        return { ...prev, comments: comments };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  console.log(comments);
+  async function setLike(liked) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipe/like/${id}`, {
+        method: liked === true ? "DELETE" : "POST",
+        headers: {
+          'R-A-Token': localStorage.getItem('token')
+        }
+      });
+      console.log(liked + ", " + response.status);
+      if (response.status !== (liked === true ? 204 : 201)) return;
+      setData((prev) => {
+        return { ...prev, AlreadyLiked: !liked, Likes: liked === true ? prev.Likes - 1 : prev.Likes + 1 };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function deleteComment(commentId, index) {
+    try {
+      const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+        method: "DELETE",
+        headers: {
+          'r-a-token': localStorage.getItem('token')
+        }
+      });
+      if (response.status !== 204) return;
+      setComments((prev) => {
+        const comments = [...prev.slice(0, index), ...prev.slice(index + 1, prev.length)];
+        return comments;
+      })
+      setData((prev) => {
+        const comments = [...prev.comments.slice(0, index), ...prev.comments.slice(index + 1, prev.comments.length)];
+        return { ...prev, comments: comments };
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  function setEditingMode(index) {
+    setData((prev) => {
+      const comments = [...prev.comments];
+      comments[index] = { ...comments[index], editingMode: true };
+      return { ...prev, comments: [...comments] };
+    })
+  }
+  useEffect(() => {
+    setComponents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (Object.keys(data).length !== 0)
     return (
       <div>
-        {recipeData ? (
-          <SingleRecipe recipe={recipeData} />
-        ) : (
-          <SingleRecipe recipe={recipe} />
-        )}
+        <SingleRecipe recipe={data} />
+        <h1>LIKES: {data.Likes}</h1>
+        <button onClick={() => {
+          setLike(data.AlreadyLiked);
+        }}>{data.AlreadyLiked === true ? 'UNLIKE' : 'LIKE'}</button><br />
+        <input ref={comment} type='text' /><button onClick={publishComment}>COMMENT</button>
+        <ol>
+          {data.comments.map((item, index) => {
+            return <> <li>{item.Username}: {item.editingMode ? <input value={comments[index]} ref={item.ref} onChange={(e) => { handleCommentChange(e, index) }} type='text' /> : item.Content}, {new Date(item.CreatedAt).toLocaleString()}, Likes: {item.Likes}</li><button onClick={() => {
+              likeComment(item.AlreadyLiked, item.CommentId, index);
+            }}>{item.AlreadyLiked === 1 ? 'UNLIKE' : "LIKE"}</button>{item.CanEdit == 1 && <><button onClick={() => { deleteComment(item.CommentId, index) }} style={{ marginLeft: "5px" }}>DELETE</button><button style={{ marginLeft: "5px" }} onClick={() => {
+              if (item.editingMode === true) editComment(item.CommentId, item.ref, index);
+              else setEditingMode(index);
+            }}>{item.editingMode ? 'CONFIRM EDIT' : "EDIT"}</button></>}</>
+          })}
+        </ol>
       </div>
     );
-  };
-  
-  export default RecipePage;
+};
+
+export default RecipePage;

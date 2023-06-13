@@ -45,8 +45,7 @@ function App() {
           <Route path="/users/:id" element={<Profile />} />
           <Route path="/about" element={<About />} />
           <Route path="/random" element={<Random />} />
-          <Route path="/recipe/:id" element={<Recipe />} />
-          <Route path="/recipe" element={<SingleRecipe />} />
+          <Route path="/recipe/:id" element={<SingleRecipe />} />
           <Route path="/edit/:id" element={<EditRecipe />} />
           <Route path="/recipes" element={<Recipes />} />
           <Route path='/saved/:id' element={<Saved />} />

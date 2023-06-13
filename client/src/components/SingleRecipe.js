@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faEye, faSave, faStar } from '@fortawesome/free-solid-svg-icons';
 
 const SingleRecipe = ({ recipe }) => {
+  console.log(recipe);
   const totalCookTime = recipe.CookTime + recipe.PreparationTime;
   const [isSaved, setIsSaved] = useState(false);
   const [rating, setRating] = useState(recipe.Rating);
@@ -11,6 +12,34 @@ const SingleRecipe = ({ recipe }) => {
   const handleSaveClick = () => {
     setIsSaved(!isSaved);
   };
+  async function saveRecipe() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {
+        method: "POST",
+        headers: {
+          "R-A-Token": localStorage.getItem('token'),
+        }
+      });
+      if (response.status !== 201) return;
+      setIsSaved(true);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async function unsaveRecipe() {
+    try {
+      const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {
+        method: "DELETE",
+        headers: {
+          "R-A-Token": localStorage.getItem('token'),
+        }
+      });
+      if (response.status !== 204) return;
+      setIsSaved(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const handleRatingClick = (newRating) => {
     setRating(newRating);
@@ -45,8 +74,14 @@ const SingleRecipe = ({ recipe }) => {
             <div className="flex items-center mt-2">
               <FontAwesomeIcon icon={faEye} className="text-gray-200 mr-1" />
               <span className="text-gray-300">{recipe.Views}</span>
-              <FontAwesomeIcon icon={faSave} className={`text-gray-200 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={handleSaveClick} />
-              <span className="text-gray-300">{isSaved ? 'Saved' : 'Save'}</span>
+              <FontAwesomeIcon icon={faSave} className={`text-gray-200 ml-4 mr-1 cursor-pointer ${isSaved ? 'text-green-500' : ''}`} onClick={() => {
+                if (isSaved == true) unsaveRecipe();
+                else saveRecipe()
+              }} />
+              <span className="text-gray-300" onClick={() => {
+                if (isSaved == true) unsaveRecipe();
+                else saveRecipe()
+              }}>{isSaved ? 'Saved' : 'Save'}</span>
               <FontAwesomeIcon icon={faClock} className="text-gray-200 ml-4 mr-1" />
               <span className="text-gray-300">Total time: {totalCookTime} min (prep: {recipe.PreparationTime} min)</span>
             </div>
@@ -72,17 +107,17 @@ const SingleRecipe = ({ recipe }) => {
             <div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Ingredients</h3>
               <ul className="list-disc list-inside text-gray-600">
-                {recipe.Ingredients.map((ingredient, index) => (
-                  <li key={index} className="mb-2">{ingredient}</li>
+                {recipe.ingredients.map((ingredient, index) => (
+                  <li key={index} className="mb-2">{ingredient.Name}</li>
                 ))}
               </ul>
             </div>
             <div>
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Instructions</h3>
               <ol className="list-decimal list-inside text-gray-600">
-                {recipe.Instructions.map((instruction, index) => (
-                  <li key={index} className="mb-2">{instruction}</li>
-                ))} 
+                {recipe.steps.map((instruction, index) => (
+                  <li key={index} className="mb-2">{instruction.StepDescription}</li>
+                ))}
               </ol>
             </div>
           </div>

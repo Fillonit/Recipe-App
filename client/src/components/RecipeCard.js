@@ -30,7 +30,6 @@ const RecipeCard = ({ recipe }) => {
             if (response.status !== 201) return;
             setIsSaved(true);
         } catch (error) {
-            setIsSaved(true);
             console.log(error);
         }
     }
@@ -45,7 +44,6 @@ const RecipeCard = ({ recipe }) => {
             if (response.status !== 204) return;
             setIsSaved(false);
         } catch (error) {
-            setIsSaved(false);
             console.log(error);
         }
     }

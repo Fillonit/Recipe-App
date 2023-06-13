@@ -524,7 +524,7 @@ const getRecipePost = asyncHandler(async (req, res, next) => {
                              WHERE RecipeId = @recipeId;
 
                              SELECT r.Title, r.Description,r.ImageUrl, r.Rating, r.Views,r.CreatedAt, c.Name, u.Username, @LikesCount AS Likes, @AlreadyLiked AS AlreadyLiked,
-                             @Proteins AS Proteins, @Calories AS Calories, @Carbs AS Carbs, @Fats AS Fats
+                             @Proteins AS Proteins, @Calories AS Calories, @Carbs AS Carbs, @Fats AS Fats, r.PreparationTime, r.CookTime, r.RecipeId
                              FROM Recipes r
                                JOIN Users u 
                                ON u.UserId = r.ChefId
