@@ -48,7 +48,7 @@ export default function UsersDashboard() {
                 'rows': 4
             }
         });
-        if (usersResponse.status !== 200) return;
+        if (usersResponse.status !== 200) return toast.error(`An error has occured!`, notifyConfig);
         const json = await usersResponse.json();
         setLastPage(page);
         setUsers(json.response);
@@ -85,6 +85,7 @@ export default function UsersDashboard() {
             { name: 'admins', value: chartData.response[1][0].Count }])
         } catch (err) {
             console.log(err);
+            toast.error(`An error has occured!`, notifyConfig);
         }
     }
     async function searchUsers() {
@@ -98,13 +99,14 @@ export default function UsersDashboard() {
                     'rows': 4
                 }
             });
-            if (response.status !== 200) return;
+            if (response.status !== 200) return toast.error(`An error has occured!`, notifyConfig);
             const users = await response.json();
             setUsers(users.response);
             setSearchString(currentSearchString.current.value);
             setLastPage(1);
         } catch (error) {
             console.log(error);
+            toast.error(`An error has occured!`, notifyConfig);
         }
     }
     const colorRange = ['#FF7F0E', '#1F77B4', '#93C572']
