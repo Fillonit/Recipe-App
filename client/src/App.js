@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './components/HomePage';
 import Profile from './pages/Profile';
 import About from './pages/About';
-import Recipe from './pages/Recipe';
+// import Recipe from './pages/Recipe';
 import SingleRecipe from './pages/SingleRecipe';
 import Recipes from './pages/Recipes';
 import Random from './pages/Random';
@@ -28,6 +28,7 @@ import DashboardContacts from './components/DashboardContacts';
 import Insights from './components/Insights';
 import NotFound from './components/NotFound';
 import Notifications from './components/Notifications';
+import EditUser from './components/EditUser';
 function App() {
   const [userId, setUserId] = useState(localStorage.getItem('userId'));
   return (
@@ -59,6 +60,7 @@ function App() {
           <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/dashboard/users' element={<UsersDashboard />} />
           <Route path='/dashboard/contacts' element={<DashboardContacts />} />
+          <Route path='/me/edit' element={<EditUser />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         {
