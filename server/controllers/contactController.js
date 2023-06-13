@@ -54,8 +54,10 @@ const getContacts = asyncHandler(async (req, res, next) => {
         request.input('offset', sql.Int, (page - 1) * rows);
         request.input('rows', sql.Int, rows);
         console.log(request.parameters)
-        const QUERY = `SELECT c.Name, c.Description, c.CreatedAt, c.ContactId, c.Email
+        const QUERY = `SELECT u.Username, c.Description, c.CreatedAt, c.ContactId, u.Email, u.UserId
                        FROM Contacts c
+                         JOIN Users u
+                         ON u.UserId = c.UserId
                        ORDER BY c.CreatedAt DESC
                        OFFSET @offset ROWS
                        FETCH NEXT @rows ROWS ONLY;`;
@@ -73,7 +75,26 @@ const getContacts = asyncHandler(async (req, res, next) => {
     })
 });
 const createContact = asyncHandler(async (req, res) => {
-    const email = req.body.email, name = req.body.name, description = req.body.description;
+    const token = req.headers['r-a-token'];
+    let isValid = false, userId = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            responses.tokenNoPermission(res);
+            return;
+        }
+        if (Date.now() / 1000 > decoded.exp) {
+            responses.tokenExpired(res);
+            return;
+        }
+        if (decoded.role != 'admin') {
+            res.status(403).json({ message: "You do not have access to this resource" });
+            return;
+        }
+        userId = decoded.userId;
+        isValid = true;
+    });
+    if (!isValid) return;
+    const description = req.body.description;
 
     sql.connect(config, (error) => {
         if (error) {
@@ -82,17 +103,20 @@ const createContact = asyncHandler(async (req, res) => {
         }
         const request = new sql.Request();
 
-        request.input('email', sql.VarChar, email);
-        request.input('name', sql.VarChar, name);
+        request.input('userId', sql.Int, userId);
         request.input('message', sql.VarChar, description);
 
         const QUERY = `BEGIN TRANSACTION
                          BEGIN TRY
                           IF(@ContactCount = 0)
                           BEGIN
-                            INSERT INTO Contacts(Name, Email, Description, CreatedAt) VALUES(@name, @email, @message, GETDATE())
+                            INSERT INTO Contacts(UserId, Description, CreatedAt) VALUES(@userId,, @message, GETDATE())
+                            DECLARE @username VARCHAR(50);
+                            SELECT @username = Username
+                            FROM Users 
+                            WHERE UserId = @userId;
                             INSERT INTO Notifications(UserId, Content, ReceivedAt) 
-                            SELECT AdminId, @name+' just sent a contact!', GETDATE()
+                            SELECT AdminId, @username+' just sent a contact!', GETDATE()
                             FROM Admin;
                           END
                          END TRY
@@ -172,7 +196,8 @@ const acceptContact = asyncHandler(async (req, res) => {
                        COMMIT;`;
         request.query(QUERY, (err, result) => {
             if (err) {
-                errorHandler(error, req, res, "");
+                res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
             if (result.rowsAffected === 0) {
