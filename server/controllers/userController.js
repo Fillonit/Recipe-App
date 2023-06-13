@@ -158,9 +158,9 @@ const logUserIn = asyncHandler(async (req, res) => {
 // @route: PUT /api/users
 // @access: Private
 const editUser = asyncHandler(async (req, res) => {
-    const token = req.body.auth;
-    let username = null, role = null;
-    jwt.verify(token, tokenKey, (err, decoded) => {
+    const token = req.headers['r-a-token'];
+    let userId = null, role = null;
+    jwt.verify(token, TOKEN_KEY, (err, decoded) => {
         if (err) {
             res.status(401).json({ message: "Token is invalid" });
             return;
@@ -169,26 +169,36 @@ const editUser = asyncHandler(async (req, res) => {
             res.status(401).json({ message: "Token is invalid" });
             return;
         }
-        username = decoded.username;
+        userId = decoded.userId;
         role = decoded.role;
     });
-    const { usernameToUpdate, password, description, email, name, profilePicture } = req.body;
-
-    if (usernameToUpdate === null || usernameToUpdate === undefined || usernameToUpdate === "" || password === null || password === undefined || password === "" || description === null || description === undefined || description === "" || email === null || email === undefined || email === "" || name === null || name === undefined || name === "" || profilePicture === null || profilePicture === undefined || profilePicture === "") {
-        res.status(401).json({ message: "You are not authorized to do this." });
-        return;
-    }
+    const { username, password, description, email, name } = req.body;
 
     sql.connect(config, (err) => {
         if (err) {
             res.status(500).json({ message: "An error ocurred in our part." });
             return;
         }
+        const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
         const request = new sql.Request();
-        const QUERY = `
-        UPDATE Users 
-        SET Username = '${usernameToUpdate}', Password = '${password}', Description = '${description}', Email = '${email}', Name = '${name}', ProfilePicture = '${profilePicture}'
-        WHERE Username = '${username}';`;
+        request.input(`username`, sql.VarChar, username);
+        request.input(`description`, sql.VarChar, description);
+        request.input(`name`, sql.VarChar, name);
+        request.input(`email`, sql.VarChar, email);
+        request.input(`password`, sql.VarChar, hashedPassword);
+        request.input(`userId`, sql.Int, userId)
+        if (req.file !== undefined) request.input(`imageUrl`, sql.VarChar, `http://localhost:5000/images/${req.file.filename}`);
+        const QUERY = ` DECLARE @CanEdit BIT;
+                           
+                        SELECT @CanEdit = CASE WHEN (SELECT COUNT(*)
+                                                     FROM Users
+                                                     WHERE UserId = @userId AND Password = @password) = 1 THEN 1 ELSE 0 END;
+                        IF(@CanEdit = 1)
+                        BEGIN
+                          UPDATE Users
+                          SET Username = @username, Description = @description, Name = @name${req.file !== undefined ? ", ProfilePicture = @imageUrl" : ""}
+                          WHERE UserId = @userId;
+                        END`;
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error ocurred in our part." });
