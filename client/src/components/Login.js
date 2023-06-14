@@ -10,7 +10,9 @@ export default function Login({ setLogIn, setUserId }) {
 
   console.log(setLogIn)
   async function handleLogin() {
-    const id = toast.loading("Loggin In...")
+    const id = toast.loading("Loggin In...", {
+      autoClose: 3000
+    })
     try {
       console.log({ username: username, password: password });
       const response = await fetch('http://localhost:5000/api/user/login', {

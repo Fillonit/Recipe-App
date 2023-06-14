@@ -134,6 +134,7 @@ const logUserIn = asyncHandler(async (req, res) => {
         const { username, password } = req.body;
         console.log(username + ", " + password);
         const hashedPassword = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
+        console.log(hashedPassword)
         const userQuery = `SELECT * FROM Users WHERE Username = '${username}' AND Password = '${hashedPassword}'`;
         const request = new sql.Request();
         request.query(userQuery, (err, result) => {

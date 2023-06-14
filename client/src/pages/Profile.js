@@ -68,7 +68,7 @@ const Profile = () => {
         }
       });
       let favorites = [], postedRecipes = [];
-      if (localStorage.getItem('userId') != id) {
+      if (localStorage.getItem('userId') !== id) {
         const favoritesResponse = await fetch(`http://localhost:5000/api/recipe/saved/${id}`, {
           method: "GET",
           headers: {
@@ -82,7 +82,7 @@ const Profile = () => {
         favorites = favoriteJson.response;
       }
       const profileJsonData = await profileResponse.json();
-      if (profileJsonData.response.Role == 'chef') {
+      if (profileJsonData.response.Role === 'chef') {
         const postedResponse = await fetch(`http://localhost:5000/api/recipe/chef/${id}`, {
           method: "GET",
           headers: {
@@ -191,7 +191,7 @@ const Profile = () => {
                 <div className="relative">
                   {
                     data.ProfilePicture === null ?
-                      <img src="https://img.freepik.com/free-icon/user_318-563642.jpg" className="shadow-xl rounded-full align-middle absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] border-indigo-500 border-2" alt="profile pic" />
+                      <img src="http://localhost:5000/images/defaultProfile.jpg" className="shadow-xl rounded-full align-middle absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] border-indigo-500 border-2" alt="profile pic" />
                       :
                       <img src={data.ProfilePicture} className="shadow-xl rounded-full align-middle absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] border-indigo-500 border-2" alt="profile pic" />
                   }
