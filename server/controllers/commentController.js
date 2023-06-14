@@ -338,16 +338,29 @@ const editComment = asyncHandler(async (req, res) => {
 
                          IF(@Count = 1)
                          BEGIN 
-                          UPDATE Comments
-                          SET Content = @content, UpdatedAt = GETDATE(), Edited = 1
-                          WHERE CommentId = @commentId;
+                          DECLARE @IsEdited BIT
+                          SET @IsEdited = CASE WHEN (SELECT COUNT(*) 
+                                                     FROM Comments 
+                                                     WHERE CommentId = @commentId AND UserId = @userId AND Content = @content) = 1 THEN 0 ELSE 1 END;
+                            IF(@IsEdited = 1)
+                            BEGIN
+                              UPDATE Comments
+                              SET Content = @content, UpdatedAt = GETDATE(), Edited = 1
+                              WHERE CommentId = @commentId;
+                            END
                          END
                          ELSE IF(@role = 'admin')
                          BEGIN
                           UPDATE Comments
                           SET Content = @content, AdminUpdatedAt = GETDATE()
                           WHERE CommentId = @commentId;
-                         END
+                        END
+                         SELECT c.Content, c.Edited
+                         FROM Comments c
+                            JOIN Users u
+                            ON u.UserId = c.UserId
+                         WHERE c.CommentId = @commentId;
+
                         END TRY
                         BEGIN CATCH
                          THROW;
@@ -360,7 +373,7 @@ const editComment = asyncHandler(async (req, res) => {
                 console.log(err);
                 return;
             }
-            res.status(200).json({ message: "Successfully updated resource.", response: content });
+            res.status(200).json({ message: "Successfully updated resource.", response: result.recordset });
         });
     });
 });

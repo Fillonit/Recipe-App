@@ -110,12 +110,12 @@ const RecipePage = () => {
       const json = await response.json();
       setComments((prev) => {
         const comments = [...prev];
-        comments[index] = json.response;
+        comments[index] = json.response[0].Content;
         return comments;
       })
       setData((prev) => {
         const comments = [...prev.comments];
-        comments[index] = { ...comments[index], Content: json.response, editingMode: false, Edited: true };
+        comments[index] = { ...comments[index], Content: json.response[0].Content, editingMode: false, Edited: json.response[0].Edited };
         return { ...prev, comments: comments };
       })
     } catch (error) {
@@ -207,7 +207,7 @@ const RecipePage = () => {
                         <span>{item.Content}</span>
                       )}
                       <span className="ml-2 text-xs text-gray-500">{item.TimeDifference} ago</span>
-                      <span className="ml-2 text-xs text-gray-500">{item.Edited === 1 ? "(Edited)" : ""}</span>
+                      <span className="ml-2 text-xs text-gray-500">{item.Edited === true ? "(Edited)" : ""}</span>
                     </div>
                     <div className="w-1/2 h-100 flex justify-end">
                       <FontAwesomeIcon className="px-4 py-2 ml-2 text-gray hover:text-gray-600 cursor-pointer"

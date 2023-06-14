@@ -24,7 +24,7 @@ export default function NotificationBell() {
     return (
         <div className="cursor-pointer relative">
             <FontAwesomeIcon className='cursor-pointer' icon={faBell} size="lg" />
-            {notificationCount !== undefined && NotificationBell != 0 &&
+            {notificationCount !== undefined && notificationCount != 0 &&
                 <div style={{ transform: "translate(70%, -150%)", border: "1px solid #3949AB" }} className="h-4 w-4 bg-red-600 absolute flex justify-center items-center rounded-full">
                     <p className='text-sm text-white'>{notificationCount}</p>
                 </div>}

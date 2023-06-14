@@ -58,7 +58,7 @@ const RecipeCard = ({ recipe }) => {
                 <div className='relative flex justify-between items-center w-full'>
                     <div className='m-2 max-w-max pl-2 pr-2 pt-1 pb-1 h-auto flex items-center justify-start'>
                         <img src={recipe.ChefImage} className='w-10 h-10 rounded-full border-2 border-t border-slate-950' alt={'Chef'} />
-                        <h1 className='ml-2 cursor-pointer'><a href={`/users/${recipe.ChefId}`}>@{recipe.Username}, {recipe.RecipeId}</a></h1>
+                        <h1 className='ml-2 cursor-pointer'><a href={`/users/${recipe.ChefId}`}>@{recipe.Username}</a></h1>
                     </div>
                     {/* eslint-disable-next-line no-mixed-operators */}
                     {(localStorage.getItem('role') == 'admin' || localStorage.getItem('userId') == recipe.ChefId) && <div>

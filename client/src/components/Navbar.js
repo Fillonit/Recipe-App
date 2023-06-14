@@ -10,11 +10,21 @@ const Navbar = ({ title, image, description, userId }) => {
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
   };
-
+  async function randomRecipe() {
+    try {
+      try {
+        const response = await fetch(`http://localhost:5000/api/recipe`);
+      } catch (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const navItems = [
     // { label: "Home", icon: <FaHome className="inline-block mr-1 ml-4 text-lg"/>, link: "/" },
     { label: "Recipes", icon: <FaUtensils className="inline-block mr-1 ml-4 text-lg" />, link: "/recipes" },
-    { label: "Random", icon: <FaRandom className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
+    { label: "Random", icon: <FaRandom onClick={randomRecipe} className="inline-block mr-1 ml-4 text-lg" />, link: "" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
     { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId ?? 1}` },

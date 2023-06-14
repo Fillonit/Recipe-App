@@ -107,7 +107,7 @@ const SingleRecipe = ({ recipe, setLike }) => {
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Ingredients</h3>
               <ul className="list-disc list-inside text-gray-600">
                 {recipe.ingredients.map((ingredient, index) => (
-                  <li key={index} className="mb-2">{ingredient.Name}</li>
+                  <li key={index} className="mb-2">{ingredient.Name}({ingredient.Amount}{ingredient.UnitName.toLowerCase()})</li>
                 ))}
               </ul>
             </div>

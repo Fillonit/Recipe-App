@@ -361,7 +361,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
     const order = sortOrder === undefined ? "" : sortOrder;
     const sortingQueries = {
         nutritients: {
-            select: `(SELECT SUM(ri.Amount*i.${mappings[sortBy].field}*u.ValueInStandardUnit) 
+            select: `, (SELECT SUM(ri.Amount*i.${mappings[sortBy].field}*u.ValueInStandardUnit) 
                            FROM RecipeIngredients ri
                              JOIN Ingredients i 
                              ON i.IngredientId = ri.IngredientId
@@ -399,9 +399,11 @@ const getRecipes = asyncHandler(async (req, res, next) => {
                        SELECT CEILING(COUNT(*)/CAST(@rows AS FLOAT)) AS TotalPages
                        FROM Recipes r
                        WHERE Title LIKE CONCAT('%', @substring,'%');`;
+        console.log(QUERY);
         request.query(QUERY, (err, result) => {
             if (err) {
                 res.status(500).json({ message: "An error occurred on our part." });
+                console.log(err);
                 return;
             }
             if (result.recordset.length === 0) {

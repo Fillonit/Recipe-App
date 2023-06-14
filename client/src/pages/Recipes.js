@@ -114,11 +114,13 @@ function Recipes() {
           onChange={event => setSortField(prev => { return { ...prev, modified: event.target.value } })}
         >
           <option value="title">Title</option>
-          <option value="cuisine">Cuisine</option>
           <option value="cookTime">Cook Time</option>
           <option value="prepTime">Preparation Time</option>
-          <option value="rating">Rating</option>
           <option value="views">Views</option>
+          <option value="proteins">Protein</option>
+          <option value="calories">Calories</option>
+          <option value="fats">Fats</option>
+          <option value="carbs">Carbohydrates</option>
         </select>
       </div>
       {isLoading ? (
