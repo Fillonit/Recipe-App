@@ -9,9 +9,9 @@ const SingleRecipe = ({ recipe, setLike }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [rating, setRating] = useState(recipe.Rating);
 
-  const handleSaveClick = () => {
-    setIsSaved(!isSaved);
-  };
+  // const handleSaveClick = () => {
+  //   setIsSaved(!isSaved);
+  // };
   async function saveRecipe() {
     try {
       const response = await fetch(`http://localhost:5000/api/recipe/save/${recipe.RecipeId}`, {
