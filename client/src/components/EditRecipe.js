@@ -102,6 +102,7 @@ export default function EditRecipe() {
     useEffect(() => {
         setComponents();
         setRecipeData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return (
         <div className="w-full h-full flex mt-36 items-center justify-start">
