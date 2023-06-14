@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ChefCard from './ChefCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faEye, faSave, faStar, faThumbsUp } from '@fortawesome/free-solid-svg-icons';
