@@ -37,7 +37,7 @@ const {
     randomRecipes
 } = require('../controllers/recipeController');
 
-3
+router.route('/randomRecipe').get(randomRecipes);
 router.route('/save/:id').post(saveRecipe).delete(unsaveRecipe);
 router.route('/saved/:id').get(getSaved);
 router.route('/trending').get(getTrending);
@@ -55,6 +55,5 @@ router.route('/get').get(getRecipes);
 router.route('/:id').delete(deleteRecipe);
 router.route('/:id').get(getRecipe);
 router.route('/:id').put(upload.single('image'), editRecipe);
-router.route('/randomRecipe').get(randomRecipes);
 
 module.exports = router;
