@@ -31,7 +31,7 @@ const Navbar = ({ title, image, description, userId }) => {
   const navItems = [
     // { label: "Home", icon: <FaHome className="inline-block mr-1 ml-4 text-lg"/>, link: "/" },
     { label: "Recipes", icon: <FaUtensils className="inline-block mr-1 ml-4 text-lg" />, link: "/recipes" },
-    { label: "Random", icon: <FaRandom onClick={randomRecipe} className="inline-block mr-1 ml-4 text-lg" />, link: "" },
+    { label: "Random", icon: <FaRandom onClick={randomRecipe} className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
     { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId ?? 1}` },
