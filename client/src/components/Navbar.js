@@ -19,8 +19,9 @@ const Navbar = ({ title, image, description, userId }) => {
             'R-A-Token': localStorage.getItem('token')
           },
         });
-        if(response.status !== 200)return;
-        window.location.href = `http://localhost:3000/`
+        if (response.status !== 200) return;
+        const json = await response.json();
+        window.location.href = `http://localhost:3000/recipe/${json.response[0].RecipeId}`;
       } catch (error) {
         console.log(error);
       }
