@@ -7,7 +7,7 @@ const RandomRecipePage = () => {
 
   useEffect(() => {
     const fetchRandomRecipe = async () => {
-      const response = await fetch('/api/recipe/randomRecipe');
+      const response = await fetch('http://localhost:5000/api/recipe/randomRecipe');
       const data = await response.json();
       setRecipeId(data[0].RecipeId);
     };
