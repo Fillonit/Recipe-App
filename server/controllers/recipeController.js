@@ -1430,11 +1430,9 @@ const randomRecipes = asyncHandler(async (req, res, next) => {
                 res.status(500).json({ message: "An error occurred on our part." });
                 return;
             }
-            if (result.recordset.length === 0) {
-                res.status(400).json({ message: "Could not get recipes." });
-                return;
-            }
+            console.log("--------")
             console.log(result.recordset);
+            console.log("--------")
             res.status(200).json({ message: "Successfully fetched resource", response: result.recordset });
             return;
         });

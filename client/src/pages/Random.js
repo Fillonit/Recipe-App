@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const RandomRecipePage = () => {
-  const [recipeId, setRecipeId] = useState(1);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchRandomRecipe = async () => {
+  const fetchRandomRecipe = async () => {
+    try {
       const response = await fetch('http://localhost:5000/api/recipe/randomRecipe');
       const data = await response.json();
-      setRecipeId(data[0].RecipeId);
-    };
-
-    fetchRandomRecipe();
-  }, []);
+      alert(data.response[0].RecipeId);
+      window.location.href = `/recipe/${data.response[0].RecipeId}`;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    if (recipeId) {
-      navigate(`/recipe/${recipeId}`);
-    }
-  }, [navigate, recipeId]);
+    fetchRandomRecipe();
+  }, []);
 
   return (
     <div>
