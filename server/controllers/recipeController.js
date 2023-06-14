@@ -1465,6 +1465,5 @@ module.exports = {
     getSaved,
     editRecipe,
     getRecipePost,
-    getRecipePosts,
     randomRecipes
 }

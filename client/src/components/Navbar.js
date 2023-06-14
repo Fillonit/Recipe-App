@@ -13,7 +13,14 @@ const Navbar = ({ title, image, description, userId }) => {
   async function randomRecipe() {
     try {
       try {
-        const response = await fetch(`http://localhost:5000/api/recipe`);
+        const response = await fetch(`http://localhost:5000/api/recipe/randomRecipe`, {
+          method: "GET",
+          headers: {
+            'R-A-Token': localStorage.getItem('token')
+          },
+        });
+        if(response.status !== 200)return;
+        window.location.href = `http://localhost:3000/`
       } catch (error) {
         console.log(error);
       }
