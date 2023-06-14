@@ -2,7 +2,14 @@
 import React from 'react';
 import { useRef } from 'react';
 import RecipeTags from './RecipeTags';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "../notifyConfig";
+import { useNavigate } from 'react-router-dom';
+
+
 export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep, addIngredient, tags, recipeTags, setRecipeTags, ingredients, selectedIngredient, units, ingredientChange }) {
+    const navigate = useNavigate();
     const title = useRef(), description = useRef(), servings = useRef(), cookTime = useRef();
     const unit = useRef(), quantity = useRef(), currentStep = useRef(), prepTime = useRef(), cuisine = useRef(), image = useRef();
     async function publishRecipe() {
@@ -30,8 +37,11 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                 body: form
             });
             console.log(response.status);
+            toast.success('Recipe published successfully!', notifyConfig);
+            navigate('/recipes');
         } catch (err) {
             console.log(err);
+            toast.error('Recipe publishing failed!', notifyConfig);
         }
     }
     return (
@@ -148,6 +158,7 @@ export default function RecipeForm({ recipeIngredients, steps, cuisines, addStep
                 </div>
                 <RecipeTags tags={tags} recipeTags={recipeTags} setRecipeTags={setRecipeTags} />
             </div>
+            <ToastContainer />
         </form>
     );
 }
