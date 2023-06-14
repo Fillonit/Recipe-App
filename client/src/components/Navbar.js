@@ -35,7 +35,7 @@ const Navbar = ({ title, image, description, userId }) => {
     { label: "Random", icon: <FaRandom onClick={randomRecipe} className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
-    { label: "Add Recipe", icon: <FaUtensils className="inline-block mr-1 ml-4 text-lg" />, link: "/publishRecipe" },
+    { label: "Add Recipe", icon: <FaPlusCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/publishRecipe" },
     { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId ?? 1}` },
     { label: "", icon: <NotificationBell />, link: `/notifications` },
   ];
