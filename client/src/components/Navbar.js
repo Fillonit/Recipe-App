@@ -2,7 +2,7 @@ import React, { useState } from "react";
 // import Logo from "../images/logo.png"
 import Icon from "../images/icon.png"
 import NotificationBell from "./NotificationBell";
-import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes } from "react-icons/fa";
+import { FaUser, FaRandom, FaUtensils, FaInfoCircle, FaEnvelope, FaBars, FaTimes, FaPlusCircle } from "react-icons/fa";
 
 const Navbar = ({ title, image, description, userId }) => {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -35,6 +35,7 @@ const Navbar = ({ title, image, description, userId }) => {
     { label: "Random", icon: <FaRandom onClick={randomRecipe} className="inline-block mr-1 ml-4 text-lg" />, link: "/random" },
     { label: "About", icon: <FaInfoCircle className="inline-block mr-1 ml-4 text-lg" />, link: "/about" },
     { label: "Contact", icon: <FaEnvelope className="inline-block mr-1 ml-4 text-lg" />, link: "/contact" },
+    { label: "Add Recipe", icon: <FaUtensils className="inline-block mr-1 ml-4 text-lg" />, link: "/publishRecipe" },
     { label: "Profile", icon: <FaUser className="inline-block mr-1 ml-4 text-lg" />, link: `/users/${userId ?? 1}` },
     { label: "", icon: <NotificationBell />, link: `/notifications` },
   ];
@@ -75,16 +76,23 @@ const Navbar = ({ title, image, description, userId }) => {
             } w-full block flex-grow lg:flex lg:items-center lg:w-auto`}
         >
           <div className="text-sm lg:flex-grow lg:text-center justify-between">
-            {navItems.map((item, index) => (
-              <a
-                key={index}
-                href={`${item.link}`}
-                className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-900 mr-4"
-              >
-                <p className="text-lg">{item.icon} {item.label}</p>
-              </a>
-            ))}
-          </div>
+          {navItems.filter(item => {
+            if (item.label === "Add Recipe") {
+              const role = localStorage.getItem("role");
+              return role === "chef";
+            }
+            return true;
+          }).map((item, index) => (
+            <a
+              key={index}
+              href={`${item.link}`}
+              className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-900 mr-4"
+            >
+              <p className="text-lg">{item.icon} {item.label}</p>
+            </a>
+          ))}
+
+        </div>
           <div>
             <a
               href="/login"
