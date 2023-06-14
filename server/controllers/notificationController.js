@@ -102,6 +102,7 @@ const getNotificationCount = asyncHandler(async (req, res) => {
                 console.log(err);
                 return;
             }
+            console.log(result.recordset)
             res.status(200).json({ message: "Successfully fetched resource.", response: result.recordset });
         });
     });

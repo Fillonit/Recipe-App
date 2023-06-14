@@ -207,10 +207,6 @@ const addRecipe = asyncHandler(async (req, res) => {
         ** reminder that unitIds are "KG", "GR" etc**
     }*/
     /*req.body.steps = [step1, step2, step3 ...]*/
-    if (req.file === undefined) {
-        res.status(401).json({ message: "Image was not provided." });
-        return;
-    }
     const title = req.body.title, description = req.body.description;
     const ingredients = req.body.ingredients.substring(0, req.body.ingredients.length - 1).split(","), cuisineId = req.body.cuisineId;
     const cookTime = req.body.cookTime, servings = req.body.servings;
@@ -248,7 +244,7 @@ const addRecipe = asyncHandler(async (req, res) => {
         request.input('preparationTime', sql.Int, prepTime);
         request.input('cuisineId', sql.Int, cuisineId);
         request.input('chefId', sql.Int, chefId);
-        request.input('imageUrl', sql.VarChar, `http://localhost:5000/images/${req.file.filename}`);
+        if (req.file !== undefined) request.input('imageUrl', sql.VarChar, `http://localhost:5000/images/${req.file.filename}`);
 
         let QUERY = `BEGIN TRANSACTION;
                       BEGIN TRY
@@ -267,7 +263,7 @@ const addRecipe = asyncHandler(async (req, res) => {
 
                           DECLARE @CurrentRecipeId INT;
                 
-                          INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ImageUrl, CreatedAt, CuisineId, ChefId)
+                          INSERT INTO Recipes(Title, Description, CookTime, Servings, PreparationTime, ${req.file !== undefined ? "ImageUrl, " : ","} CreatedAt, CuisineId, ChefId)
                           VALUES (@title, @description, @cookTime, @servings, @preparationTime, @imageUrl ,GETDATE(), @cuisineId, @chefId);
 
                           INSERT INTO Notifications(UserId, Content, ReceivedAt)
@@ -387,7 +383,7 @@ const getRecipes = asyncHandler(async (req, res, next) => {
         request.input('rows', sql.Int, pageSize);
         request.input('substring', sql.VarChar, search);
         console.log((page - 1) * pageSize + ", " + pageSize);
-        const QUERY = `SELECT u.Username, r.* ${sortingQueries[mappings[sortBy].key].select}
+        const QUERY = `SELECT u.Username, u.ProfilePicture AS ChefImage, r.* ${sortingQueries[mappings[sortBy].key].select}
                        FROM Recipes r
                          JOIN Users u
                          ON u.UserId = r.ChefId
