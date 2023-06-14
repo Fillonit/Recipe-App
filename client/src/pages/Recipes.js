@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import RecipeCard from '../components/RecipeCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowUpWideShort, faArrowUpShortWide } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import notifyConfig from "../components/notifyConfig";
 
 function Recipes() {
   const [recipes, setRecipes] = useState([]);
@@ -21,6 +24,10 @@ function Recipes() {
           'R-A-Token': localStorage.getItem('token')
         }
       });
+      if(response.status === 400) {
+        setIsLoading(false);
+        toast.warn('No recipes found!', notifyConfig);
+      }
       if (response.status !== 200 && response.status !== 304) return;
       const json = await response.json();
       setRecipes(json.response[0]);
@@ -177,6 +184,7 @@ function Recipes() {
               Next
             </button>
           </div>
+          <ToastContainer />
         </>
       )}
     </div>
