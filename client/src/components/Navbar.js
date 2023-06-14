@@ -44,7 +44,7 @@ const Navbar = ({ title, image, description, userId }) => {
 
     <div className="fixed top-0 inset-x-0 justify-center items-center opacity-90 z-50">
       <nav className="flex items-center justify-between min-w-0 flex-wrap bg-white text-indigo-500 border border-gray-300 shadow-md p-4 rounded-xl mt-6 lg:ml-40 lg:mr-40
-     xl:ml-80 xl:mr-80 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
+     xl:ml-70 xl:mr-70 md:ml-20 md:mr-20 sm:mr-20 sm:ml-20 ml-8 mr-8 text-center">
         <a className="flex items-center flex-shrink-0 text-indigo-500 mr-6" href="/">
           {isNavOpen ? (
             <>
@@ -76,23 +76,23 @@ const Navbar = ({ title, image, description, userId }) => {
             } w-full block flex-grow lg:flex lg:items-center lg:w-auto`}
         >
           <div className="text-sm lg:flex-grow lg:text-center justify-between">
-          {navItems.filter(item => {
-            if (item.label === "Add Recipe") {
-              const role = localStorage.getItem("role");
-              return role === "chef";
-            }
-            return true;
-          }).map((item, index) => (
-            <a
-              key={index}
-              href={`${item.link}`}
-              className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-900 mr-4"
-            >
-              <p className="text-lg">{item.icon} {item.label}</p>
-            </a>
-          ))}
+            {navItems.filter(item => {
+              if (item.label === "Add Recipe") {
+                const role = localStorage.getItem("role");
+                return role === "chef";
+              }
+              return true;
+            }).map((item, index) => (
+              <a
+                key={index}
+                href={`${item.link}`}
+                className="block mt-4 lg:inline-block lg:-mt-1 text-indigo-500 hover:text-indigo-900 mr-4"
+              >
+                <p className="text-lg">{item.icon} {item.label}</p>
+              </a>
+            ))}
 
-        </div>
+          </div>
           <div>
             <a
               href="/login"
