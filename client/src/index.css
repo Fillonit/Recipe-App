@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-.min-w-0{
-    max-width: 100%;
-    border-radius: 40px 40px 40px 40px;
+.min-w-0 {
+  max-width: 100%;
+  border-radius: 40px 40px 40px 40px;
 }
 
 ::-webkit-scrollbar {
@@ -23,7 +23,7 @@
   background: #4338ca;
 }
 
-input[type=file]::file-selector-button {
+input[type="file"]::file-selector-button {
   /* margin-right:; */
   border: none;
   background: #4338ca;
@@ -32,17 +32,17 @@ input[type=file]::file-selector-button {
   border-radius: 25px;
   color: #fff;
   cursor: pointer;
-  transition: background .2s ease-in-out;
+  transition: background 0.2s ease-in-out;
   font-weight: bold;
   font-size: 12px;
 }
 
-input[type=file]::file-selector-button:hover {
+input[type="file"]::file-selector-button:hover {
   background: #3125c5;
 }
 
-input[type=file] {
-    background-color: #fff;
+input[type="file"] {
+  background-color: #fff;
 }
 
 body {
