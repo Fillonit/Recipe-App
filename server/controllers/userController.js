@@ -327,7 +327,7 @@ const deleteUserr = asyncHandler(async (req, res) => {
 });
 
 const register = asyncHandler(async (req, res) => {
-    if (req.body === undefined || req.body === null || req.body === "" || req.body === {} || req.body === []) {
+    if (req.body === undefined || req.body === null || req.body === "") {
         res.status(401).json({ message: "Body property not included in the request." });
         console.log("req.body undefined");
         return;
