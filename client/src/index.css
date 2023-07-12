@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.min-w-0 {
+  max-width: 100%;
+  border-radius: 40px 40px 40px 40px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6061ed;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4338ca;
+}
+
+input[type="file"]::file-selector-button {
+  /* margin-right:; */
+  border: none;
+  background: #4338ca;
+  padding: 3px 7px;
+  /* margin-left: 5px;  */
+  border-radius: 25px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: #3125c5;
+}
+
+input[type="file"] {
+  background-color: #fff;
+}
+
+body {
+  @apply min-h-screen;
+}
+
+/* Add this section to create the gradient background */
+.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}

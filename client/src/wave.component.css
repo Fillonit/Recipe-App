@@ -1,0 +1,13 @@
+@keyframes wave {
+    0% {
+      transform: translateX(0) translateY(20px);
+    }
+    100% {
+      transform: translateX(-100%) translateY(20px);
+    }
+  }
+  
+  .animate-wave {
+    animation: wave 1s linear infinite;
+  }
+  
